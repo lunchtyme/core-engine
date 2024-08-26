@@ -36,7 +36,6 @@ class Database {
         console.log('Database disconnected');
       } catch (error: any) {
         console.error('Database failed to disconnect', error.message);
-        // Decide whether to exit or handle differently
       }
     }
   }

@@ -16,37 +16,37 @@ export class Authservice {
     this._companyRepo = companyRepo;
   }
 
-  async register(payload: RegisterAccountDTO): Promise<User> {
-    try {
-      return;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // async register(payload: RegisterAccountDTO): Promise<User> {
+  //   try {
+  //     return;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
-  async registerCompany(payload: CreateCompanyAccountDTO): Promise<Company> {
-    try {
-      return;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // async registerCompany(payload: CreateCompanyAccountDTO): Promise<Company> {
+  //   try {
+  //     return;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
-  async registerAdmin(payload: CreateAdminAccountDTO): Promise<Admin> {
-    try {
-      return;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // async registerAdmin(payload: CreateAdminAccountDTO): Promise<Admin> {
+  //   try {
+  //     return;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
-  async registerIndividual(payload: CreateIndividualAccountDTO): Promise<Individual> {
-    try {
-      return;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // async registerIndividual(payload: CreateIndividualAccountDTO): Promise<Individual> {
+  //   try {
+  //     return;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
   async authenticate() {}
 }

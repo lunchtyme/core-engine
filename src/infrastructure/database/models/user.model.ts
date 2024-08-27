@@ -1,48 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-
-/**
- * Enum for user account types.
- */
-export enum UserAccountType {
-  /**
-   * Company account type.
-   */
-  COMPANY = 'COMPANY',
-  /**
-   * Individual account type.
-   */
-  INDIVIDUAL = 'INDIVIDUAL',
-  /**
-   * Administrative account type.
-   */
-  ADMIN = 'ADMIN',
-  /**
-   * Internal staff or employee account type.
-   */
-  // STAFF = 'STAFF',
-}
-
-/**
- * Enum for user account states.
- */
-export enum UserAccountState {
-  /**
-   * Account is active and fully functional.
-   */
-  ACTIVE = 'ACTIVE',
-  /**
-   * Account is temporarily blocked or restricted.
-   */
-  SUSPENDED = 'SUSPENDED',
-  /**
-   * Account is no longer active or has been deactivated.
-   */
-  INACTIVE = 'INACTIVE',
-  /**
-   * Account is locked due to security concerns or excessive login attempts.
-   */
-  LOCKED = 'LOCKED',
-}
+import { UserAccountState, UserAccountType } from '../../../typings/user';
 
 const userSchema = new Schema(
   {
@@ -75,6 +32,14 @@ const userSchema = new Schema(
     },
     account_state: {
       type: String,
+      enum: [
+        UserAccountState.ACTIVE,
+        UserAccountState.LOCKED,
+        UserAccountState.INACTIVE,
+        UserAccountState.SUSPENDED,
+      ],
+      default: UserAccountState.ACTIVE,
+      required: true,
     },
     dial_code: {
       type: String,

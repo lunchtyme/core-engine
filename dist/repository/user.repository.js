@@ -31,17 +31,18 @@ class UserRepository {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { identifier, value } = params;
-                let getUserFilterOptions = identifier === 'email'
+                const getUserFilterOptions = identifier === 'email'
                     ? { email: value }
-                    : {
-                        _id: mongoose_1.default.Types.ObjectId.isValid(value)
-                            ? new mongoose_1.default.Types.ObjectId(value)
-                            : value,
-                    };
-                return yield infrastructure_1.UserModel.findOne(getUserFilterOptions)
-                    .populate('account_details')
-                    .lean()
-                    .exec();
+                    : identifier === 'id'
+                        ? {
+                            _id: mongoose_1.default.Types.ObjectId.isValid(value)
+                                ? new mongoose_1.default.Types.ObjectId(value)
+                                : value,
+                        }
+                        : identifier === 'phone_number'
+                            ? { phone_number: value }
+                            : {};
+                return yield infrastructure_1.UserModel.findOne(getUserFilterOptions).populate('account_details').exec();
             }
             catch (error) {
                 throw error;

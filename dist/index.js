@@ -11,6 +11,7 @@ const infrastructure_1 = require("./infrastructure");
 const morgan_1 = __importDefault(require("morgan"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+(0, index_1.validateEnvVariables)();
 (0, index_1.loadEnv)(process.env.NODE_ENV);
 const SERVER = (0, express_1.default)();
 const PORT = parseInt(process.env.PORT) || 8080;

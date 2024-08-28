@@ -3,7 +3,7 @@ import { UserModel } from '../infrastructure';
 import { CreateAccountDTO } from '../services/dtos/request.dto';
 
 export type GetUserParams = {
-  identifier: 'email' | 'id';
+  identifier: 'email' | 'id' | 'phone_number';
   value: string | mongoose.Types.ObjectId;
 };
 
@@ -20,19 +20,20 @@ export class UserRepository {
   async getUser(params: GetUserParams) {
     try {
       const { identifier, value } = params;
-      let getUserFilterOptions =
+      const getUserFilterOptions =
         identifier === 'email'
           ? { email: value }
-          : {
+          : identifier === 'id'
+          ? {
               _id: mongoose.Types.ObjectId.isValid(value)
                 ? new mongoose.Types.ObjectId(value)
                 : value,
-            };
+            }
+          : identifier === 'phone_number'
+          ? { phone_number: value }
+          : {};
 
-      return await UserModel.findOne(getUserFilterOptions)
-        .populate('account_details')
-        .lean()
-        .exec();
+      return await UserModel.findOne(getUserFilterOptions).populate('account_details').exec();
     } catch (error) {
       throw error;
     }

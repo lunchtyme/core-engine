@@ -9,25 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SharedServices = void 0;
-class SharedServices {
-    constructor(userRepo) {
-        this._userRepo = userRepo;
-    }
-    getUser(params) {
+exports.IndividualRepository = void 0;
+const infrastructure_1 = require("../infrastructure");
+class IndividualRepository {
+    create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this._userRepo.getUser(params);
-            if (!user) {
-                // TODO: Refactor to use custom not found error handler
-                throw new Error('User not found');
+            try {
+                const result = new infrastructure_1.IndividualModel(params);
+                return yield result.save({ session });
             }
-            return user;
-        });
-    }
-    checkUserExist(params) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this._userRepo.checkUserExist(params);
+            catch (error) {
+                throw error;
+            }
         });
     }
 }
-exports.SharedServices = SharedServices;
+exports.IndividualRepository = IndividualRepository;

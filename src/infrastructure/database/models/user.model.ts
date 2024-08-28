@@ -19,7 +19,7 @@ const userSchema = new Schema(
     },
     account_ref: {
       type: Schema.Types.ObjectId,
-      required: true,
+      required: false,
       refPath: 'account_type', // Dynamically reference based on the account type
     },
     email_verified: {

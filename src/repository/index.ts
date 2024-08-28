@@ -5,3 +5,5 @@ export * from './foodMenu.repository';
 export * from './invitation.repository';
 export * from './order.repository';
 export * from './user.repository';
+export * from './admin.repository';
+export * from './individual.repository';

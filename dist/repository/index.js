@@ -21,3 +21,5 @@ __exportStar(require("./foodMenu.repository"), exports);
 __exportStar(require("./invitation.repository"), exports);
 __exportStar(require("./order.repository"), exports);
 __exportStar(require("./user.repository"), exports);
+__exportStar(require("./admin.repository"), exports);
+__exportStar(require("./individual.repository"), exports);

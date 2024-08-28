@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 import { UserAccountType } from '../../typings/user';
 
 export interface CreateAccountDTO {
@@ -17,13 +17,13 @@ export interface CreateCompanyAccountDTO extends CreateAccountDTO {
   website: String;
   size: string;
   max_spend_amount_per_employee: number;
-  user: Schema.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
 }
 
 export interface CreateIndividualAccountDTO extends CreateAccountDTO {
   first_name: string;
   last_name: string;
-  user: Schema.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
   invitation_code: string;
   lunch_time: string;
 }
@@ -31,10 +31,23 @@ export interface CreateIndividualAccountDTO extends CreateAccountDTO {
 export interface CreateAdminAccountDTO extends CreateAccountDTO {
   first_name: string;
   last_name: string;
-  user: Schema.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
 }
 
 export type RegisterAccountDTO =
   | CreateCompanyAccountDTO
   | CreateAdminAccountDTO
   | CreateIndividualAccountDTO;
+
+export interface LoginDTO {
+  identifier: string;
+  password: string;
+}
+
+export interface ResendEmailVerificationCodeDTO {
+  email: string;
+}
+export interface ConfirmEmailDTO {
+  email: string;
+  otp: string;
+}

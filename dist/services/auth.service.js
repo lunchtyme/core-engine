@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -27,6 +50,8 @@ exports.Authservice = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const user_1 = require("../typings/user");
 const argon2_1 = require("argon2");
+const jwt = __importStar(require("jsonwebtoken"));
+const utils_1 = require("../utils");
 class Authservice {
     constructor(userRepo, companyRepo, adminRepo, individualRepo, sharedService) {
         this._userRepo = userRepo;
@@ -47,24 +72,26 @@ class Authservice {
                 if (userExist) {
                     throw new Error('User already exist');
                 }
+                // User specific validation
                 // Password hashing
                 const hashedPassword = yield (0, argon2_1.hash)(params.password);
                 const user = yield this._userRepo.create(Object.assign(Object.assign({}, params), { password: hashedPassword }), session);
                 let accountCreateResult;
                 switch (params.account_type) {
                     case user_1.UserAccountType.COMPANY:
-                        accountCreateResult = yield this.registerCompany(params);
+                        accountCreateResult = yield this.registerCompany(Object.assign(Object.assign({}, params), { user: user._id }));
                         break;
                     case user_1.UserAccountType.INDIVIDUAL:
-                        accountCreateResult = yield this.registerIndividual(params);
+                        accountCreateResult = yield this.registerIndividual(Object.assign(Object.assign({}, params), { user: user._id }));
                         break;
                     case user_1.UserAccountType.ADMIN:
-                        accountCreateResult = yield this.registerAdmin(params);
+                        accountCreateResult = yield this.registerAdmin(Object.assign(Object.assign({}, params), { user: user._id }));
                         break;
                     default:
                         throw new Error('Invalid account type provided');
                 }
-                // OTP and email queues
+                const OTP = utils_1.Helper.generateOTPCode();
+                //  put verify email on queue
                 // Set the account reference
                 user.account_ref = accountCreateResult._id;
                 yield user.save({ session });
@@ -112,8 +139,75 @@ class Authservice {
             }
         });
     }
-    authenticate() {
-        return __awaiter(this, void 0, void 0, function* () { });
+    authenticate(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { identifier, password } = params;
+                // Validate user input
+                const userCheckParam = identifier === 'email'
+                    ? { identifier: 'email', value: identifier }
+                    : { identifier: 'phone_number', value: identifier };
+                const user = yield this._sharedService.getUser(userCheckParam);
+                if (!user) {
+                    throw new Error('Invalid credentials, user not found');
+                }
+                // Compare password
+                const isPasswordMatch = yield (0, argon2_1.verify)(user.password, password);
+                if (!isPasswordMatch) {
+                    throw new Error('Invalid credentials');
+                }
+                // TODO: Probably check if user has verified their email and provide follow up flow
+                // ...any other required business logic
+                const jwtClaim = { sub: user._id };
+                const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET, {
+                    expiresIn: process.env.JWT_EXPIRES_IN,
+                });
+                return accessTokenHash;
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    confirmEmail(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, otp } = params;
+                // Validate user inputs
+                const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
+                if (!user) {
+                    throw new Error('User not found');
+                }
+                // Lookup to redis to check otp and validate
+                // Update user info
+                user.email_verified = true;
+                user.verified = true;
+                yield user.save();
+                // Send success email
+                return user._id;
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    resendEmailVerificationCode(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email } = params;
+                // Validate user inputs
+                const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
+                if (!user) {
+                    throw new Error('User not found');
+                }
+                // Generate OTP and send verification email
+                const OTP = utils_1.Helper.generateOTPCode();
+                return user._id;
+            }
+            catch (error) {
+                throw error;
+            }
+        });
     }
 }
 exports.Authservice = Authservice;

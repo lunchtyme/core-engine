@@ -1,12 +1,13 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
-import { loadEnv } from './utils/index';
+import { loadEnv, validateEnvVariables } from './utils/index';
 import { notFound } from './middlewares/index';
 import { DB } from './infrastructure';
 import morgan from 'morgan';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 
+validateEnvVariables();
 loadEnv(process.env.NODE_ENV!);
 
 const SERVER = express();

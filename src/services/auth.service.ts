@@ -19,12 +19,23 @@ import {
 import { SharedServices } from './shared.service';
 import { hash, verify } from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import { Helper } from '../utils';
+import { EMAIL_DATA, Helper, sendEmail, SendEmailParams } from '../utils';
+import { RedisService } from './redis.service';
+import {
+  confirmEmailDTOValidator,
+  createAccountDTOValidator,
+  createAdminAccountDTOValidator,
+  createCompanyAccountDTOValidator,
+  createIndividualAccountDTOValidator,
+  loginDTOValidator,
+  resendEmailVerificationCodeDTOValidator,
+} from './dtos/validators';
 
 export class Authservice {
   private readonly _userRepo: UserRepository;
   private readonly _companyRepo: CompanyRepository;
   private readonly _sharedService: SharedServices;
+  private readonly _redisService: RedisService;
   private readonly _adminRepo: AdminRepository;
   private readonly _individualRepo: IndividualRepository;
 
@@ -34,36 +45,41 @@ export class Authservice {
     adminRepo: AdminRepository,
     individualRepo: IndividualRepository,
     sharedService: SharedServices,
+    redisService: RedisService,
   ) {
     this._userRepo = userRepo;
     this._companyRepo = companyRepo;
     this._adminRepo = adminRepo;
     this._individualRepo = individualRepo;
     this._sharedService = sharedService;
+    this._redisService = redisService;
   }
 
   async register(params: RegisterAccountDTO) {
     const session = await mongoose.startSession();
     try {
-      const { email } = params;
+      // User specific validation
+      const { error, value } = createAccountDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
+
+      const { email } = value;
       const userExist = await this._sharedService.checkUserExist({
         identifier: 'email',
         value: email,
       });
-
       if (userExist) {
         throw new Error('User already exist');
       }
 
-      // User specific validation
-
       // Password hashing
-      const hashedPassword = await hash(params.password);
-
-      const user = await this._userRepo.create({ ...params, password: hashedPassword }, session);
-
+      const hashedPassword = await hash(value.password);
+      const user: any = await this._userRepo.create(
+        { ...value, password: hashedPassword },
+        session,
+      );
       let accountCreateResult;
-
       switch (params.account_type) {
         case UserAccountType.COMPANY:
           accountCreateResult = await this.registerCompany({
@@ -86,15 +102,26 @@ export class Authservice {
         default:
           throw new Error('Invalid account type provided');
       }
-
+      // Generate OTP and send verification email
       const OTP = Helper.generateOTPCode();
-
-      //  put verify email on queue
-
+      const cacheKey = `${user._id}:verify:mail`;
+      await this._redisService.set(cacheKey, OTP, true, 600);
+      const emailPayload: SendEmailParams = {
+        receiver: user.email,
+        subject: EMAIL_DATA.subject.verifyEmail,
+        template: EMAIL_DATA.template.verifyEmail,
+        context: {
+          email: user.email,
+          name:
+            user.account_type === UserAccountType.COMPANY
+              ? user.account_details.name
+              : user.account_details.first_name,
+        },
+      };
+      await sendEmail(emailPayload);
       // Set the account reference
       user.account_ref = accountCreateResult._id;
       await user.save({ session });
-
       const { password, ...result } = user.toObject();
       return result;
     } catch (error) {
@@ -107,8 +134,12 @@ export class Authservice {
   async registerCompany(params: CreateCompanyAccountDTO, session?: mongoose.ClientSession | null) {
     try {
       // Perform company-specific validation and logic
+      const { error, value } = createCompanyAccountDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
 
-      return await this._companyRepo.create({ ...params }, session);
+      return await this._companyRepo.create({ ...value }, session);
     } catch (error) {
       throw error;
     }
@@ -117,8 +148,12 @@ export class Authservice {
   async registerAdmin(params: CreateAdminAccountDTO, session?: mongoose.ClientSession | null) {
     try {
       // Perform admin-specific validation and logic
+      const { error, value } = createAdminAccountDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
 
-      return await this._adminRepo.create({ ...params }, session);
+      return await this._adminRepo.create({ ...value }, session);
     } catch (error) {
       throw error;
     }
@@ -130,8 +165,15 @@ export class Authservice {
   ) {
     try {
       // Perform individual-specific validation and logic
+      const { error, value } = createIndividualAccountDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
 
-      return await this._individualRepo.create({ ...params }, session);
+      // Validate invitation code
+      // Update invitation data state
+
+      return await this._individualRepo.create({ ...value }, session);
     } catch (error) {
       throw error;
     }
@@ -139,36 +181,34 @@ export class Authservice {
 
   async authenticate(params: LoginDTO) {
     try {
-      const { identifier, password } = params;
-
       // Validate user input
+      const { error, value } = loginDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
 
+      const { identifier, password } = value;
       const userCheckParam =
         identifier === 'email'
           ? { identifier: 'email', value: identifier }
           : { identifier: 'phone_number', value: identifier };
-
       const user = await this._sharedService.getUser(userCheckParam as GetUserParams);
-
       if (!user) {
         throw new Error('Invalid credentials, user not found');
       }
 
       // Compare password
       const isPasswordMatch = await verify(user.password, password);
-
       if (!isPasswordMatch) {
         throw new Error('Invalid credentials');
       }
 
       // TODO: Probably check if user has verified their email and provide follow up flow
       // ...any other required business logic
-
       const jwtClaim = { sub: user._id };
       const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN!,
       });
-
       return accessTokenHash;
     } catch (error) {
       throw error;
@@ -177,25 +217,31 @@ export class Authservice {
 
   async confirmEmail(params: ConfirmEmailDTO) {
     try {
-      const { email, otp } = params;
-
       // Validate user inputs
+      const { error, value } = confirmEmailDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
 
+      const { email, otp } = value;
       const user = await this._sharedService.getUser({ identifier: 'email', value: email });
-
       if (!user) {
         throw new Error('User not found');
       }
 
       // Lookup to redis to check otp and validate
+      const cacheKey = `${user._id}:verify:mail`;
+      const cacheValue = await this._redisService.get(cacheKey);
+      if (!cacheValue || parseInt(cacheValue) !== parseInt(otp)) {
+        throw new Error('Invalid or expired otp provided');
+      }
 
-      // Update user info
+      // delete from cache and update user data
+      await this._redisService.del(cacheKey);
       user.email_verified = true;
       user.verified = true;
-
       await user.save();
-      // Send success email
-
+      // Send success email if needed
       return user._id;
     } catch (error) {
       throw error;
@@ -204,19 +250,35 @@ export class Authservice {
 
   async resendEmailVerificationCode(params: ResendEmailVerificationCodeDTO) {
     try {
-      const { email } = params;
-
       // Validate user inputs
+      const { error, value } = resendEmailVerificationCodeDTOValidator.validate(params);
+      if (error) {
+        throw error;
+      }
 
-      const user = await this._sharedService.getUser({ identifier: 'email', value: email });
-
+      const { email } = value;
+      const user: any = await this._sharedService.getUser({ identifier: 'email', value: email });
       if (!user) {
         throw new Error('User not found');
       }
 
       // Generate OTP and send verification email
       const OTP = Helper.generateOTPCode();
-
+      const cacheKey = `${user._id}:verify:mail`;
+      await this._redisService.set(cacheKey, OTP, true, 600);
+      const emailPayload: SendEmailParams = {
+        receiver: user.email,
+        subject: EMAIL_DATA.subject.verifyEmail,
+        template: EMAIL_DATA.template.verifyEmail,
+        context: {
+          email: user.email,
+          name:
+            user.account_type === UserAccountType.COMPANY
+              ? user.account_details.name
+              : user.account_details.first_name,
+        },
+      };
+      await sendEmail(emailPayload);
       return user._id;
     } catch (error) {
       throw error;

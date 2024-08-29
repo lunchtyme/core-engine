@@ -16,6 +16,7 @@ exports.queueConnection.on('connect', () => {
 });
 exports.queueConnection.on('error', (err) => {
     console.error('Queue failed to connect:', err);
+    process.exit(0);
 });
 exports.emailQueue = new bullmq_1.Queue('emailQueue', {
     connection: exports.queueConnection,

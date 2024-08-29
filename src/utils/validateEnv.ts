@@ -2,13 +2,13 @@ const requiredEnvVariables = [
   'MONGO_URI',
   'NODE_ENV',
   'JWT_SECRET',
-  'JWT_',
-  'API_KEY',
+  'JWT_EXPIRES_IN',
   'MAIL_SENDER_FROM',
   'MAIL_HOST',
   'MAIL_PORT',
   'MAIL_USER',
   'MAIL_PASS',
+  'REDIS_URL',
   // Add all other required environment variables here
 ];
 

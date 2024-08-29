@@ -52,19 +52,26 @@ const user_1 = require("../typings/user");
 const argon2_1 = require("argon2");
 const jwt = __importStar(require("jsonwebtoken"));
 const utils_1 = require("../utils");
+const validators_1 = require("./dtos/validators");
 class Authservice {
-    constructor(userRepo, companyRepo, adminRepo, individualRepo, sharedService) {
+    constructor(userRepo, companyRepo, adminRepo, individualRepo, sharedService, redisService) {
         this._userRepo = userRepo;
         this._companyRepo = companyRepo;
         this._adminRepo = adminRepo;
         this._individualRepo = individualRepo;
         this._sharedService = sharedService;
+        this._redisService = redisService;
     }
     register(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const session = yield mongoose_1.default.startSession();
             try {
-                const { email } = params;
+                // User specific validation
+                const { error, value } = validators_1.createAccountDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                const { email } = value;
                 const userExist = yield this._sharedService.checkUserExist({
                     identifier: 'email',
                     value: email,
@@ -72,10 +79,9 @@ class Authservice {
                 if (userExist) {
                     throw new Error('User already exist');
                 }
-                // User specific validation
                 // Password hashing
-                const hashedPassword = yield (0, argon2_1.hash)(params.password);
-                const user = yield this._userRepo.create(Object.assign(Object.assign({}, params), { password: hashedPassword }), session);
+                const hashedPassword = yield (0, argon2_1.hash)(value.password);
+                const user = yield this._userRepo.create(Object.assign(Object.assign({}, value), { password: hashedPassword }), session);
                 let accountCreateResult;
                 switch (params.account_type) {
                     case user_1.UserAccountType.COMPANY:
@@ -90,8 +96,22 @@ class Authservice {
                     default:
                         throw new Error('Invalid account type provided');
                 }
+                // Generate OTP and send verification email
                 const OTP = utils_1.Helper.generateOTPCode();
-                //  put verify email on queue
+                const cacheKey = `${user._id}:verify:mail`;
+                yield this._redisService.set(cacheKey, OTP, true, 600);
+                const emailPayload = {
+                    receiver: user.email,
+                    subject: utils_1.EMAIL_DATA.subject.verifyEmail,
+                    template: utils_1.EMAIL_DATA.template.verifyEmail,
+                    context: {
+                        email: user.email,
+                        name: user.account_type === user_1.UserAccountType.COMPANY
+                            ? user.account_details.name
+                            : user.account_details.first_name,
+                    },
+                };
+                yield (0, utils_1.sendEmail)(emailPayload);
                 // Set the account reference
                 user.account_ref = accountCreateResult._id;
                 yield user.save({ session });
@@ -110,7 +130,11 @@ class Authservice {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Perform company-specific validation and logic
-                return yield this._companyRepo.create(Object.assign({}, params), session);
+                const { error, value } = validators_1.createCompanyAccountDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                return yield this._companyRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
                 throw error;
@@ -121,7 +145,11 @@ class Authservice {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Perform admin-specific validation and logic
-                return yield this._adminRepo.create(Object.assign({}, params), session);
+                const { error, value } = validators_1.createAdminAccountDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                return yield this._adminRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
                 throw error;
@@ -132,7 +160,13 @@ class Authservice {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // Perform individual-specific validation and logic
-                return yield this._individualRepo.create(Object.assign({}, params), session);
+                const { error, value } = validators_1.createIndividualAccountDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                // Validate invitation code
+                // Update invitation data state
+                return yield this._individualRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
                 throw error;
@@ -142,8 +176,12 @@ class Authservice {
     authenticate(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { identifier, password } = params;
                 // Validate user input
+                const { error, value } = validators_1.loginDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                const { identifier, password } = value;
                 const userCheckParam = identifier === 'email'
                     ? { identifier: 'email', value: identifier }
                     : { identifier: 'phone_number', value: identifier };
@@ -172,18 +210,28 @@ class Authservice {
     confirmEmail(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email, otp } = params;
                 // Validate user inputs
+                const { error, value } = validators_1.confirmEmailDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                const { email, otp } = value;
                 const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
                 if (!user) {
                     throw new Error('User not found');
                 }
                 // Lookup to redis to check otp and validate
-                // Update user info
+                const cacheKey = `${user._id}:verify:mail`;
+                const cacheValue = yield this._redisService.get(cacheKey);
+                if (!cacheValue || parseInt(cacheValue) !== parseInt(otp)) {
+                    throw new Error('Invalid or expired otp provided');
+                }
+                // delete from cache and update user data
+                yield this._redisService.del(cacheKey);
                 user.email_verified = true;
                 user.verified = true;
                 yield user.save();
-                // Send success email
+                // Send success email if needed
                 return user._id;
             }
             catch (error) {
@@ -194,14 +242,32 @@ class Authservice {
     resendEmailVerificationCode(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email } = params;
                 // Validate user inputs
+                const { error, value } = validators_1.resendEmailVerificationCodeDTOValidator.validate(params);
+                if (error) {
+                    throw error;
+                }
+                const { email } = value;
                 const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
                 if (!user) {
                     throw new Error('User not found');
                 }
                 // Generate OTP and send verification email
                 const OTP = utils_1.Helper.generateOTPCode();
+                const cacheKey = `${user._id}:verify:mail`;
+                yield this._redisService.set(cacheKey, OTP, true, 600);
+                const emailPayload = {
+                    receiver: user.email,
+                    subject: utils_1.EMAIL_DATA.subject.verifyEmail,
+                    template: utils_1.EMAIL_DATA.template.verifyEmail,
+                    context: {
+                        email: user.email,
+                        name: user.account_type === user_1.UserAccountType.COMPANY
+                            ? user.account_details.name
+                            : user.account_details.first_name,
+                    },
+                };
+                yield (0, utils_1.sendEmail)(emailPayload);
                 return user._id;
             }
             catch (error) {

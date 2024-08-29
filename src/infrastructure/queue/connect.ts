@@ -13,6 +13,7 @@ queueConnection.on('connect', () => {
 
 queueConnection.on('error', (err) => {
   console.error('Queue failed to connect:', err);
+  process.exit(0);
 });
 
 export const emailQueue = new Queue('emailQueue', {

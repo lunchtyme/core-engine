@@ -72,6 +72,7 @@ class Authservice {
                     // User specific validation
                     const { error, value } = validators_1.createAccountDTOValidator.validate(params);
                     if (error) {
+                        utils_1.logger.error('Validation error', error);
                         throw new utils_1.BadRequestError(error.message);
                     }
                     const { email } = value;
@@ -103,6 +104,7 @@ class Authservice {
                     user.account_ref = accountCreateResult._id;
                     yield user.save({ session });
                     const _a = user.toObject(), { password } = _a, result = __rest(_a, ["password"]);
+                    utils_1.logger.info('Create user transaction complete', user._id);
                     return result;
                 }));
                 const userDetails = yield this._sharedService.getUser({
@@ -130,10 +132,11 @@ class Authservice {
                     attempts: 5,
                     removeOnComplete: true,
                 });
+                utils_1.logger.info('User created successfully', user._id);
                 return user._id;
             }
             catch (error) {
-                console.error('Transaction error:', error);
+                utils_1.logger.error('Error creating user account:', error);
                 throw error;
             }
             finally {
@@ -147,11 +150,13 @@ class Authservice {
                 // Perform company-specific validation and logic
                 const { error, value } = validators_1.createCompanyAccountDTOValidator.validate(params);
                 if (error) {
+                    utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._companyRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
+                utils_1.logger.error('Error creating company account', error);
                 throw error;
             }
         });
@@ -162,11 +167,13 @@ class Authservice {
                 // Perform admin-specific validation and logic
                 const { error, value } = validators_1.createAdminAccountDTOValidator.validate(params);
                 if (error) {
+                    utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._adminRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
+                utils_1.logger.error('Error creating admin account', error);
                 throw error;
             }
         });
@@ -177,6 +184,7 @@ class Authservice {
                 // Perform individual-specific validation and logic
                 const { error, value } = validators_1.createIndividualAccountDTOValidator.validate(params);
                 if (error) {
+                    utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 // Validate invitation code
@@ -184,6 +192,7 @@ class Authservice {
                 return yield this._individualRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
+                utils_1.logger.error('Error creating individual account', error);
                 throw error;
             }
         });
@@ -194,6 +203,7 @@ class Authservice {
                 // Validate user input
                 const { error, value } = validators_1.loginDTOValidator.validate(params);
                 if (error) {
+                    utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { identifier, password } = value;
@@ -215,9 +225,11 @@ class Authservice {
                 const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET, {
                     expiresIn: process.env.JWT_EXPIRES_IN,
                 });
+                utils_1.logger.info('User login successful', user._id);
                 return accessTokenHash;
             }
             catch (error) {
+                utils_1.logger.error('Error logging user in', error);
                 throw error;
             }
         });
@@ -228,6 +240,7 @@ class Authservice {
                 // Validate user inputs
                 const { error, value } = validators_1.confirmEmailDTOValidator.validate(params);
                 if (error) {
+                    utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email, otp } = value;
@@ -247,9 +260,11 @@ class Authservice {
                 user.verified = true;
                 yield user.save();
                 // Send success email if needed
+                utils_1.logger.info('Email verification successfully', user.email);
                 return user._id;
             }
             catch (error) {
+                utils_1.logger.error('Error verifying user email', error);
                 throw error;
             }
         });
@@ -260,6 +275,7 @@ class Authservice {
                 // Validate user inputs
                 const { error, value } = validators_1.resendEmailVerificationCodeDTOValidator.validate(params);
                 if (error) {
+                    utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email } = value;
@@ -273,8 +289,8 @@ class Authservice {
                 yield this._redisService.set(cacheKey, OTP, true, 600);
                 const emailPayload = {
                     receiver: user.email,
-                    subject: utils_1.EMAIL_DATA.subject.verifyEmail,
-                    template: utils_1.EMAIL_DATA.template.verifyEmail,
+                    subject: utils_1.EMAIL_DATA.subject.welcome,
+                    template: utils_1.EMAIL_DATA.template.welcome,
                     context: {
                         email: user.email,
                         name: user.account_type === user_1.UserAccountType.COMPANY
@@ -282,10 +298,16 @@ class Authservice {
                             : user.account_details.first_name,
                     },
                 };
-                yield (0, utils_1.sendEmail)(emailPayload);
+                infrastructure_1.emailQueue.add('mailer', emailPayload, {
+                    delay: 2000,
+                    attempts: 5,
+                    removeOnComplete: true,
+                });
+                utils_1.logger.info('Email verification code resent', user.email);
                 return user._id;
             }
             catch (error) {
+                utils_1.logger.error('Error resending email verification code', error);
                 throw error;
             }
         });

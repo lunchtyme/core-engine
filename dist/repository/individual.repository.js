@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IndividualRepository = void 0;
 const infrastructure_1 = require("../infrastructure");
+const utils_1 = require("../utils");
 class IndividualRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -19,6 +20,7 @@ class IndividualRepository {
                 return yield result.save({ session });
             }
             catch (error) {
+                utils_1.logger.error('Error storing individual user to db:', error);
                 throw error;
             }
         });

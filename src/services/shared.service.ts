@@ -13,7 +13,6 @@ export class SharedServices {
       // TODO: Refactor to use custom not found error handler
       throw new Error('User not found');
     }
-
     return user;
   }
 

@@ -16,6 +16,7 @@ exports.sendEmail = void 0;
 const handlebars_converter_1 = require("handlebars-converter");
 const node_path_1 = __importDefault(require("node:path"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const logger_1 = require("./logger");
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const EMAIL_TEMPLATE_DEFAULTS = {
     metaData: {
@@ -59,6 +60,7 @@ const sendEmail = (params) => __awaiter(void 0, void 0, void 0, function* () {
             },
         });
         if (!mailTransporter) {
+            logger_1.logger.error('Error creating mail transporter:');
             throw new Error('Failed to create mail transporter');
         }
         const mailOption = {
@@ -71,6 +73,7 @@ const sendEmail = (params) => __awaiter(void 0, void 0, void 0, function* () {
         return;
     }
     catch (error) {
+        logger_1.logger.error('Error sending email:', error);
         throw error;
     }
 });

@@ -1,6 +1,7 @@
 import { HandlebarsConverter } from 'handlebars-converter';
 import path from 'node:path';
 import nodemailer, { SendMailOptions } from 'nodemailer';
+import { logger } from './logger';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const EMAIL_TEMPLATE_DEFAULTS = {
@@ -65,6 +66,7 @@ export const sendEmail = async (params: SendEmailParams) => {
     });
 
     if (!mailTransporter) {
+      logger.error('Error creating mail transporter:');
       throw new Error('Failed to create mail transporter');
     }
 
@@ -78,6 +80,7 @@ export const sendEmail = async (params: SendEmailParams) => {
     await mailTransporter.sendMail(mailOption);
     return;
   } catch (error) {
+    logger.error('Error sending email:', error);
     throw error;
   }
 };

@@ -23,6 +23,7 @@ import {
   BadRequestError,
   EMAIL_DATA,
   Helper,
+  logger,
   NotFoundError,
   sendEmail,
   SendEmailParams,
@@ -73,6 +74,7 @@ export class Authservice {
         // User specific validation
         const { error, value } = createAccountDTOValidator.validate(params);
         if (error) {
+          logger.error('Validation error', error);
           throw new BadRequestError(error.message);
         }
 
@@ -127,6 +129,7 @@ export class Authservice {
         await user.save({ session });
 
         const { password, ...result } = user.toObject();
+        logger.info('Create user transaction complete', user._id);
         return result;
       });
 
@@ -159,9 +162,11 @@ export class Authservice {
         attempts: 5,
         removeOnComplete: true,
       });
+
+      logger.info('User created successfully', user._id);
       return user._id;
     } catch (error) {
-      console.error('Transaction error:', error);
+      logger.error('Error creating user account:', error);
       throw error;
     } finally {
       session.endSession();
@@ -176,11 +181,13 @@ export class Authservice {
       // Perform company-specific validation and logic
       const { error, value } = createCompanyAccountDTOValidator.validate(params);
       if (error) {
+        logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
       return await this._companyRepo.create({ ...value }, session);
     } catch (error) {
+      logger.error('Error creating company account', error);
       throw error;
     }
   }
@@ -193,11 +200,13 @@ export class Authservice {
       // Perform admin-specific validation and logic
       const { error, value } = createAdminAccountDTOValidator.validate(params);
       if (error) {
+        logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
       return await this._adminRepo.create({ ...value }, session);
     } catch (error) {
+      logger.error('Error creating admin account', error);
       throw error;
     }
   }
@@ -210,6 +219,7 @@ export class Authservice {
       // Perform individual-specific validation and logic
       const { error, value } = createIndividualAccountDTOValidator.validate(params);
       if (error) {
+        logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
@@ -218,6 +228,7 @@ export class Authservice {
 
       return await this._individualRepo.create({ ...value }, session);
     } catch (error) {
+      logger.error('Error creating individual account', error);
       throw error;
     }
   }
@@ -227,6 +238,7 @@ export class Authservice {
       // Validate user input
       const { error, value } = loginDTOValidator.validate(params);
       if (error) {
+        logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
@@ -252,8 +264,10 @@ export class Authservice {
       const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN!,
       });
+      logger.info('User login successful', user._id);
       return accessTokenHash;
     } catch (error) {
+      logger.error('Error logging user in', error);
       throw error;
     }
   }
@@ -263,6 +277,7 @@ export class Authservice {
       // Validate user inputs
       const { error, value } = confirmEmailDTOValidator.validate(params);
       if (error) {
+        logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
@@ -285,8 +300,10 @@ export class Authservice {
       user.verified = true;
       await user.save();
       // Send success email if needed
+      logger.info('Email verification successfully', user.email);
       return user._id;
     } catch (error) {
+      logger.error('Error verifying user email', error);
       throw error;
     }
   }
@@ -296,6 +313,7 @@ export class Authservice {
       // Validate user inputs
       const { error, value } = resendEmailVerificationCodeDTOValidator.validate(params);
       if (error) {
+        logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
@@ -311,8 +329,8 @@ export class Authservice {
       await this._redisService.set(cacheKey, OTP, true, 600);
       const emailPayload: SendEmailParams = {
         receiver: user.email,
-        subject: EMAIL_DATA.subject.verifyEmail,
-        template: EMAIL_DATA.template.verifyEmail,
+        subject: EMAIL_DATA.subject.welcome,
+        template: EMAIL_DATA.template.welcome,
         context: {
           email: user.email,
           name:
@@ -321,9 +339,17 @@ export class Authservice {
               : user.account_details.first_name,
         },
       };
-      await sendEmail(emailPayload);
+
+      emailQueue.add('mailer', emailPayload, {
+        delay: 2000,
+        attempts: 5,
+        removeOnComplete: true,
+      });
+
+      logger.info('Email verification code resent', user.email);
       return user._id;
     } catch (error) {
+      logger.error('Error resending email verification code', error);
       throw error;
     }
   }

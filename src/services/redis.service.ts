@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis';
+import { logger } from '../utils';
 
 export class RedisService {
   /**
@@ -25,6 +26,7 @@ export class RedisService {
     try {
       return await this.redisClient.get(key);
     } catch (error) {
+      logger.error('Error getting value for redis via key:', error);
       throw error;
     }
   }
@@ -55,6 +57,7 @@ export class RedisService {
         await this.redisClient.set(key, value);
       }
     } catch (error) {
+      logger.error('Error setting redis value:', error);
       throw error;
     }
   }
@@ -63,6 +66,7 @@ export class RedisService {
     try {
       await this.redisClient.del(key);
     } catch (error) {
+      logger.error('Error deleting value from redis store:', error);
       throw error;
     }
   }

@@ -1,23 +1,23 @@
 /**
- * Enum for user account types.
+ * Enum for user account types and it should match the model name.
  */
 export enum UserAccountType {
   /**
    * Company account type.
    */
-  COMPANY = 'COMPANY',
+  COMPANY = 'Company',
   /**
    * Individual account type.
    */
-  INDIVIDUAL = 'INDIVIDUAL',
+  INDIVIDUAL = 'Individual',
   /**
    * Administrative account type.
    */
-  ADMIN = 'ADMIN',
+  ADMIN = 'Admin',
   /**
    * Internal staff or employee account type.
    */
-  // STAFF = 'STAFF',
+  // STAFF = 'Staff',
 }
 
 /**

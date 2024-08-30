@@ -43,7 +43,6 @@ const userSchema = new mongoose_1.Schema({
     },
     account_ref: {
         type: mongoose_1.Schema.Types.ObjectId,
-        required: false,
         refPath: 'account_type', // Dynamically reference based on the account type
     },
     email_verified: {

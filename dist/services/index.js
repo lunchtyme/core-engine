@@ -17,3 +17,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./auth.service"), exports);
 __exportStar(require("./shared.service"), exports);
 __exportStar(require("./redis.service"), exports);
+__exportStar(require("./instance.service"), exports);

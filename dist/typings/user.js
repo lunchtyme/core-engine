@@ -2,26 +2,26 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserAccountState = exports.UserAccountType = void 0;
 /**
- * Enum for user account types.
+ * Enum for user account types and it should match the model name.
  */
 var UserAccountType;
 (function (UserAccountType) {
     /**
      * Company account type.
      */
-    UserAccountType["COMPANY"] = "COMPANY";
+    UserAccountType["COMPANY"] = "Company";
     /**
      * Individual account type.
      */
-    UserAccountType["INDIVIDUAL"] = "INDIVIDUAL";
+    UserAccountType["INDIVIDUAL"] = "Individual";
     /**
      * Administrative account type.
      */
-    UserAccountType["ADMIN"] = "ADMIN";
+    UserAccountType["ADMIN"] = "Admin";
     /**
      * Internal staff or employee account type.
      */
-    // STAFF = 'STAFF',
+    // STAFF = 'Staff',
 })(UserAccountType || (exports.UserAccountType = UserAccountType = {}));
 /**
  * Enum for user account states.

@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { parse } from 'tldts'; // Importing a library for accurate domain extraction
 
 export type APIJSONResponseParams = {
   message: string;
@@ -24,5 +25,16 @@ export class Helper {
   static formatAPIResponse(res: Response, message: string, result: any, statusCode: number = 200) {
     const apiResponse = Helper.APIJSONResponse({ message, result });
     res.status(statusCode).json(apiResponse);
+  }
+
+  static async verifyCompanyDomain(companyWebsite: string, email: string): Promise<boolean> {
+    // Extract the domain from the company's website
+    const companyDomain = parse(companyWebsite).domain;
+
+    // Extract the domain from the email
+    const emailDomain = email.split('@')[1];
+
+    // Compare the two domains
+    return companyDomain === emailDomain;
   }
 }

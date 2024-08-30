@@ -47,6 +47,7 @@
     "nodemailer": "^6.9.13",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tldts": "^6.1.41",
     "winston": "^3.14.2"
   },
   "_moduleAliases": {

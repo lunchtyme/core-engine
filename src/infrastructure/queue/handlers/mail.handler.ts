@@ -1,15 +1,15 @@
 import { Worker as TaskHandler } from 'bullmq';
 import { queueConnection } from '../connect';
-import { sendEmail } from '../../../utils';
+import { logger, sendEmail } from '../../../utils';
 
 export const mailTaskHandler = new TaskHandler(
   'emailQueue',
   async (job) => {
-    console.log('Processing email job:', job.id);
+    logger.info('Processing email job:', job.id);
     try {
       await sendEmail(job.data);
     } catch (error) {
-      console.error('Error processing email job:', error);
+      logger.error('Error processing email job', error);
       throw error;
     }
   },
@@ -19,9 +19,11 @@ export const mailTaskHandler = new TaskHandler(
 );
 
 mailTaskHandler.on('completed', (job) => {
+  logger.info(`Email worker done processing job ${job.id}`);
   console.log(`Email worker done processing job ${job.id}`);
 });
 
 mailTaskHandler.on('error', (err) => {
+  logger.error('Email worker error:', err);
   console.error('Email worker error:', err.message);
 });

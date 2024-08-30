@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRepository = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const infrastructure_1 = require("../infrastructure");
+const utils_1 = require("../utils");
 class UserRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -23,6 +24,7 @@ class UserRepository {
                 return yield result.save({ session });
             }
             catch (error) {
+                utils_1.logger.error('Error storing user to db:', error);
                 throw error;
             }
         });
@@ -45,6 +47,7 @@ class UserRepository {
                 return yield infrastructure_1.UserModel.findOne(getUserFilterOptions).populate('account_details').exec();
             }
             catch (error) {
+                utils_1.logger.error('Error getting user data from db:', error);
                 throw error;
             }
         });
@@ -64,6 +67,7 @@ class UserRepository {
                 return !!user;
             }
             catch (error) {
+                utils_1.logger.error('Error checking user exist from db:', error);
                 throw error;
             }
         });

@@ -14,20 +14,22 @@ const bullmq_1 = require("bullmq");
 const connect_1 = require("../connect");
 const utils_1 = require("../../../utils");
 exports.mailTaskHandler = new bullmq_1.Worker('emailQueue', (job) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Processing email job:', job.id);
+    utils_1.logger.info('Processing email job:', job.id);
     try {
         yield (0, utils_1.sendEmail)(job.data);
     }
     catch (error) {
-        console.error('Error processing email job:', error);
+        utils_1.logger.error('Error processing email job', error);
         throw error;
     }
 }), {
     connection: connect_1.queueConnection,
 });
 exports.mailTaskHandler.on('completed', (job) => {
+    utils_1.logger.info(`Email worker done processing job ${job.id}`);
     console.log(`Email worker done processing job ${job.id}`);
 });
 exports.mailTaskHandler.on('error', (err) => {
+    utils_1.logger.error('Email worker error:', err);
     console.error('Email worker error:', err.message);
 });

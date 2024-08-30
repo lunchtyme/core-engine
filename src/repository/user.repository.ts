@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { UserModel } from '../infrastructure';
 import { CreateAccountDTO } from '../services/dtos/request.dto';
+import { logger } from '../utils';
 
 export type GetUserParams = {
   identifier: 'email' | 'id' | 'phone_number';
@@ -13,6 +14,7 @@ export class UserRepository {
       const result = new UserModel(params);
       return await result.save({ session });
     } catch (error) {
+      logger.error('Error storing user to db:', error);
       throw error;
     }
   }
@@ -35,6 +37,7 @@ export class UserRepository {
 
       return await UserModel.findOne(getUserFilterOptions).populate('account_details').exec();
     } catch (error) {
+      logger.error('Error getting user data from db:', error);
       throw error;
     }
   }
@@ -54,6 +57,7 @@ export class UserRepository {
       const user = await UserModel.exists(getUserFilterOptions).exec();
       return !!user;
     } catch (error) {
+      logger.error('Error checking user exist from db:', error);
       throw error;
     }
   }

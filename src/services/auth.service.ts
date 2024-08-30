@@ -185,6 +185,16 @@ export class Authservice {
         throw new BadRequestError(error.message);
       }
 
+      // Validate email matches company domain
+      const isDomainMatch = await Helper.verifyCompanyDomain(value.website, value.email);
+      if (!isDomainMatch) {
+        logger.error('Company domain does not match email domain', {
+          website: value.website,
+          email: value.email,
+        });
+        throw new BadRequestError('The email domain does not match the company domain.');
+      }
+
       return await this._companyRepo.create({ ...value }, session);
     } catch (error) {
       logger.error('Error creating company account', error);
@@ -224,7 +234,12 @@ export class Authservice {
       }
 
       // Validate invitation code
-      // Update invitation data state
+
+      // Find the company they belong to
+
+      // Verify that the email they signup with matches the company own
+
+      // Update invitation data state, share session
 
       return await this._individualRepo.create({ ...value }, session);
     } catch (error) {

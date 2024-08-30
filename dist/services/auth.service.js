@@ -153,6 +153,15 @@ class Authservice {
                     utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
+                // Validate email matches company domain
+                const isDomainMatch = yield utils_1.Helper.verifyCompanyDomain(value.website, value.email);
+                if (!isDomainMatch) {
+                    utils_1.logger.error('Company domain does not match email domain', {
+                        website: value.website,
+                        email: value.email,
+                    });
+                    throw new utils_1.BadRequestError('The email domain does not match the company domain.');
+                }
                 return yield this._companyRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
@@ -187,6 +196,7 @@ class Authservice {
                     utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
+                // Verify that the email they signup with matches the company own
                 // Validate invitation code
                 // Update invitation data state
                 return yield this._individualRepo.create(Object.assign({}, value), session);

@@ -20,8 +20,8 @@ const rootDir = process.cwd();
 
 // Initialize the handlebar converter class
 const hbsConverter = new HandlebarsConverter({
-  templateDirPath: path.join(rootDir, './template/contents'),
-  partialDirPath: path.join(rootDir, './template/partials'),
+  templateDirPath: path.join(rootDir, './templates/contents'),
+  partialDirPath: path.join(rootDir, './templates/partials'),
 });
 
 export const sendEmail = async (params: SendEmailParams) => {

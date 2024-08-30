@@ -42,11 +42,10 @@ export const createAccountDTOValidator = Joi.object({
       'any.required': 'Dial code is required',
     }),
   phone_number: Joi.string()
-    .pattern(/^\+\d+$/)
+    .length(10) // Enforces exactly 10 characters
     .required()
     .messages({
-      'string.pattern.base':
-        'Phone number must start with a plus (+) and be followed by numbers only',
+      'string.length': 'Phone number must be exactly 10 characters long',
       'any.required': 'Phone number is required',
     }),
   time_zone: Joi.string()
@@ -54,69 +53,57 @@ export const createAccountDTOValidator = Joi.object({
     .messages({
       'string.pattern.base': 'Time zone must be a valid IANA time zone (e.g., Africa/Lagos)',
     }),
-});
+}).unknown(); // Allow additional fields not defined in the schema
 
-export const createCompanyAccountDTOValidator = createAccountDTOValidator.keys({
-  name: Joi.string().required().messages({
-    'any.required': 'Company name is required',
-  }),
-  website: Joi.string().uri().required().messages({
-    'string.uri': 'Invalid website URL',
-    'any.required': 'Website is required',
-  }),
-  size: Joi.string().required().messages({
-    'any.required': 'Company size is required',
-  }),
-  max_spend_amount_per_employee: Joi.number().positive().required().messages({
-    'number.positive': 'Max spend amount per employee must be a positive number',
-    'any.required': 'Max spend amount per employee is required',
-  }),
-  user: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'Invalid user ID',
-      'any.required': 'User ID is required',
+export const createCompanyAccountDTOValidator = createAccountDTOValidator
+  .keys({
+    name: Joi.string().required().messages({
+      'any.required': 'Company name is required',
     }),
-});
+    website: Joi.string().uri().required().messages({
+      'string.uri': 'Invalid website URL',
+      'any.required': 'Website is required',
+    }),
+    size: Joi.string().required().messages({
+      'any.required': 'Company size is required',
+    }),
+    max_spend_amount_per_employee: Joi.number().positive().required().messages({
+      'number.positive': 'Max spend amount per employee must be a positive number',
+      'any.required': 'Max spend amount per employee is required',
+    }),
+    user: Joi.required(),
+  })
+  .unknown(); // Allow additional fields not defined in the schema
 
-export const createIndividualAccountDTOValidator = createAccountDTOValidator.keys({
-  first_name: Joi.string().required().messages({
-    'any.required': 'First name is required',
-  }),
-  last_name: Joi.string().required().messages({
-    'any.required': 'Last name is required',
-  }),
-  user: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'Invalid user ID',
-      'any.required': 'User ID is required',
+export const createIndividualAccountDTOValidator = createAccountDTOValidator
+  .keys({
+    first_name: Joi.string().required().messages({
+      'any.required': 'First name is required',
     }),
-  invitation_code: Joi.string().required().messages({
-    'any.required': 'Invitation code is required',
-  }),
-  lunch_time: Joi.string().required().messages({
-    'any.required': 'Lunch time is required',
-  }),
-});
+    last_name: Joi.string().required().messages({
+      'any.required': 'Last name is required',
+    }),
+    user: Joi.required(),
+    invitation_code: Joi.string().required().messages({
+      'any.required': 'Invitation code is required',
+    }),
+    lunch_time: Joi.string().required().messages({
+      'any.required': 'Lunch time is required',
+    }),
+  })
+  .unknown(); // Allow additional fields not defined in the schema
 
-export const createAdminAccountDTOValidator = createAccountDTOValidator.keys({
-  first_name: Joi.string().required().messages({
-    'any.required': 'First name is required',
-  }),
-  last_name: Joi.string().required().messages({
-    'any.required': 'Last name is required',
-  }),
-  user: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'Invalid user ID',
-      'any.required': 'User ID is required',
+export const createAdminAccountDTOValidator = createAccountDTOValidator
+  .keys({
+    first_name: Joi.string().required().messages({
+      'any.required': 'First name is required',
     }),
-});
+    last_name: Joi.string().required().messages({
+      'any.required': 'Last name is required',
+    }),
+    user: Joi.required(),
+  })
+  .unknown(); // Allow additional fields not defined in the schema
 
 export const loginDTOValidator = Joi.object({
   identifier: Joi.string().required().messages({
@@ -132,7 +119,7 @@ export const resendEmailVerificationCodeDTOValidator = Joi.object({
     'string.email': 'Invalid email format',
     'any.required': 'Email is required',
   }),
-});
+}).unknown(); // Allow additional fields not defined in the schema
 
 export const confirmEmailDTOValidator = Joi.object({
   email: Joi.string().email().required().messages({
@@ -143,4 +130,4 @@ export const confirmEmailDTOValidator = Joi.object({
     'string.length': 'OTP must be 6 characters long',
     'any.required': 'OTP is required',
   }),
-});
+}).unknown(); // Allow additional fields not defined in the schema

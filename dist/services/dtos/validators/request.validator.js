@@ -44,10 +44,10 @@ exports.createAccountDTOValidator = joi_1.default.object({
         'any.required': 'Dial code is required',
     }),
     phone_number: joi_1.default.string()
-        .pattern(/^\+\d+$/)
+        .length(10) // Enforces exactly 10 characters
         .required()
         .messages({
-        'string.pattern.base': 'Phone number must start with a plus (+) and be followed by numbers only',
+        'string.length': 'Phone number must be exactly 10 characters long',
         'any.required': 'Phone number is required',
     }),
     time_zone: joi_1.default.string()
@@ -55,8 +55,9 @@ exports.createAccountDTOValidator = joi_1.default.object({
         .messages({
         'string.pattern.base': 'Time zone must be a valid IANA time zone (e.g., Africa/Lagos)',
     }),
-});
-exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator.keys({
+}).unknown(); // Allow additional fields not defined in the schema
+exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator
+    .keys({
     name: joi_1.default.string().required().messages({
         'any.required': 'Company name is required',
     }),
@@ -71,50 +72,37 @@ exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator.key
         'number.positive': 'Max spend amount per employee must be a positive number',
         'any.required': 'Max spend amount per employee is required',
     }),
-    user: joi_1.default.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
-        .required()
-        .messages({
-        'string.pattern.base': 'Invalid user ID',
-        'any.required': 'User ID is required',
-    }),
-});
-exports.createIndividualAccountDTOValidator = exports.createAccountDTOValidator.keys({
+    user: joi_1.default.required(),
+})
+    .unknown(); // Allow additional fields not defined in the schema
+exports.createIndividualAccountDTOValidator = exports.createAccountDTOValidator
+    .keys({
     first_name: joi_1.default.string().required().messages({
         'any.required': 'First name is required',
     }),
     last_name: joi_1.default.string().required().messages({
         'any.required': 'Last name is required',
     }),
-    user: joi_1.default.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
-        .required()
-        .messages({
-        'string.pattern.base': 'Invalid user ID',
-        'any.required': 'User ID is required',
-    }),
+    user: joi_1.default.required(),
     invitation_code: joi_1.default.string().required().messages({
         'any.required': 'Invitation code is required',
     }),
     lunch_time: joi_1.default.string().required().messages({
         'any.required': 'Lunch time is required',
     }),
-});
-exports.createAdminAccountDTOValidator = exports.createAccountDTOValidator.keys({
+})
+    .unknown(); // Allow additional fields not defined in the schema
+exports.createAdminAccountDTOValidator = exports.createAccountDTOValidator
+    .keys({
     first_name: joi_1.default.string().required().messages({
         'any.required': 'First name is required',
     }),
     last_name: joi_1.default.string().required().messages({
         'any.required': 'Last name is required',
     }),
-    user: joi_1.default.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
-        .required()
-        .messages({
-        'string.pattern.base': 'Invalid user ID',
-        'any.required': 'User ID is required',
-    }),
-});
+    user: joi_1.default.required(),
+})
+    .unknown(); // Allow additional fields not defined in the schema
 exports.loginDTOValidator = joi_1.default.object({
     identifier: joi_1.default.string().required().messages({
         'any.required': 'Identifier is required',
@@ -128,7 +116,7 @@ exports.resendEmailVerificationCodeDTOValidator = joi_1.default.object({
         'string.email': 'Invalid email format',
         'any.required': 'Email is required',
     }),
-});
+}).unknown(); // Allow additional fields not defined in the schema
 exports.confirmEmailDTOValidator = joi_1.default.object({
     email: joi_1.default.string().email().required().messages({
         'string.email': 'Invalid email format',
@@ -138,4 +126,4 @@ exports.confirmEmailDTOValidator = joi_1.default.object({
         'string.length': 'OTP must be 6 characters long',
         'any.required': 'OTP is required',
     }),
-});
+}).unknown(); // Allow additional fields not defined in the schema

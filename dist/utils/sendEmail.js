@@ -25,8 +25,8 @@ const EMAIL_TEMPLATE_DEFAULTS = {
 const rootDir = process.cwd();
 // Initialize the handlebar converter class
 const hbsConverter = new handlebars_converter_1.HandlebarsConverter({
-    templateDirPath: node_path_1.default.join(rootDir, './template/contents'),
-    partialDirPath: node_path_1.default.join(rootDir, './template/partials'),
+    templateDirPath: node_path_1.default.join(rootDir, './templates/contents'),
+    partialDirPath: node_path_1.default.join(rootDir, './templates/partials'),
 });
 const sendEmail = (params) => __awaiter(void 0, void 0, void 0, function* () {
     try {

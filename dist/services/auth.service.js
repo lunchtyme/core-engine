@@ -53,49 +53,62 @@ const argon2_1 = require("argon2");
 const jwt = __importStar(require("jsonwebtoken"));
 const utils_1 = require("../utils");
 const validators_1 = require("./dtos/validators");
+const infrastructure_1 = require("../infrastructure");
 class Authservice {
-    constructor(userRepo, companyRepo, adminRepo, individualRepo, sharedService, redisService) {
+    constructor(userRepo, companyRepo, adminRepo, individualRepo, sharedService, redisService, emailQueu) {
         this._userRepo = userRepo;
         this._companyRepo = companyRepo;
         this._adminRepo = adminRepo;
         this._individualRepo = individualRepo;
         this._sharedService = sharedService;
         this._redisService = redisService;
+        this._emailQueue = emailQueu;
     }
     register(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const session = yield mongoose_1.default.startSession();
             try {
-                // User specific validation
-                const { error, value } = validators_1.createAccountDTOValidator.validate(params);
-                if (error) {
-                    throw error;
-                }
-                const { email } = value;
-                const userExist = yield this._sharedService.checkUserExist({
-                    identifier: 'email',
-                    value: email,
+                const user = yield session.withTransaction(() => __awaiter(this, void 0, void 0, function* () {
+                    // User specific validation
+                    const { error, value } = validators_1.createAccountDTOValidator.validate(params);
+                    if (error) {
+                        throw new utils_1.BadRequestError(error.message);
+                    }
+                    const { email } = value;
+                    const userExist = yield this._sharedService.checkUserExist({
+                        identifier: 'email',
+                        value: email,
+                    });
+                    if (userExist) {
+                        throw new utils_1.BadRequestError('User already exists');
+                    }
+                    // Password hashing
+                    const hashedPassword = yield (0, argon2_1.hash)(value.password);
+                    const user = yield this._userRepo.create(Object.assign(Object.assign({}, value), { password: hashedPassword }), session);
+                    let accountCreateResult;
+                    switch (params.account_type) {
+                        case user_1.UserAccountType.COMPANY:
+                            accountCreateResult = yield this.registerCompany(Object.assign(Object.assign({}, params), { user: user._id }), session);
+                            break;
+                        case user_1.UserAccountType.INDIVIDUAL:
+                            accountCreateResult = yield this.registerIndividual(Object.assign(Object.assign({}, params), { user: user._id }), session);
+                            break;
+                        case user_1.UserAccountType.ADMIN:
+                            accountCreateResult = yield this.registerAdmin(Object.assign(Object.assign({}, params), { user: user._id }), session);
+                            break;
+                        default:
+                            throw new Error('Invalid account type provided');
+                    }
+                    // Set the account reference
+                    user.account_ref = accountCreateResult._id;
+                    yield user.save({ session });
+                    const _a = user.toObject(), { password } = _a, result = __rest(_a, ["password"]);
+                    return result;
+                }));
+                const userDetails = yield this._sharedService.getUser({
+                    identifier: 'id',
+                    value: user._id,
                 });
-                if (userExist) {
-                    throw new Error('User already exist');
-                }
-                // Password hashing
-                const hashedPassword = yield (0, argon2_1.hash)(value.password);
-                const user = yield this._userRepo.create(Object.assign(Object.assign({}, value), { password: hashedPassword }), session);
-                let accountCreateResult;
-                switch (params.account_type) {
-                    case user_1.UserAccountType.COMPANY:
-                        accountCreateResult = yield this.registerCompany(Object.assign(Object.assign({}, params), { user: user._id }));
-                        break;
-                    case user_1.UserAccountType.INDIVIDUAL:
-                        accountCreateResult = yield this.registerIndividual(Object.assign(Object.assign({}, params), { user: user._id }));
-                        break;
-                    case user_1.UserAccountType.ADMIN:
-                        accountCreateResult = yield this.registerAdmin(Object.assign(Object.assign({}, params), { user: user._id }));
-                        break;
-                    default:
-                        throw new Error('Invalid account type provided');
-                }
                 // Generate OTP and send verification email
                 const OTP = utils_1.Helper.generateOTPCode();
                 const cacheKey = `${user._id}:verify:mail`;
@@ -105,24 +118,26 @@ class Authservice {
                     subject: utils_1.EMAIL_DATA.subject.verifyEmail,
                     template: utils_1.EMAIL_DATA.template.verifyEmail,
                     context: {
+                        OTP,
                         email: user.email,
                         name: user.account_type === user_1.UserAccountType.COMPANY
-                            ? user.account_details.name
-                            : user.account_details.first_name,
+                            ? userDetails.account_details.name
+                            : userDetails.account_details.first_name,
                     },
                 };
-                yield (0, utils_1.sendEmail)(emailPayload);
-                // Set the account reference
-                user.account_ref = accountCreateResult._id;
-                yield user.save({ session });
-                const _a = user.toObject(), { password } = _a, result = __rest(_a, ["password"]);
-                return result;
+                infrastructure_1.emailQueue.add('mailer', emailPayload, {
+                    delay: 2000,
+                    attempts: 5,
+                    removeOnComplete: true,
+                });
+                return user._id;
             }
             catch (error) {
+                console.error('Transaction error:', error);
                 throw error;
             }
             finally {
-                yield session.endSession();
+                session.endSession();
             }
         });
     }
@@ -132,7 +147,7 @@ class Authservice {
                 // Perform company-specific validation and logic
                 const { error, value } = validators_1.createCompanyAccountDTOValidator.validate(params);
                 if (error) {
-                    throw error;
+                    throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._companyRepo.create(Object.assign({}, value), session);
             }
@@ -147,7 +162,7 @@ class Authservice {
                 // Perform admin-specific validation and logic
                 const { error, value } = validators_1.createAdminAccountDTOValidator.validate(params);
                 if (error) {
-                    throw error;
+                    throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._adminRepo.create(Object.assign({}, value), session);
             }
@@ -162,7 +177,7 @@ class Authservice {
                 // Perform individual-specific validation and logic
                 const { error, value } = validators_1.createIndividualAccountDTOValidator.validate(params);
                 if (error) {
-                    throw error;
+                    throw new utils_1.BadRequestError(error.message);
                 }
                 // Validate invitation code
                 // Update invitation data state
@@ -179,7 +194,7 @@ class Authservice {
                 // Validate user input
                 const { error, value } = validators_1.loginDTOValidator.validate(params);
                 if (error) {
-                    throw error;
+                    throw new utils_1.BadRequestError(error.message);
                 }
                 const { identifier, password } = value;
                 const userCheckParam = identifier === 'email'
@@ -187,12 +202,12 @@ class Authservice {
                     : { identifier: 'phone_number', value: identifier };
                 const user = yield this._sharedService.getUser(userCheckParam);
                 if (!user) {
-                    throw new Error('Invalid credentials, user not found');
+                    throw new utils_1.NotFoundError('Invalid credentials, user not found');
                 }
                 // Compare password
                 const isPasswordMatch = yield (0, argon2_1.verify)(user.password, password);
                 if (!isPasswordMatch) {
-                    throw new Error('Invalid credentials');
+                    throw new utils_1.BadRequestError('Invalid credentials');
                 }
                 // TODO: Probably check if user has verified their email and provide follow up flow
                 // ...any other required business logic
@@ -213,18 +228,18 @@ class Authservice {
                 // Validate user inputs
                 const { error, value } = validators_1.confirmEmailDTOValidator.validate(params);
                 if (error) {
-                    throw error;
+                    throw new utils_1.BadRequestError(error.message);
                 }
                 const { email, otp } = value;
                 const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
                 if (!user) {
-                    throw new Error('User not found');
+                    throw new utils_1.NotFoundError('User not found');
                 }
                 // Lookup to redis to check otp and validate
                 const cacheKey = `${user._id}:verify:mail`;
                 const cacheValue = yield this._redisService.get(cacheKey);
                 if (!cacheValue || parseInt(cacheValue) !== parseInt(otp)) {
-                    throw new Error('Invalid or expired otp provided');
+                    throw new utils_1.BadRequestError('Invalid or expired otp provided');
                 }
                 // delete from cache and update user data
                 yield this._redisService.del(cacheKey);
@@ -245,12 +260,12 @@ class Authservice {
                 // Validate user inputs
                 const { error, value } = validators_1.resendEmailVerificationCodeDTOValidator.validate(params);
                 if (error) {
-                    throw error;
+                    throw new utils_1.BadRequestError(error.message);
                 }
                 const { email } = value;
                 const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
                 if (!user) {
-                    throw new Error('User not found');
+                    throw new utils_1.NotFoundError('User not found');
                 }
                 // Generate OTP and send verification email
                 const OTP = utils_1.Helper.generateOTPCode();

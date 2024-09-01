@@ -54,6 +54,7 @@ exports.createAccountDTOValidator = joi_1.default.object({
         .pattern(/^[A-Za-z]+\/[A-Za-z_]+$/)
         .messages({
         'string.pattern.base': 'Time zone must be a valid IANA time zone (e.g., Africa/Lagos)',
+        'any.required': 'Timezone is required',
     }),
 }).unknown(); // Allow additional fields not defined in the schema
 exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator

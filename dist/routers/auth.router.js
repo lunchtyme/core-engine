@@ -134,9 +134,6 @@ exports.authRouter = (0, express_1.Router)();
  *         phone_number:
  *           type: string
  *           example: "1234567890"
- *         time_zone:
- *           type: string
- *           example: "America/New_York"
  *         invitation_code:
  *           type: string
  *           example: "INV12345"

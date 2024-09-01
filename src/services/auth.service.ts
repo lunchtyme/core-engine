@@ -236,6 +236,7 @@ export class Authservice {
       // Validate invitation code
 
       // Find the company they belong to
+      value.company = new mongoose.Types.ObjectId('66d11be3c1a9d88a0bc56f2d');
 
       // Verify that the email they signup with matches the company own
 

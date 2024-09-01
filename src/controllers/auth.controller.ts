@@ -4,8 +4,6 @@ import { authService } from '../services';
 
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Since this is the only controller that needs the time_zone, I'll add it to the request body
-    req.body.time_zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const result = await authService.register(req.body);
     Helper.formatAPIResponse(res, 'Account created successfully', result, 201);
   } catch (error) {

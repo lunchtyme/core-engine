@@ -14,8 +14,6 @@ const utils_1 = require("../utils");
 const services_1 = require("../services");
 const registerController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Since this is the only controller that needs the time_zone, I'll add it to the request body
-        req.body.time_zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const result = yield services_1.authService.register(req.body);
         utils_1.Helper.formatAPIResponse(res, 'Account created successfully', result, 201);
     }

@@ -196,9 +196,11 @@ class Authservice {
                     utils_1.logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
-                // Verify that the email they signup with matches the company own
                 // Validate invitation code
-                // Update invitation data state
+                // Find the company they belong to
+                value.company = new mongoose_1.default.Types.ObjectId('66d11be3c1a9d88a0bc56f2d');
+                // Verify that the email they signup with matches the company own
+                // Update invitation data state, share session
                 return yield this._individualRepo.create(Object.assign({}, value), session);
             }
             catch (error) {

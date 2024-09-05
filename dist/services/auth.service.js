@@ -219,7 +219,8 @@ class Authservice {
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { identifier, password } = value;
-                const userCheckParam = identifier === 'email'
+                const isEmail = identifier.includes('@');
+                const userCheckParam = isEmail
                     ? { identifier: 'email', value: identifier }
                     : { identifier: 'phone_number', value: identifier };
                 const user = yield this._sharedService.getUser(userCheckParam);
@@ -233,12 +234,12 @@ class Authservice {
                 }
                 // TODO: Probably check if user has verified their email and provide follow up flow
                 // ...any other required business logic
-                const jwtClaim = { sub: user._id };
+                const jwtClaim = { sub: user._id, account_type: user.account_type };
                 const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET, {
                     expiresIn: process.env.JWT_EXPIRES_IN,
                 });
                 utils_1.logger.info('User login successful', user._id);
-                return accessTokenHash;
+                return { accessTokenHash, onboarded: user.has_completed_onboarding };
             }
             catch (error) {
                 utils_1.logger.error('Error logging user in', error);
@@ -320,6 +321,33 @@ class Authservice {
             }
             catch (error) {
                 utils_1.logger.error('Error resending email verification code', error);
+                throw error;
+            }
+        });
+    }
+    // Onboarding for company/Employee
+    // /me
+    me(user_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this._userRepo.getUser({ identifier: 'id', value: user_id });
+                const hydratedUser = {
+                    id: user === null || user === void 0 ? void 0 : user._id,
+                    account_type: user === null || user === void 0 ? void 0 : user.account_type,
+                    account_state: user === null || user === void 0 ? void 0 : user.account_state,
+                    email: user === null || user === void 0 ? void 0 : user.email,
+                    email_verified: user === null || user === void 0 ? void 0 : user.email_verified,
+                    verified: user === null || user === void 0 ? void 0 : user.verified,
+                    dial_code: user === null || user === void 0 ? void 0 : user.dial_code,
+                    phone_number: user === null || user === void 0 ? void 0 : user.phone_number,
+                    time_zone: user === null || user === void 0 ? void 0 : user.time_zone,
+                    created_at: user === null || user === void 0 ? void 0 : user.created_at,
+                    onboarded: user === null || user === void 0 ? void 0 : user.has_completed_onboarding,
+                };
+                return hydratedUser;
+            }
+            catch (error) {
+                utils_1.logger.error('Error fetching user profile data', error);
                 throw error;
             }
         });

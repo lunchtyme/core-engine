@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRouter = void 0;
 const express_1 = require("express");
 const controllers_1 = require("../controllers");
+const middlewares_1 = require("../middlewares");
 exports.authRouter = (0, express_1.Router)();
 /**
  * @swagger
@@ -73,14 +74,14 @@ exports.authRouter = (0, express_1.Router)();
  *         - account_type
  *         - name
  *         - website
- *         - size
+ *         - time_zone
  *       properties:
  *         email:
  *           type: string
  *           example: "company@example.com"
  *         password:
  *           type: string
- *           example: "securePassword123"
+ *           example: "securePassword123!"
  *         account_type:
  *           type: string
  *           enum: [Company]
@@ -91,12 +92,9 @@ exports.authRouter = (0, express_1.Router)();
  *         website:
  *           type: string
  *           example: "https://www.example.com"
- *         size:
+ *         time_zone:
  *           type: string
- *           example: "100-500"
- *         max_spend_amount_per_employee:
- *           type: number
- *           example: 1000
+ *           example: "Africa/Lagos"
  *         dial_code:
  *           type: string
  *           example: "+1"
@@ -111,6 +109,7 @@ exports.authRouter = (0, express_1.Router)();
  *         - account_type
  *         - first_name
  *         - last_name
+ *         - time_zone
  *       properties:
  *         email:
  *           type: string
@@ -137,9 +136,9 @@ exports.authRouter = (0, express_1.Router)();
  *         invitation_code:
  *           type: string
  *           example: "INV12345"
- *         lunch_time:
+ *         time_zone:
  *           type: string
- *           example: "12:30 PM"
+ *           example: "Africa/Lagos"
  *     CreateAdminAccountDTO:
  *       type: object
  *       required:
@@ -148,6 +147,7 @@ exports.authRouter = (0, express_1.Router)();
  *         - account_type
  *         - first_name
  *         - last_name
+ *         - time_zone
  *       properties:
  *         email:
  *           type: string
@@ -171,6 +171,9 @@ exports.authRouter = (0, express_1.Router)();
  *         phone_number:
  *           type: string
  *           example: "1234567890"
+ *         time_zone:
+ *           type: string
+ *           example: "Africa/Lagos"
  */
 exports.authRouter.post('/signup', controllers_1.registerController);
 /**
@@ -212,6 +215,9 @@ exports.authRouter.post('/signup', controllers_1.registerController);
  *                     access_token:
  *                       type: string
  *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                     onboarded:
+ *                       type: boolean
+ *                       example: false
  */
 exports.authRouter.post('/login', controllers_1.loginController);
 /**
@@ -293,3 +299,80 @@ exports.authRouter.post('/confirm-email', controllers_1.verifyEmailController);
  *                       example: "64d9f5c3c394bb73b5b5c681"
  */
 exports.authRouter.post('/resend-verify-email', controllers_1.resendVerificationCodeController);
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Fetch sessioned user's hydrated data
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile data fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Profile fetched
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "66da18efe3e4db49ec4be929"
+ *                     account_type:
+ *                       type: string
+ *                       example: Company
+ *                     account_state:
+ *                       type: string
+ *                       example: ACTIVE
+ *                     email:
+ *                       type: string
+ *                       example: "tobi@lunch.store"
+ *                     email_verified:
+ *                       type: boolean
+ *                       example: false
+ *                     verified:
+ *                       type: boolean
+ *                       example: false
+ *                     dial_code:
+ *                       type: string
+ *                       example: "+1"
+ *                     phone_number:
+ *                       type: string
+ *                       example: "1234567890"
+ *                     time_zone:
+ *                       type: string
+ *                       example: "Africa/Lagos"
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-09-05T20:47:43.508Z"
+ *                     onboarded:
+ *                       type: boolean
+ *                       example: false
+ *       401:
+ *         description: Unauthorized - Session expired, please login to continue.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *                 data:
+ *                   type: object
+ *                   example: null
+ */
+exports.authRouter.get('/me', middlewares_1.resolveAuthContext, controllers_1.meController);

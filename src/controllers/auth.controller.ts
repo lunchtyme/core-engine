@@ -41,3 +41,14 @@ export const resendVerificationCodeController = async (
     next(error);
   }
 };
+
+export const meController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract userId from session claim
+    const userId = req.user?.sub;
+    const result = await authService.me(userId as string);
+    Helper.formatAPIResponse(res, 'Profile fetched', result);
+  } catch (error) {
+    next(error);
+  }
+};

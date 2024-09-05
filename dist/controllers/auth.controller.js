@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resendVerificationCodeController = exports.verifyEmailController = exports.loginController = exports.registerController = void 0;
+exports.meController = exports.resendVerificationCodeController = exports.verifyEmailController = exports.loginController = exports.registerController = void 0;
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const registerController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -52,3 +52,16 @@ const resendVerificationCodeController = (req, res, next) => __awaiter(void 0, v
     }
 });
 exports.resendVerificationCodeController = resendVerificationCodeController;
+const meController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        // Extract userId from session claim
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub;
+        const result = yield services_1.authService.me(userId);
+        utils_1.Helper.formatAPIResponse(res, 'Profile fetched', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.meController = meController;

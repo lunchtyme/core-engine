@@ -79,3 +79,8 @@ export interface Admin extends BaseUser {
 }
 
 export type User = Company | Individual | Admin;
+
+export interface AuthUserClaim {
+  sub: mongoose.Types.ObjectId | string;
+  account_type: UserAccountType;
+}

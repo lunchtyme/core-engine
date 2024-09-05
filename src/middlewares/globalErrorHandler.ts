@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { BaseError } from '../utils';
 
 export const globalErrorMiddleware = (
   err: any,
@@ -7,7 +6,6 @@ export const globalErrorMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log('SERVER ERROR:', err, err.name);
   const errStatusCode = err.errStatusCode ?? 500;
   const errMessage =
     err instanceof Error

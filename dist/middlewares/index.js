@@ -16,3 +16,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./notFound"), exports);
 __exportStar(require("./globalErrorHandler"), exports);
+__exportStar(require("./resolveAuthContext"), exports);

@@ -25,7 +25,6 @@ import {
   Helper,
   logger,
   NotFoundError,
-  sendEmail,
   SendEmailParams,
 } from '../utils';
 import { RedisService } from './redis.service';
@@ -259,10 +258,11 @@ export class Authservice {
       }
 
       const { identifier, password } = value;
-      const userCheckParam =
-        identifier === 'email'
-          ? { identifier: 'email', value: identifier }
-          : { identifier: 'phone_number', value: identifier };
+      const isEmail = (identifier as string).includes('@');
+
+      const userCheckParam = isEmail
+        ? { identifier: 'email', value: identifier }
+        : { identifier: 'phone_number', value: identifier };
       const user = await this._sharedService.getUser(userCheckParam as GetUserParams);
       if (!user) {
         throw new NotFoundError('Invalid credentials, user not found');
@@ -276,12 +276,12 @@ export class Authservice {
 
       // TODO: Probably check if user has verified their email and provide follow up flow
       // ...any other required business logic
-      const jwtClaim = { sub: user._id };
+      const jwtClaim = { sub: user._id, account_type: user.account_type };
       const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN!,
       });
       logger.info('User login successful', user._id);
-      return accessTokenHash;
+      return { accessTokenHash, onboarded: user.has_completed_onboarding };
     } catch (error) {
       logger.error('Error logging user in', error);
       throw error;
@@ -366,6 +366,33 @@ export class Authservice {
       return user._id;
     } catch (error) {
       logger.error('Error resending email verification code', error);
+      throw error;
+    }
+  }
+
+  // Onboarding for company/Employee
+
+  // /me
+  async me(user_id: string) {
+    try {
+      const user = await this._userRepo.getUser({ identifier: 'id', value: user_id });
+      const hydratedUser = {
+        id: user?._id,
+        account_type: user?.account_type,
+        account_state: user?.account_state,
+        email: user?.email,
+        email_verified: user?.email_verified,
+        verified: user?.verified,
+        dial_code: user?.dial_code,
+        phone_number: user?.phone_number,
+        time_zone: user?.time_zone,
+        created_at: user?.created_at,
+        onboarded: user?.has_completed_onboarding,
+      };
+
+      return hydratedUser;
+    } catch (error) {
+      logger.error('Error fetching user profile data', error);
       throw error;
     }
   }

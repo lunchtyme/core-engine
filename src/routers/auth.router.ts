@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import {
   loginController,
+  meController,
   registerController,
   resendVerificationCodeController,
   verifyEmailController,
 } from '../controllers';
+import { resolveAuthContext } from '../middlewares';
 
 export const authRouter = Router();
 
@@ -78,14 +80,14 @@ export const authRouter = Router();
  *         - account_type
  *         - name
  *         - website
- *         - size
+ *         - time_zone
  *       properties:
  *         email:
  *           type: string
  *           example: "company@example.com"
  *         password:
  *           type: string
- *           example: "securePassword123"
+ *           example: "securePassword123!"
  *         account_type:
  *           type: string
  *           enum: [Company]
@@ -96,12 +98,9 @@ export const authRouter = Router();
  *         website:
  *           type: string
  *           example: "https://www.example.com"
- *         size:
+ *         time_zone:
  *           type: string
- *           example: "100-500"
- *         max_spend_amount_per_employee:
- *           type: number
- *           example: 1000
+ *           example: "Africa/Lagos"
  *         dial_code:
  *           type: string
  *           example: "+1"
@@ -116,6 +115,7 @@ export const authRouter = Router();
  *         - account_type
  *         - first_name
  *         - last_name
+ *         - time_zone
  *       properties:
  *         email:
  *           type: string
@@ -142,9 +142,9 @@ export const authRouter = Router();
  *         invitation_code:
  *           type: string
  *           example: "INV12345"
- *         lunch_time:
+ *         time_zone:
  *           type: string
- *           example: "12:30 PM"
+ *           example: "Africa/Lagos"
  *     CreateAdminAccountDTO:
  *       type: object
  *       required:
@@ -153,6 +153,7 @@ export const authRouter = Router();
  *         - account_type
  *         - first_name
  *         - last_name
+ *         - time_zone
  *       properties:
  *         email:
  *           type: string
@@ -176,6 +177,9 @@ export const authRouter = Router();
  *         phone_number:
  *           type: string
  *           example: "1234567890"
+ *         time_zone:
+ *           type: string
+ *           example: "Africa/Lagos"
  */
 
 authRouter.post('/signup', registerController);
@@ -219,6 +223,9 @@ authRouter.post('/signup', registerController);
  *                     access_token:
  *                       type: string
  *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                     onboarded:
+ *                       type: boolean
+ *                       example: false
  */
 authRouter.post('/login', loginController);
 
@@ -302,3 +309,81 @@ authRouter.post('/confirm-email', verifyEmailController);
  *                       example: "64d9f5c3c394bb73b5b5c681"
  */
 authRouter.post('/resend-verify-email', resendVerificationCodeController);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Fetch sessioned user's hydrated data
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile data fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Profile fetched
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "66da18efe3e4db49ec4be929"
+ *                     account_type:
+ *                       type: string
+ *                       example: Company
+ *                     account_state:
+ *                       type: string
+ *                       example: ACTIVE
+ *                     email:
+ *                       type: string
+ *                       example: "tobi@lunch.store"
+ *                     email_verified:
+ *                       type: boolean
+ *                       example: false
+ *                     verified:
+ *                       type: boolean
+ *                       example: false
+ *                     dial_code:
+ *                       type: string
+ *                       example: "+1"
+ *                     phone_number:
+ *                       type: string
+ *                       example: "1234567890"
+ *                     time_zone:
+ *                       type: string
+ *                       example: "Africa/Lagos"
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-09-05T20:47:43.508Z"
+ *                     onboarded:
+ *                       type: boolean
+ *                       example: false
+ *       401:
+ *         description: Unauthorized - Session expired, please login to continue.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *                 data:
+ *                   type: object
+ *                   example: null
+ */
+authRouter.get('/me', resolveAuthContext, meController);

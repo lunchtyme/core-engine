@@ -50,6 +50,11 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    has_completed_onboarding: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

@@ -19,10 +19,6 @@ const companySchema = new Schema(
       type: String,
       required: true,
     },
-    address: {
-      type: Schema.Types.ObjectId,
-      ref: 'Address',
-    },
     max_spend_amount_per_employee: {
       type: Schema.Types.Decimal128,
       required: true,

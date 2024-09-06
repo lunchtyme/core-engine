@@ -26,6 +26,11 @@ const addressSchema = new Schema(
       type: String,
       default: null,
     },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

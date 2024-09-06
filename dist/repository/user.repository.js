@@ -44,7 +44,33 @@ class UserRepository {
                         : identifier === 'phone_number'
                             ? { phone_number: value }
                             : {};
-                return yield infrastructure_1.UserModel.findOne(getUserFilterOptions).populate('account_details').exec();
+                return yield infrastructure_1.UserModel.findOne(getUserFilterOptions).exec();
+            }
+            catch (error) {
+                utils_1.logger.error('Error getting user data from db:', error);
+                throw error;
+            }
+        });
+    }
+    getUserWithDetails(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { identifier, value } = params;
+                const getUserFilterOptions = identifier === 'email'
+                    ? { email: value }
+                    : identifier === 'id'
+                        ? {
+                            _id: mongoose_1.default.Types.ObjectId.isValid(value)
+                                ? new mongoose_1.default.Types.ObjectId(value)
+                                : value,
+                        }
+                        : identifier === 'phone_number'
+                            ? { phone_number: value }
+                            : {};
+                return yield infrastructure_1.UserModel.findOne(getUserFilterOptions)
+                    .select('-password')
+                    .populate('account_details')
+                    .exec();
             }
             catch (error) {
                 utils_1.logger.error('Error getting user data from db:', error);

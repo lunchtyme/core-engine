@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   loginController,
   meController,
+  onboardingController,
   registerController,
   resendVerificationCodeController,
   verifyEmailController,
@@ -387,3 +388,91 @@ authRouter.post('/resend-verify-email', resendVerificationCodeController);
  *                   example: null
  */
 authRouter.get('/me', resolveAuthContext, meController);
+
+/**
+ * @swagger
+ * /auth/onboard:
+ *   post:
+ *     summary: Onboard a user (Company or Employee)
+ *     description: This endpoint handles the onboarding process for users, either as a company or an employee.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/EmployeeOnboardingDTO'
+ *               - $ref: '#/components/schemas/CompanyOnboardingDTO'
+ *     responses:
+ *       200:
+ *         description: User successfully onboarded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: User onboarded successfully
+ *                 data:
+ *                   type: string
+ *                   description: User ID of the onboarded user
+ *                   example: "64d9f5c3c394bb73b5b5c681"
+ *       400:
+ *         description: Invalid input or validation error
+ *       401:
+ *         description: Unauthorized, invalid token
+ *       500:
+ *         description: Internal server error
+ * components:
+ *   schemas:
+ *     CreateAddressDTO:
+ *       type: object
+ *       properties:
+ *         address_line_1:
+ *           type: string
+ *           example: "123 Main St"
+ *         address_line_2:
+ *           type: string
+ *           example: "Apt 4B"
+ *         city:
+ *           type: string
+ *           example: "New York"
+ *         state:
+ *           type: string
+ *           example: "NY"
+ *         country:
+ *           type: string
+ *           example: "USA"
+ *         zip_code:
+ *           type: string
+ *           example: "10001"
+ *
+ *     EmployeeOnboardingDTO:
+ *       allOf:
+ *         - $ref: '#/components/schemas/CreateAddressDTO'
+ *         - type: object
+ *           properties:
+ *             lunch_time:
+ *               type: string
+ *               example: "12:00 PM"
+ *
+ *     CompanyOnboardingDTO:
+ *       allOf:
+ *         - $ref: '#/components/schemas/CreateAddressDTO'
+ *         - type: object
+ *           properties:
+ *             max_spend_amount_per_employee:
+ *               type: string
+ *               example: "100"
+ *             size:
+ *               type: string
+ *               example: "50-100"
+ */
+authRouter.post('/onboard', resolveAuthContext, onboardingController);

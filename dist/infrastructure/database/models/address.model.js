@@ -50,6 +50,11 @@ const addressSchema = new mongoose_1.Schema({
         type: String,
         default: null,
     },
+    user: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
 }, {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
     toJSON: { virtuals: true },

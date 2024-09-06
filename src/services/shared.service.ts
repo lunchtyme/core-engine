@@ -1,4 +1,5 @@
 import { GetUserParams, UserRepository } from '../repository';
+import { NotFoundError } from '../utils';
 
 export class SharedServices {
   private readonly _userRepo: UserRepository;
@@ -7,11 +8,18 @@ export class SharedServices {
     this._userRepo = userRepo;
   }
 
+  async getUserWithDetails(params: GetUserParams) {
+    const user = await this._userRepo.getUserWithDetails(params);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    return user;
+  }
+
   async getUser(params: GetUserParams) {
     const user = await this._userRepo.getUser(params);
     if (!user) {
-      // TODO: Refactor to use custom not found error handler
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
     return user;
   }

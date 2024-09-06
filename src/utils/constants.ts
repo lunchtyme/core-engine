@@ -9,3 +9,4 @@ export const EMAIL_DATA = {
     verifyEmail: 'verifyEmail',
   },
 };
+export const DEFAULT_CACHE_EXPIRY_IN_SECS = 180;

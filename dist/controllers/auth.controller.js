@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.meController = exports.resendVerificationCodeController = exports.verifyEmailController = exports.loginController = exports.registerController = void 0;
+exports.onboardingController = exports.meController = exports.resendVerificationCodeController = exports.verifyEmailController = exports.loginController = exports.registerController = void 0;
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const registerController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield services_1.authService.register(req.body);
+        const result = yield services_1.authCreateService.register(req.body);
         utils_1.Helper.formatAPIResponse(res, 'Account created successfully', result, 201);
     }
     catch (error) {
@@ -24,7 +24,7 @@ const registerController = (req, res, next) => __awaiter(void 0, void 0, void 0,
 exports.registerController = registerController;
 const loginController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield services_1.authService.authenticate(req.body);
+        const result = yield services_1.authCreateService.authenticate(req.body);
         utils_1.Helper.formatAPIResponse(res, 'User logged in successfully', result);
     }
     catch (error) {
@@ -34,7 +34,7 @@ const loginController = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 exports.loginController = loginController;
 const verifyEmailController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield services_1.authService.confirmEmail(req.body);
+        const result = yield services_1.authCreateService.confirmEmail(req.body);
         utils_1.Helper.formatAPIResponse(res, 'Email confirmed successfully', result);
     }
     catch (error) {
@@ -44,7 +44,7 @@ const verifyEmailController = (req, res, next) => __awaiter(void 0, void 0, void
 exports.verifyEmailController = verifyEmailController;
 const resendVerificationCodeController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield services_1.authService.resendEmailVerificationCode(req.body);
+        const result = yield services_1.authCreateService.resendEmailVerificationCode(req.body);
         utils_1.Helper.formatAPIResponse(res, 'Email verification code resent', result);
     }
     catch (error) {
@@ -57,7 +57,7 @@ const meController = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     try {
         // Extract userId from session claim
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub;
-        const result = yield services_1.authService.me(userId);
+        const result = yield services_1.authReadService.me(userId);
         utils_1.Helper.formatAPIResponse(res, 'Profile fetched', result);
     }
     catch (error) {
@@ -65,3 +65,16 @@ const meController = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.meController = meController;
+const onboardingController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        // Extract userId from session claim
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub;
+        const result = yield services_1.authCreateService.processUserOnboarding(Object.assign(Object.assign({}, req.body), { user: userId }));
+        utils_1.Helper.formatAPIResponse(res, 'Onboarding completed', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.onboardingController = onboardingController;

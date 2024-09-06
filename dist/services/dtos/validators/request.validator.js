@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const user_1 = require("../../../typings/user");
 exports.createAccountDTOValidator = joi_1.default.object({
@@ -66,13 +66,6 @@ exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator
         'string.uri': 'Invalid website URL',
         'any.required': 'Website is required',
     }),
-    size: joi_1.default.string().required().messages({
-        'any.required': 'Company size is required',
-    }),
-    max_spend_amount_per_employee: joi_1.default.number().positive().required().messages({
-        'number.positive': 'Max spend amount per employee must be a positive number',
-        'any.required': 'Max spend amount per employee is required',
-    }),
     user: joi_1.default.required(),
 })
     .unknown(); // Allow additional fields not defined in the schema
@@ -87,9 +80,6 @@ exports.createIndividualAccountDTOValidator = exports.createAccountDTOValidator
     user: joi_1.default.required(),
     invitation_code: joi_1.default.string().required().messages({
         'any.required': 'Invitation code is required',
-    }),
-    lunch_time: joi_1.default.string().required().messages({
-        'any.required': 'Lunch time is required',
     }),
 })
     .unknown(); // Allow additional fields not defined in the schema
@@ -128,3 +118,48 @@ exports.confirmEmailDTOValidator = joi_1.default.object({
         'any.required': 'OTP is required',
     }),
 }).unknown(); // Allow additional fields not defined in the schema
+exports.createAddressDTOValidator = joi_1.default.object({
+    address_line_1: joi_1.default.string().required().messages({
+        'any.required': 'Provide your street address line',
+    }),
+    city: joi_1.default.string().required().messages({
+        'any.required': 'City is required',
+    }),
+    state: joi_1.default.string().required().messages({
+        'any.required': 'State is required',
+    }),
+    country: joi_1.default.string().required().messages({
+        'any.required': 'Country is required',
+    }),
+    zip_code: joi_1.default.string().required().messages({
+        'any.required': 'Please provide your address zipcode',
+    }),
+    user: joi_1.default.required(),
+    address_line_2: joi_1.default.string().optional(),
+}).unknown();
+exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator
+    .keys({
+    max_spend_amount_per_employee: joi_1.default.number().positive().required().messages({
+        'number.positive': 'Spend budget must be a positive number',
+        'any.required': 'Please specify spend budget for each employee you invite',
+    }),
+    size: joi_1.default.string()
+        .pattern(/^\d+-(\d+|\+|\d+\+)$/)
+        .required()
+        .messages({
+        'string.pattern.base': 'Provide company size in a valid format (e.g., 0-5, 50-100, 1000+)',
+        'any.required': 'Provide company size',
+    }),
+})
+    .unknown();
+exports.employeeOnboardingDTOValidator = exports.createAddressDTOValidator
+    .keys({
+    lunch_time: joi_1.default.string()
+        .pattern(/^((0[1-9]|1[0-2]):([0-5][0-9]) (AM|PM))$/)
+        .required()
+        .messages({
+        'string.pattern.base': 'Please enter a valid lunch time (e.g., 12:30 PM)',
+        'any.required': 'Please choose your preferred lunchtime',
+    }),
+})
+    .unknown();

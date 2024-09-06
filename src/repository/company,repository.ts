@@ -13,4 +13,19 @@ export class CompanyRepository {
       throw error;
     }
   }
+
+  async update(params: Partial<CreateCompanyAccountDTO>, session?: mongoose.ClientSession | null) {
+    try {
+      const updateQuery = { ...params };
+      const options: any = {};
+      if (session) {
+        options.session = session;
+      }
+      const result = await CompanyModel.updateOne({ user: params.user }, updateQuery, options);
+      return result.acknowledged;
+    } catch (error) {
+      logger.error('Error updating company user in db:', error);
+      throw error;
+    }
+  }
 }

@@ -43,10 +43,6 @@ const companySchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
-    address: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Address',
-    },
     max_spend_amount_per_employee: {
         type: mongoose_1.Schema.Types.Decimal128,
         required: true,

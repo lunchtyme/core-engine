@@ -44,10 +44,6 @@ const individualSchema = new mongoose_1.Schema({
         ref: 'Company',
         required: true,
     },
-    address: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Address',
-    },
     spend_balance: {
         type: mongoose_1.Schema.Types.Decimal128,
         default: 0.0,

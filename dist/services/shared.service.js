@@ -10,16 +10,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SharedServices = void 0;
+const utils_1 = require("../utils");
 class SharedServices {
     constructor(userRepo) {
         this._userRepo = userRepo;
+    }
+    getUserWithDetails(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this._userRepo.getUserWithDetails(params);
+            if (!user) {
+                throw new utils_1.NotFoundError('User not found');
+            }
+            return user;
+        });
     }
     getUser(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this._userRepo.getUser(params);
             if (!user) {
-                // TODO: Refactor to use custom not found error handler
-                throw new Error('User not found');
+                throw new utils_1.NotFoundError('User not found');
             }
             return user;
         });

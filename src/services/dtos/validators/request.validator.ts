@@ -65,13 +65,6 @@ export const createCompanyAccountDTOValidator = createAccountDTOValidator
       'string.uri': 'Invalid website URL',
       'any.required': 'Website is required',
     }),
-    size: Joi.string().required().messages({
-      'any.required': 'Company size is required',
-    }),
-    max_spend_amount_per_employee: Joi.number().positive().required().messages({
-      'number.positive': 'Max spend amount per employee must be a positive number',
-      'any.required': 'Max spend amount per employee is required',
-    }),
     user: Joi.required(),
   })
   .unknown(); // Allow additional fields not defined in the schema
@@ -87,9 +80,6 @@ export const createIndividualAccountDTOValidator = createAccountDTOValidator
     user: Joi.required(),
     invitation_code: Joi.string().required().messages({
       'any.required': 'Invitation code is required',
-    }),
-    lunch_time: Joi.string().required().messages({
-      'any.required': 'Lunch time is required',
     }),
   })
   .unknown(); // Allow additional fields not defined in the schema
@@ -132,3 +122,51 @@ export const confirmEmailDTOValidator = Joi.object({
     'any.required': 'OTP is required',
   }),
 }).unknown(); // Allow additional fields not defined in the schema
+
+export const createAddressDTOValidator = Joi.object({
+  address_line_1: Joi.string().required().messages({
+    'any.required': 'Provide your street address line',
+  }),
+  city: Joi.string().required().messages({
+    'any.required': 'City is required',
+  }),
+  state: Joi.string().required().messages({
+    'any.required': 'State is required',
+  }),
+  country: Joi.string().required().messages({
+    'any.required': 'Country is required',
+  }),
+  zip_code: Joi.string().required().messages({
+    'any.required': 'Please provide your address zipcode',
+  }),
+  user: Joi.required(),
+  address_line_2: Joi.string().optional(),
+}).unknown();
+
+export const companyOnboardingDTOValidator = createAddressDTOValidator
+  .keys({
+    max_spend_amount_per_employee: Joi.number().positive().required().messages({
+      'number.positive': 'Spend budget must be a positive number',
+      'any.required': 'Please specify spend budget for each employee you invite',
+    }),
+    size: Joi.string()
+      .pattern(/^\d+-(\d+|\+|\d+\+)$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'Provide company size in a valid format (e.g., 0-5, 50-100, 1000+)',
+        'any.required': 'Provide company size',
+      }),
+  })
+  .unknown();
+
+export const employeeOnboardingDTOValidator = createAddressDTOValidator
+  .keys({
+    lunch_time: Joi.string()
+      .pattern(/^((0[1-9]|1[0-2]):([0-5][0-9]) (AM|PM))$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'Please enter a valid lunch time (e.g., 12:30 PM)',
+        'any.required': 'Please choose your preferred lunchtime',
+      }),
+  })
+  .unknown();

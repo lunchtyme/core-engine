@@ -51,3 +51,24 @@ export interface ConfirmEmailDTO {
   email: string;
   otp: string;
 }
+
+export interface CreateAddressDTO {
+  address_line_1: string;
+  city: string;
+  state: string;
+  country: string;
+  zip_code: string;
+  user: mongoose.Types.ObjectId;
+  address_line_2?: string;
+}
+
+export interface EmployeeOnboardingDTO extends CreateAddressDTO {
+  lunch_time: string;
+}
+
+export interface CompanyOnboardingDTO extends CreateAddressDTO {
+  max_spend_amount_per_employee: string;
+  size: string;
+}
+
+export type OnboardingUserDTO = EmployeeOnboardingDTO | CompanyOnboardingDTO;

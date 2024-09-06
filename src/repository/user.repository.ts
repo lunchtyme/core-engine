@@ -35,7 +35,33 @@ export class UserRepository {
           ? { phone_number: value }
           : {};
 
-      return await UserModel.findOne(getUserFilterOptions).populate('account_details').exec();
+      return await UserModel.findOne(getUserFilterOptions).exec();
+    } catch (error) {
+      logger.error('Error getting user data from db:', error);
+      throw error;
+    }
+  }
+
+  async getUserWithDetails(params: GetUserParams) {
+    try {
+      const { identifier, value } = params;
+      const getUserFilterOptions =
+        identifier === 'email'
+          ? { email: value }
+          : identifier === 'id'
+          ? {
+              _id: mongoose.Types.ObjectId.isValid(value)
+                ? new mongoose.Types.ObjectId(value)
+                : value,
+            }
+          : identifier === 'phone_number'
+          ? { phone_number: value }
+          : {};
+
+      return await UserModel.findOne(getUserFilterOptions)
+        .select('-password')
+        .populate('account_details')
+        .exec();
     } catch (error) {
       logger.error('Error getting user data from db:', error);
       throw error;

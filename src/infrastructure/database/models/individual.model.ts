@@ -20,10 +20,6 @@ const individualSchema = new Schema(
       ref: 'Company',
       required: true,
     },
-    address: {
-      type: Schema.Types.ObjectId,
-      ref: 'Address',
-    },
     spend_balance: {
       type: Schema.Types.Decimal128,
       default: 0.0,

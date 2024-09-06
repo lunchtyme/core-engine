@@ -25,5 +25,22 @@ class IndividualRepository {
             }
         });
     }
+    update(params, session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const updateQuery = Object.assign({}, params);
+                const options = {};
+                if (session) {
+                    options.session = session;
+                }
+                const result = yield infrastructure_1.IndividualModel.updateOne({ user: params.user }, updateQuery, options);
+                return result.acknowledged;
+            }
+            catch (error) {
+                utils_1.logger.error('Error updating individual user in db:', error);
+                throw error;
+            }
+        });
+    }
 }
 exports.IndividualRepository = IndividualRepository;

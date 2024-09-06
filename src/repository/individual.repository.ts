@@ -13,4 +13,22 @@ export class IndividualRepository {
       throw error;
     }
   }
+
+  async update(
+    params: Partial<CreateIndividualAccountDTO>,
+    session?: mongoose.ClientSession | null,
+  ) {
+    try {
+      const updateQuery = { ...params };
+      const options: any = {};
+      if (session) {
+        options.session = session;
+      }
+      const result = await IndividualModel.updateOne({ user: params.user }, updateQuery, options);
+      return result.acknowledged;
+    } catch (error) {
+      logger.error('Error updating individual user in db:', error);
+      throw error;
+    }
+  }
 }

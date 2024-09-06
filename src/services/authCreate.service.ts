@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import {
+  AddressRepository,
   AdminRepository,
   CompanyRepository,
   GetUserParams,
@@ -8,11 +9,15 @@ import {
 } from '../repository';
 import { UserAccountType } from '../typings/user';
 import {
+  CompanyOnboardingDTO,
   ConfirmEmailDTO,
+  CreateAddressDTO,
   CreateAdminAccountDTO,
   CreateCompanyAccountDTO,
   CreateIndividualAccountDTO,
+  EmployeeOnboardingDTO,
   LoginDTO,
+  OnboardingUserDTO,
   RegisterAccountDTO,
   ResendEmailVerificationCodeDTO,
 } from './dtos/request.dto';
@@ -29,23 +34,27 @@ import {
 } from '../utils';
 import { RedisService } from './redis.service';
 import {
+  companyOnboardingDTOValidator,
   confirmEmailDTOValidator,
   createAccountDTOValidator,
+  createAddressDTOValidator,
   createAdminAccountDTOValidator,
   createCompanyAccountDTOValidator,
   createIndividualAccountDTOValidator,
+  employeeOnboardingDTOValidator,
   loginDTOValidator,
   resendEmailVerificationCodeDTOValidator,
 } from './dtos/validators';
 import { emailQueue } from '../infrastructure';
 
-export class Authservice {
+export class AuthCreateservice {
   private readonly _userRepo: UserRepository;
   private readonly _companyRepo: CompanyRepository;
-  private readonly _sharedService: SharedServices;
-  private readonly _redisService: RedisService;
   private readonly _adminRepo: AdminRepository;
   private readonly _individualRepo: IndividualRepository;
+  private readonly _addressRepo: AddressRepository;
+  private readonly _sharedService: SharedServices;
+  private readonly _redisService: RedisService;
   private readonly _emailQueue: typeof emailQueue;
 
   constructor(
@@ -53,6 +62,7 @@ export class Authservice {
     companyRepo: CompanyRepository,
     adminRepo: AdminRepository,
     individualRepo: IndividualRepository,
+    addressRepo: AddressRepository,
     sharedService: SharedServices,
     redisService: RedisService,
     emailQueu: typeof emailQueue,
@@ -61,6 +71,7 @@ export class Authservice {
     this._companyRepo = companyRepo;
     this._adminRepo = adminRepo;
     this._individualRepo = individualRepo;
+    this._addressRepo = addressRepo;
     this._sharedService = sharedService;
     this._redisService = redisService;
     this._emailQueue = emailQueu;
@@ -69,15 +80,14 @@ export class Authservice {
   async register(params: RegisterAccountDTO) {
     const session = await mongoose.startSession();
     try {
+      // User specific validation
+      const { error, value } = createAccountDTOValidator.validate(params);
+      if (error) {
+        logger.error('Validation error', error);
+        throw new BadRequestError(error.message);
+      }
+      const { email } = value;
       const user = await session.withTransaction(async () => {
-        // User specific validation
-        const { error, value } = createAccountDTOValidator.validate(params);
-        if (error) {
-          logger.error('Validation error', error);
-          throw new BadRequestError(error.message);
-        }
-
-        const { email } = value;
         const userExist = await this._sharedService.checkUserExist({
           identifier: 'email',
           value: email,
@@ -132,7 +142,7 @@ export class Authservice {
         return result;
       });
 
-      const userDetails: any = await this._sharedService.getUser({
+      const userDetails: any = await this._sharedService.getUserWithDetails({
         identifier: 'id',
         value: user._id,
       });
@@ -256,10 +266,8 @@ export class Authservice {
         logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-
       const { identifier, password } = value;
       const isEmail = (identifier as string).includes('@');
-
       const userCheckParam = isEmail
         ? { identifier: 'email', value: identifier }
         : { identifier: 'phone_number', value: identifier };
@@ -267,13 +275,11 @@ export class Authservice {
       if (!user) {
         throw new NotFoundError('Invalid credentials, user not found');
       }
-
       // Compare password
       const isPasswordMatch = await verify(user.password, password);
       if (!isPasswordMatch) {
         throw new BadRequestError('Invalid credentials');
       }
-
       // TODO: Probably check if user has verified their email and provide follow up flow
       // ...any other required business logic
       const jwtClaim = { sub: user._id, account_type: user.account_type };
@@ -296,20 +302,17 @@ export class Authservice {
         logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-
       const { email, otp } = value;
       const user = await this._sharedService.getUser({ identifier: 'email', value: email });
       if (!user) {
         throw new NotFoundError('User not found');
       }
-
       // Lookup to redis to check otp and validate
       const cacheKey = `${user._id}:verify:mail`;
       const cacheValue = await this._redisService.get(cacheKey);
       if (!cacheValue || parseInt(cacheValue) !== parseInt(otp)) {
         throw new BadRequestError('Invalid or expired otp provided');
       }
-
       // delete from cache and update user data
       await this._redisService.del(cacheKey);
       user.email_verified = true;
@@ -332,13 +335,11 @@ export class Authservice {
         logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-
       const { email } = value;
       const user: any = await this._sharedService.getUser({ identifier: 'email', value: email });
       if (!user) {
         throw new NotFoundError('User not found');
       }
-
       // Generate OTP and send verification email
       const OTP = Helper.generateOTPCode();
       const cacheKey = `${user._id}:verify:mail`;
@@ -355,13 +356,11 @@ export class Authservice {
               : user.account_details.first_name,
         },
       };
-
       emailQueue.add('mailer', emailPayload, {
         delay: 2000,
         attempts: 5,
         removeOnComplete: true,
       });
-
       logger.info('Email verification code resent', user.email);
       return user._id;
     } catch (error) {
@@ -371,28 +370,108 @@ export class Authservice {
   }
 
   // Onboarding for company/Employee
-
-  // /me
-  async me(user_id: string) {
+  async processUserOnboarding(params: OnboardingUserDTO) {
+    const session = await mongoose.startSession();
     try {
-      const user = await this._userRepo.getUser({ identifier: 'id', value: user_id });
-      const hydratedUser = {
-        id: user?._id,
-        account_type: user?.account_type,
-        account_state: user?.account_state,
-        email: user?.email,
-        email_verified: user?.email_verified,
-        verified: user?.verified,
-        dial_code: user?.dial_code,
-        phone_number: user?.phone_number,
-        time_zone: user?.time_zone,
-        created_at: user?.created_at,
-        onboarded: user?.has_completed_onboarding,
-      };
-
-      return hydratedUser;
+      const result = await session.withTransaction(async () => {
+        const user = await this._sharedService.getUser({
+          identifier: 'id',
+          value: params.user,
+        });
+        // Process address creation:
+        await this.createAddress(params, session);
+        switch (user.account_type) {
+          case UserAccountType.COMPANY:
+            await this.processCompanyOnboardingData(
+              {
+                ...params,
+                user: user._id,
+              } as CompanyOnboardingDTO,
+              session,
+            );
+            // Update user: set onboarded to true
+            user.has_completed_onboarding = true;
+            user.save({ session });
+            break;
+          case UserAccountType.INDIVIDUAL:
+            await this.processEmployeeOnboardingData(
+              {
+                ...params,
+                user: user._id,
+              } as EmployeeOnboardingDTO,
+              session,
+            );
+            // Update user: set onboarded to true
+            user.has_completed_onboarding = true;
+            user.save({ session });
+            break;
+          default:
+            throw new Error('Account type not recognized');
+        }
+        logger.info('Process user onboarding data transaction complete', user._id);
+        return user;
+      });
+      logger.info('User onboarded', result._id);
+      return result._id;
     } catch (error) {
-      logger.error('Error fetching user profile data', error);
+      logger.error('Error processing user onboarding', error);
+      throw error;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  private async createAddress(params: CreateAddressDTO, session?: mongoose.ClientSession | null) {
+    try {
+      const { error, value } = createAddressDTOValidator.validate(params);
+      if (error) {
+        logger.error('Validation error', error);
+        throw new BadRequestError(error.message);
+      }
+      // check if user has already create an address
+      const isDuplicateAddress = await this._addressRepo.checkIfExist(params.user);
+      if (isDuplicateAddress) {
+        throw new BadRequestError('Address already created, update instead');
+      }
+      const result = await this._addressRepo.create(value, session);
+      logger.info('Address created', result._id);
+      return result._id;
+    } catch (error) {
+      logger.error('Error creating address', error);
+      throw error;
+    }
+  }
+
+  private async processEmployeeOnboardingData(
+    params: EmployeeOnboardingDTO,
+    session?: mongoose.ClientSession | null,
+  ) {
+    try {
+      const { error, value } = employeeOnboardingDTOValidator.validate(params);
+      if (error) {
+        logger.error('Validation error', error);
+        throw new BadRequestError(error.message);
+      }
+      return await this._individualRepo.update(value, session);
+    } catch (error) {
+      logger.error('Error processing employee onboarding data', error);
+      throw error;
+    }
+  }
+
+  private async processCompanyOnboardingData(
+    params: CompanyOnboardingDTO,
+    session?: mongoose.ClientSession | null,
+  ) {
+    try {
+      const { error, value } = companyOnboardingDTOValidator.validate(params);
+      if (error) {
+        logger.error('Validation error', error);
+        throw new BadRequestError(error.message);
+      }
+      return await this._companyRepo.update(value, session);
+    } catch (error) {
+      logger.error('Error processing company onboarding data', error);
       throw error;
     }
   }

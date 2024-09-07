@@ -52,12 +52,12 @@ var InvitationStatus;
     InvitationStatus["ABANDONED"] = "ABANDONED";
 })(InvitationStatus || (exports.InvitationStatus = InvitationStatus = {}));
 const invitationSchema = new mongoose_1.Schema({
-    company_id: {
+    user: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-        ref: 'company',
+        ref: 'User',
     },
-    invitee_email: {
+    employee_work_email: {
         type: String,
         required: true,
     },

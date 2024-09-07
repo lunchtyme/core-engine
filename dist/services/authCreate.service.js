@@ -55,15 +55,17 @@ const utils_1 = require("../utils");
 const validators_1 = require("./dtos/validators");
 const infrastructure_1 = require("../infrastructure");
 class AuthCreateservice {
-    constructor(userRepo, companyRepo, adminRepo, individualRepo, addressRepo, sharedService, redisService, emailQueu) {
-        this._userRepo = userRepo;
-        this._companyRepo = companyRepo;
-        this._adminRepo = adminRepo;
-        this._individualRepo = individualRepo;
-        this._addressRepo = addressRepo;
-        this._sharedService = sharedService;
-        this._redisService = redisService;
-        this._emailQueue = emailQueu;
+    constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _invitationRepo, _addressRepo, _sharedService, _redisService, _emailQueue, _logger) {
+        this._userRepo = _userRepo;
+        this._companyRepo = _companyRepo;
+        this._adminRepo = _adminRepo;
+        this._individualRepo = _individualRepo;
+        this._invitationRepo = _invitationRepo;
+        this._addressRepo = _addressRepo;
+        this._sharedService = _sharedService;
+        this._redisService = _redisService;
+        this._emailQueue = _emailQueue;
+        this._logger = _logger;
     }
     register(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -72,7 +74,7 @@ class AuthCreateservice {
                 // User specific validation
                 const { error, value } = validators_1.createAccountDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email } = value;
@@ -105,7 +107,7 @@ class AuthCreateservice {
                     user.account_ref = accountCreateResult._id;
                     yield user.save({ session });
                     const _a = user.toObject(), { password } = _a, result = __rest(_a, ["password"]);
-                    utils_1.logger.info('Create user transaction complete', user._id);
+                    this._logger.info('Create user transaction complete', user._id);
                     return result;
                 }));
                 const userDetails = yield this._sharedService.getUserWithDetails({
@@ -128,16 +130,16 @@ class AuthCreateservice {
                             : userDetails.account_details.first_name,
                     },
                 };
-                infrastructure_1.emailQueue.add('mailer', emailPayload, {
+                this._emailQueue.add('mailer', emailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,
                 });
-                utils_1.logger.info('User created successfully', user._id);
+                this._logger.info('User created successfully', user._id);
                 return user._id;
             }
             catch (error) {
-                utils_1.logger.error('Error creating user account:', error);
+                this._logger.error('Error creating user account:', error);
                 throw error;
             }
             finally {
@@ -151,13 +153,13 @@ class AuthCreateservice {
                 // Perform company-specific validation and logic
                 const { error, value } = validators_1.createCompanyAccountDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 // Validate email matches company domain
                 const isDomainMatch = yield utils_1.Helper.verifyCompanyDomain(value.website, value.email);
                 if (!isDomainMatch) {
-                    utils_1.logger.error('Company domain does not match email domain', {
+                    this._logger.error('Company domain does not match email domain', {
                         website: value.website,
                         email: value.email,
                     });
@@ -166,7 +168,7 @@ class AuthCreateservice {
                 return yield this._companyRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
-                utils_1.logger.error('Error creating company account', error);
+                this._logger.error('Error creating company account', error);
                 throw error;
             }
         });
@@ -177,13 +179,13 @@ class AuthCreateservice {
                 // Perform admin-specific validation and logic
                 const { error, value } = validators_1.createAdminAccountDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._adminRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
-                utils_1.logger.error('Error creating admin account', error);
+                this._logger.error('Error creating admin account', error);
                 throw error;
             }
         });
@@ -191,21 +193,33 @@ class AuthCreateservice {
     registerIndividual(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Perform individual-specific validation and logic
                 const { error, value } = validators_1.createIndividualAccountDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
-                // Validate invitation code
-                // Find the company they belong to
-                value.company = new mongoose_1.default.Types.ObjectId('66d11be3c1a9d88a0bc56f2d');
-                // Verify that the email they signup with matches the company own
-                // Update invitation data state, share session
+                const invitation = yield this._invitationRepo.getInvitationDetails({
+                    employee_work_email: value.email,
+                    invitation_code: value.invitation_code,
+                });
+                if (!invitation) {
+                    throw new utils_1.BadRequestError('Invalid or expired invitation code');
+                }
+                const companyId = invitation.user._id;
+                const companyEmail = invitation.user.email;
+                value.company = companyId;
+                const workMailMatched = yield utils_1.Helper.verifyCompanyDomain(companyEmail, value.emaul);
+                if (!workMailMatched) {
+                    throw new utils_1.BadRequestError("The provided email doesn't match your company email");
+                }
+                yield this._invitationRepo.updateInvitationStatus({
+                    invitationId: invitation._id,
+                    status: infrastructure_1.InvitationStatus.ACCEPTED,
+                }, session);
                 return yield this._individualRepo.create(Object.assign({}, value), session);
             }
             catch (error) {
-                utils_1.logger.error('Error creating individual account', error);
+                this._logger.error('Error creating individual account', error);
                 throw error;
             }
         });
@@ -216,7 +230,7 @@ class AuthCreateservice {
                 // Validate user input
                 const { error, value } = validators_1.loginDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { identifier, password } = value;
@@ -239,11 +253,11 @@ class AuthCreateservice {
                 const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET, {
                     expiresIn: process.env.JWT_EXPIRES_IN,
                 });
-                utils_1.logger.info('User login successful', user._id);
+                this._logger.info('User login successful', user._id);
                 return { accessTokenHash, onboarded: user.has_completed_onboarding };
             }
             catch (error) {
-                utils_1.logger.error('Error logging user in', error);
+                this._logger.error('Error logging user in', error);
                 throw error;
             }
         });
@@ -254,7 +268,7 @@ class AuthCreateservice {
                 // Validate user inputs
                 const { error, value } = validators_1.confirmEmailDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email, otp } = value;
@@ -274,11 +288,11 @@ class AuthCreateservice {
                 user.verified = true;
                 yield user.save();
                 // Send success email if needed
-                utils_1.logger.info('Email verification successfully', user.email);
+                this._logger.info('Email verification successfully', user.email);
                 return user._id;
             }
             catch (error) {
-                utils_1.logger.error('Error verifying user email', error);
+                this._logger.error('Error verifying user email', error);
                 throw error;
             }
         });
@@ -289,7 +303,7 @@ class AuthCreateservice {
                 // Validate user inputs
                 const { error, value } = validators_1.resendEmailVerificationCodeDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email } = value;
@@ -317,16 +331,15 @@ class AuthCreateservice {
                     attempts: 5,
                     removeOnComplete: true,
                 });
-                utils_1.logger.info('Email verification code resent', user.email);
+                this._logger.info('Email verification code resent', user.email);
                 return user._id;
             }
             catch (error) {
-                utils_1.logger.error('Error resending email verification code', error);
+                this._logger.error('Error resending email verification code', error);
                 throw error;
             }
         });
     }
-    // Onboarding for company/Employee
     processUserOnboarding(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const session = yield mongoose_1.default.startSession();
@@ -354,14 +367,14 @@ class AuthCreateservice {
                         default:
                             throw new Error('Account type not recognized');
                     }
-                    utils_1.logger.info('Process user onboarding data transaction complete', user._id);
+                    this._logger.info('Process user onboarding data transaction complete', user._id);
                     return user;
                 }));
-                utils_1.logger.info('User onboarded', result._id);
+                this._logger.info('User onboarded', result._id);
                 return result._id;
             }
             catch (error) {
-                utils_1.logger.error('Error processing user onboarding', error);
+                this._logger.error('Error processing user onboarding', error);
                 throw error;
             }
             finally {
@@ -374,7 +387,7 @@ class AuthCreateservice {
             try {
                 const { error, value } = validators_1.createAddressDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 // check if user has already create an address
@@ -383,11 +396,11 @@ class AuthCreateservice {
                     throw new utils_1.BadRequestError('Address already created, update instead');
                 }
                 const result = yield this._addressRepo.create(value, session);
-                utils_1.logger.info('Address created', result._id);
+                this._logger.info('Address created', result._id);
                 return result._id;
             }
             catch (error) {
-                utils_1.logger.error('Error creating address', error);
+                this._logger.error('Error creating address', error);
                 throw error;
             }
         });
@@ -397,13 +410,13 @@ class AuthCreateservice {
             try {
                 const { error, value } = validators_1.employeeOnboardingDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._individualRepo.update(value, session);
             }
             catch (error) {
-                utils_1.logger.error('Error processing employee onboarding data', error);
+                this._logger.error('Error processing employee onboarding data', error);
                 throw error;
             }
         });
@@ -413,13 +426,13 @@ class AuthCreateservice {
             try {
                 const { error, value } = validators_1.companyOnboardingDTOValidator.validate(params);
                 if (error) {
-                    utils_1.logger.error('Validation error', error);
+                    this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 return yield this._companyRepo.update(value, session);
             }
             catch (error) {
-                utils_1.logger.error('Error processing company onboarding data', error);
+                this._logger.error('Error processing company onboarding data', error);
                 throw error;
             }
         });

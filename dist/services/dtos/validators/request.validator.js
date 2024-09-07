@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const user_1 = require("../../../typings/user");
 exports.createAccountDTOValidator = joi_1.default.object({
@@ -163,3 +163,19 @@ exports.employeeOnboardingDTOValidator = exports.createAddressDTOValidator
     }),
 })
     .unknown();
+exports.CreateInvitationDTOValidator = joi_1.default.object({
+    employee_work_email: joi_1.default.string()
+        .email({
+        minDomainSegments: 2,
+        tlds: {
+            allow: true,
+        },
+    })
+        .required()
+        .messages({
+        'any.required': 'Employee work email is required',
+        'string.email': 'Enter a valid work email address',
+        'string.base': 'Email must be a string',
+    }),
+    user: joi_1.default.required(),
+});

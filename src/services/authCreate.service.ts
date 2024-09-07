@@ -5,6 +5,7 @@ import {
   CompanyRepository,
   GetUserParams,
   IndividualRepository,
+  InvitationRepository,
   UserRepository,
 } from '../repository';
 import { UserAccountType } from '../typings/user';
@@ -45,37 +46,21 @@ import {
   loginDTOValidator,
   resendEmailVerificationCodeDTOValidator,
 } from './dtos/validators';
-import { emailQueue } from '../infrastructure';
+import { emailQueue, InvitationStatus } from '../infrastructure';
 
 export class AuthCreateservice {
-  private readonly _userRepo: UserRepository;
-  private readonly _companyRepo: CompanyRepository;
-  private readonly _adminRepo: AdminRepository;
-  private readonly _individualRepo: IndividualRepository;
-  private readonly _addressRepo: AddressRepository;
-  private readonly _sharedService: SharedServices;
-  private readonly _redisService: RedisService;
-  private readonly _emailQueue: typeof emailQueue;
-
   constructor(
-    userRepo: UserRepository,
-    companyRepo: CompanyRepository,
-    adminRepo: AdminRepository,
-    individualRepo: IndividualRepository,
-    addressRepo: AddressRepository,
-    sharedService: SharedServices,
-    redisService: RedisService,
-    emailQueu: typeof emailQueue,
-  ) {
-    this._userRepo = userRepo;
-    this._companyRepo = companyRepo;
-    this._adminRepo = adminRepo;
-    this._individualRepo = individualRepo;
-    this._addressRepo = addressRepo;
-    this._sharedService = sharedService;
-    this._redisService = redisService;
-    this._emailQueue = emailQueu;
-  }
+    private readonly _userRepo: UserRepository,
+    private readonly _companyRepo: CompanyRepository,
+    private readonly _adminRepo: AdminRepository,
+    private readonly _individualRepo: IndividualRepository,
+    private readonly _invitationRepo: InvitationRepository,
+    private readonly _addressRepo: AddressRepository,
+    private readonly _sharedService: SharedServices,
+    private readonly _redisService: RedisService,
+    private readonly _emailQueue: typeof emailQueue,
+    private readonly _logger: typeof logger,
+  ) {}
 
   async register(params: RegisterAccountDTO) {
     const session = await mongoose.startSession();
@@ -83,7 +68,7 @@ export class AuthCreateservice {
       // User specific validation
       const { error, value } = createAccountDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       const { email } = value;
@@ -138,7 +123,7 @@ export class AuthCreateservice {
         await user.save({ session });
 
         const { password, ...result } = user.toObject();
-        logger.info('Create user transaction complete', user._id);
+        this._logger.info('Create user transaction complete', user._id);
         return result;
       });
 
@@ -166,16 +151,16 @@ export class AuthCreateservice {
         },
       };
 
-      emailQueue.add('mailer', emailPayload, {
+      this._emailQueue.add('mailer', emailPayload, {
         delay: 2000,
         attempts: 5,
         removeOnComplete: true,
       });
 
-      logger.info('User created successfully', user._id);
+      this._logger.info('User created successfully', user._id);
       return user._id;
     } catch (error) {
-      logger.error('Error creating user account:', error);
+      this._logger.error('Error creating user account:', error);
       throw error;
     } finally {
       session.endSession();
@@ -190,14 +175,14 @@ export class AuthCreateservice {
       // Perform company-specific validation and logic
       const { error, value } = createCompanyAccountDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
       // Validate email matches company domain
       const isDomainMatch = await Helper.verifyCompanyDomain(value.website, value.email);
       if (!isDomainMatch) {
-        logger.error('Company domain does not match email domain', {
+        this._logger.error('Company domain does not match email domain', {
           website: value.website,
           email: value.email,
         });
@@ -206,7 +191,7 @@ export class AuthCreateservice {
 
       return await this._companyRepo.create({ ...value }, session);
     } catch (error) {
-      logger.error('Error creating company account', error);
+      this._logger.error('Error creating company account', error);
       throw error;
     }
   }
@@ -219,13 +204,13 @@ export class AuthCreateservice {
       // Perform admin-specific validation and logic
       const { error, value } = createAdminAccountDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
 
       return await this._adminRepo.create({ ...value }, session);
     } catch (error) {
-      logger.error('Error creating admin account', error);
+      this._logger.error('Error creating admin account', error);
       throw error;
     }
   }
@@ -235,25 +220,35 @@ export class AuthCreateservice {
     session?: mongoose.ClientSession | null,
   ) {
     try {
-      // Perform individual-specific validation and logic
       const { error, value } = createIndividualAccountDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-
-      // Validate invitation code
-
-      // Find the company they belong to
-      value.company = new mongoose.Types.ObjectId('66d11be3c1a9d88a0bc56f2d');
-
-      // Verify that the email they signup with matches the company own
-
-      // Update invitation data state, share session
-
+      const invitation: any = await this._invitationRepo.getInvitationDetails({
+        employee_work_email: value.email,
+        invitation_code: value.invitation_code,
+      });
+      if (!invitation) {
+        throw new BadRequestError('Invalid or expired invitation code');
+      }
+      const companyId = invitation.user._id;
+      const companyEmail = invitation.user.email;
+      value.company = companyId;
+      const workMailMatched = await Helper.verifyCompanyDomain(companyEmail, value.emaul);
+      if (!workMailMatched) {
+        throw new BadRequestError("The provided email doesn't match your company email");
+      }
+      await this._invitationRepo.updateInvitationStatus(
+        {
+          invitationId: invitation._id,
+          status: InvitationStatus.ACCEPTED,
+        },
+        session,
+      );
       return await this._individualRepo.create({ ...value }, session);
     } catch (error) {
-      logger.error('Error creating individual account', error);
+      this._logger.error('Error creating individual account', error);
       throw error;
     }
   }
@@ -263,7 +258,7 @@ export class AuthCreateservice {
       // Validate user input
       const { error, value } = loginDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       const { identifier, password } = value;
@@ -286,10 +281,10 @@ export class AuthCreateservice {
       const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN!,
       });
-      logger.info('User login successful', user._id);
+      this._logger.info('User login successful', user._id);
       return { accessTokenHash, onboarded: user.has_completed_onboarding };
     } catch (error) {
-      logger.error('Error logging user in', error);
+      this._logger.error('Error logging user in', error);
       throw error;
     }
   }
@@ -299,7 +294,7 @@ export class AuthCreateservice {
       // Validate user inputs
       const { error, value } = confirmEmailDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       const { email, otp } = value;
@@ -319,10 +314,10 @@ export class AuthCreateservice {
       user.verified = true;
       await user.save();
       // Send success email if needed
-      logger.info('Email verification successfully', user.email);
+      this._logger.info('Email verification successfully', user.email);
       return user._id;
     } catch (error) {
-      logger.error('Error verifying user email', error);
+      this._logger.error('Error verifying user email', error);
       throw error;
     }
   }
@@ -332,7 +327,7 @@ export class AuthCreateservice {
       // Validate user inputs
       const { error, value } = resendEmailVerificationCodeDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       const { email } = value;
@@ -361,15 +356,14 @@ export class AuthCreateservice {
         attempts: 5,
         removeOnComplete: true,
       });
-      logger.info('Email verification code resent', user.email);
+      this._logger.info('Email verification code resent', user.email);
       return user._id;
     } catch (error) {
-      logger.error('Error resending email verification code', error);
+      this._logger.error('Error resending email verification code', error);
       throw error;
     }
   }
 
-  // Onboarding for company/Employee
   async processUserOnboarding(params: OnboardingUserDTO) {
     const session = await mongoose.startSession();
     try {
@@ -408,13 +402,13 @@ export class AuthCreateservice {
           default:
             throw new Error('Account type not recognized');
         }
-        logger.info('Process user onboarding data transaction complete', user._id);
+        this._logger.info('Process user onboarding data transaction complete', user._id);
         return user;
       });
-      logger.info('User onboarded', result._id);
+      this._logger.info('User onboarded', result._id);
       return result._id;
     } catch (error) {
-      logger.error('Error processing user onboarding', error);
+      this._logger.error('Error processing user onboarding', error);
       throw error;
     } finally {
       await session.endSession();
@@ -425,7 +419,7 @@ export class AuthCreateservice {
     try {
       const { error, value } = createAddressDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       // check if user has already create an address
@@ -434,10 +428,10 @@ export class AuthCreateservice {
         throw new BadRequestError('Address already created, update instead');
       }
       const result = await this._addressRepo.create(value, session);
-      logger.info('Address created', result._id);
+      this._logger.info('Address created', result._id);
       return result._id;
     } catch (error) {
-      logger.error('Error creating address', error);
+      this._logger.error('Error creating address', error);
       throw error;
     }
   }
@@ -449,12 +443,12 @@ export class AuthCreateservice {
     try {
       const { error, value } = employeeOnboardingDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       return await this._individualRepo.update(value, session);
     } catch (error) {
-      logger.error('Error processing employee onboarding data', error);
+      this._logger.error('Error processing employee onboarding data', error);
       throw error;
     }
   }
@@ -466,12 +460,12 @@ export class AuthCreateservice {
     try {
       const { error, value } = companyOnboardingDTOValidator.validate(params);
       if (error) {
-        logger.error('Validation error', error);
+        this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
       return await this._companyRepo.update(value, session);
     } catch (error) {
-      logger.error('Error processing company onboarding data', error);
+      this._logger.error('Error processing company onboarding data', error);
       throw error;
     }
   }

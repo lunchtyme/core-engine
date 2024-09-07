@@ -72,3 +72,15 @@ export interface CompanyOnboardingDTO extends CreateAddressDTO {
 }
 
 export type OnboardingUserDTO = EmployeeOnboardingDTO | CompanyOnboardingDTO;
+
+export interface CreateInvitationDTO {
+  employee_work_email: string;
+  user: mongoose.Types.ObjectId;
+}
+
+export interface StoreInvitationDTO {
+  employee_work_email: string;
+  user: mongoose.Types.ObjectId;
+  expires_at: Date;
+  invitation_token: string;
+}

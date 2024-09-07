@@ -12,13 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthReadservice = void 0;
 const utils_1 = require("../utils");
 class AuthReadservice {
-    constructor(userRepo, companyRepo, adminRepo, individualRepo, sharedService, redisService) {
-        this._userRepo = userRepo;
-        this._companyRepo = companyRepo;
-        this._adminRepo = adminRepo;
-        this._individualRepo = individualRepo;
-        this._sharedService = sharedService;
-        this._redisService = redisService;
+    constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _sharedService, _redisService, _logger) {
+        this._userRepo = _userRepo;
+        this._companyRepo = _companyRepo;
+        this._adminRepo = _adminRepo;
+        this._individualRepo = _individualRepo;
+        this._sharedService = _sharedService;
+        this._redisService = _redisService;
+        this._logger = _logger;
     }
     me(user_id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -48,7 +49,7 @@ class AuthReadservice {
                 return hydratedUser;
             }
             catch (error) {
-                utils_1.logger.error('Error fetching user profile data', error);
+                this._logger.error('Error fetching user profile data', error);
                 throw error;
             }
         });

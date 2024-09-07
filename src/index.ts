@@ -6,7 +6,7 @@ import { DB } from './infrastructure';
 import morgan from 'morgan';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
-import { authRouter } from './routers';
+import { authRouter, invitationRouter } from './routers';
 
 validateEnvVariables();
 loadEnv(process.env.NODE_ENV!);
@@ -49,6 +49,8 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 SERVER.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 // Auth Routes
 SERVER.use('/auth', authRouter);
+// Invitation Routes
+SERVER.use('/invitations', invitationRouter);
 // Global error interceptor
 SERVER.use(globalErrorMiddleware);
 // Not found route handler

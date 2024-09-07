@@ -9,28 +9,15 @@ import { DEFAULT_CACHE_EXPIRY_IN_SECS, logger } from '../utils';
 import { RedisService } from './redis.service';
 
 export class AuthReadservice {
-  private readonly _userRepo: UserRepository;
-  private readonly _companyRepo: CompanyRepository;
-  private readonly _sharedService: SharedServices;
-  private readonly _redisService: RedisService;
-  private readonly _adminRepo: AdminRepository;
-  private readonly _individualRepo: IndividualRepository;
-
   constructor(
-    userRepo: UserRepository,
-    companyRepo: CompanyRepository,
-    adminRepo: AdminRepository,
-    individualRepo: IndividualRepository,
-    sharedService: SharedServices,
-    redisService: RedisService,
-  ) {
-    this._userRepo = userRepo;
-    this._companyRepo = companyRepo;
-    this._adminRepo = adminRepo;
-    this._individualRepo = individualRepo;
-    this._sharedService = sharedService;
-    this._redisService = redisService;
-  }
+    private readonly _userRepo: UserRepository,
+    private readonly _companyRepo: CompanyRepository,
+    private readonly _adminRepo: AdminRepository,
+    private readonly _individualRepo: IndividualRepository,
+    private readonly _sharedService: SharedServices,
+    private readonly _redisService: RedisService,
+    private readonly _logger: typeof logger,
+  ) {}
 
   async me(user_id: string) {
     try {
@@ -63,7 +50,7 @@ export class AuthReadservice {
       );
       return hydratedUser;
     } catch (error) {
-      logger.error('Error fetching user profile data', error);
+      this._logger.error('Error fetching user profile data', error);
       throw error;
     }
   }

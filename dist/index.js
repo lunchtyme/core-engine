@@ -53,6 +53,8 @@ const swaggerSpec = (0, swagger_jsdoc_1.default)(swaggerOptions);
 SERVER.use('/docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
 // Auth Routes
 SERVER.use('/auth', routers_1.authRouter);
+// Invitation Routes
+SERVER.use('/invitations', routers_1.invitationRouter);
 // Global error interceptor
 SERVER.use(index_2.globalErrorMiddleware);
 // Not found route handler

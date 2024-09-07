@@ -28,12 +28,12 @@ export enum InvitationStatus {
 
 const invitationSchema = new Schema(
   {
-    company_id: {
+    user: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'company',
+      ref: 'User',
     },
-    invitee_email: {
+    employee_work_email: {
       type: String,
       required: true,
     },

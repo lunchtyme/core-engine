@@ -15,7 +15,6 @@ export const createAccountDTOValidator = Joi.object({
       'string.email': 'Enter a valid email address',
       'string.base': 'Email must be a string',
     }),
-
   password: Joi.string()
     .pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,30}$/))
     .required()
@@ -170,3 +169,20 @@ export const employeeOnboardingDTOValidator = createAddressDTOValidator
       }),
   })
   .unknown();
+
+export const CreateInvitationDTOValidator = Joi.object({
+  employee_work_email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: {
+        allow: true,
+      },
+    })
+    .required()
+    .messages({
+      'any.required': 'Employee work email is required',
+      'string.email': 'Enter a valid work email address',
+      'string.base': 'Email must be a string',
+    }),
+  user: Joi.required(),
+});

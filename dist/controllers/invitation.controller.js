@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendInvitationController = void 0;
+exports.fetchInvitationsController = exports.fetchMyInvitationsController = exports.sendInvitationController = void 0;
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const sendInvitationController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -22,3 +22,25 @@ const sendInvitationController = (req, res, next) => __awaiter(void 0, void 0, v
     }
 });
 exports.sendInvitationController = sendInvitationController;
+const fetchMyInvitationsController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const result = yield services_1.invitationReadService.fetchMyInvitations({ user: (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub });
+        utils_1.Helper.formatAPIResponse(res, 'Invitations fetched', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.fetchMyInvitationsController = fetchMyInvitationsController;
+const fetchInvitationsController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const result = yield services_1.invitationReadService.fetchAllInvitations({ user: (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub });
+        utils_1.Helper.formatAPIResponse(res, 'Invitations Fetched', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.fetchInvitationsController = fetchInvitationsController;

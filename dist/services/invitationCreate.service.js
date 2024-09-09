@@ -33,14 +33,18 @@ class InvitationCreateService {
                     this._sharedService.getUserWithDetails({ identifier: 'id', value: user }),
                     this._invitationRepo.validInvitationExists({ employee_work_email, user }),
                 ]);
-                if (company.account_type !== user_1.UserAccountType.COMPANY) {
-                    throw new utils_1.ForbiddenError('Only companies can send employee invitations.');
-                }
+                // RBAC check
+                utils_1.Helper.checkUserType(company.account_type, [user_1.UserAccountType.COMPANY], 'send employee invitations');
                 if (validInvitationExists) {
                     throw new utils_1.BadRequestError("You've have a pending invitation for this employee set already");
                 }
                 const invitatationCode = yield this._invitationRepo.generateUniqueInvitationToken();
-                const result = yield this._invitationRepo.upsert(Object.assign(Object.assign({}, value), { invitation_token: invitatationCode, expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) }));
+                const result = yield this._invitationRepo.upsert({
+                    employee_work_email,
+                    user,
+                    invitation_token: invitatationCode,
+                    expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // Expires in 3 days
+                });
                 const companyName = company.account_details.name;
                 const emailPayload = {
                     receiver: employee_work_email,

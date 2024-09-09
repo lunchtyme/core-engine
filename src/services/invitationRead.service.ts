@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { InvitationRepository } from '../repository';
-import { ForbiddenError, logger } from '../utils';
+import { Helper, logger } from '../utils';
 import { RedisService } from './redis.service';
 import { SharedServices } from './shared.service';
 import { UserAccountType } from '../typings/user';
@@ -13,7 +13,7 @@ export class InvitationReadService {
     private readonly _logger: typeof logger,
   ) {}
 
-  // Fetch invitations for companys, allow them to filter and paginate efficiently
+  //Todo: Fetch invitations for companys, allow them to filter and paginate efficiently
   async fetchMyInvitations(params: { user: mongoose.Types.ObjectId }) {
     try {
       const { user } = params;
@@ -21,9 +21,12 @@ export class InvitationReadService {
         identifier: 'id',
         value: user,
       });
-      if (userDetails.account_type !== UserAccountType.COMPANY) {
-        throw new ForbiddenError('Access denied. Only companies can view their sent invitations');
-      }
+      // RBAC check
+      Helper.checkUserType(
+        userDetails.account_type,
+        [UserAccountType.COMPANY],
+        'view their sent invitations',
+      );
       const cacheKey = `my:${user}:invitations`;
       const cacheResults = await this._redisService.get(cacheKey);
       if (cacheResults) {
@@ -45,9 +48,12 @@ export class InvitationReadService {
         identifier: 'id',
         value: user,
       });
-      if (userDetails.account_type !== UserAccountType.ADMIN) {
-        throw new ForbiddenError('Access denied. Only admins can view sent invitations');
-      }
+      // RBAC check
+      Helper.checkUserType(
+        userDetails.account_type,
+        [UserAccountType.ADMIN],
+        'view all sent invitations',
+      );
       const cacheKey = `all:invitations`;
       const cacheResults = await this._redisService.get(cacheKey);
       if (cacheResults) {

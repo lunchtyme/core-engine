@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Helper = void 0;
 const tldts_1 = require("tldts"); // Importing a library for accurate domain extraction
+const errors_1 = require("./errors");
 class Helper {
     static generateOTPCode() {
         return Math.floor(Math.random() * 900000)
@@ -46,6 +47,17 @@ class Helper {
             token += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return token;
+    }
+    // User access guard
+    static checkUserType(userType, allowedUserTypes, suffixMessage) {
+        const defaultSuffixMessage = 'access this resource';
+        if (!allowedUserTypes.includes(userType)) {
+            const suffix = suffixMessage !== undefined ? suffixMessage : defaultSuffixMessage;
+            const allowedUserType = allowedUserTypes.length === 1 ? allowedUserTypes[0] : allowedUserTypes.join(' or ');
+            const verb = allowedUserTypes.length === 1 ? 'is' : 'are';
+            const verb2 = allowedUserTypes.length === 1 ? '' : 's';
+            throw new errors_1.ForbiddenError(`Only ${allowedUserType}${verb2} ${verb} allowed to ${suffix}`);
+        }
     }
 }
 exports.Helper = Helper;

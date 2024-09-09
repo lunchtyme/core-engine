@@ -5,7 +5,7 @@ import {
   BadRequestError,
   CLIENT_BASE_URL,
   EMAIL_DATA,
-  ForbiddenError,
+  Helper,
   logger,
   SendEmailParams,
 } from '../utils';
@@ -33,15 +33,19 @@ export class InvitationCreateService {
         this._sharedService.getUserWithDetails({ identifier: 'id', value: user }),
         this._invitationRepo.validInvitationExists({ employee_work_email, user }),
       ]);
-      if (company.account_type !== UserAccountType.COMPANY) {
-        throw new ForbiddenError('Only companies can send employee invitations.');
-      }
+      // RBAC check
+      Helper.checkUserType(
+        company.account_type,
+        [UserAccountType.COMPANY],
+        'send employee invitations',
+      );
       if (validInvitationExists) {
         throw new BadRequestError("You've have a pending invitation for this employee set already");
       }
       const invitatationCode = await this._invitationRepo.generateUniqueInvitationToken();
       const result = await this._invitationRepo.upsert({
-        ...value,
+        employee_work_email,
+        user,
         invitation_token: invitatationCode,
         expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // Expires in 3 days
       });

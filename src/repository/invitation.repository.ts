@@ -91,7 +91,7 @@ export class InvitationRepository {
         isUnique = true;
       }
     }
-    return token;
+    return token as string;
   }
 
   async deleteInvitation(invitationId: string) {

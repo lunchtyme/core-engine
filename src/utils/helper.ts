@@ -1,5 +1,7 @@
 import { Response } from 'express';
 import { parse } from 'tldts'; // Importing a library for accurate domain extraction
+import { UserAccountType } from '../typings/user';
+import { ForbiddenError } from './errors';
 
 export type APIJSONResponseParams = {
   message: string;
@@ -45,5 +47,22 @@ export class Helper {
       token += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return token;
+  }
+
+  // User access guard
+  static checkUserType(
+    userType: UserAccountType,
+    allowedUserTypes: UserAccountType[],
+    suffixMessage?: string, // Optional message to customize the error message
+  ) {
+    const defaultSuffixMessage = 'access this resource';
+    if (!allowedUserTypes.includes(userType)) {
+      const suffix = suffixMessage !== undefined ? suffixMessage : defaultSuffixMessage;
+      const allowedUserType =
+        allowedUserTypes.length === 1 ? allowedUserTypes[0] : allowedUserTypes.join(' or ');
+      const verb = allowedUserTypes.length === 1 ? 'is' : 'are';
+      const verb2 = allowedUserTypes.length === 1 ? '' : 's';
+      throw new ForbiddenError(`Only ${allowedUserType}${verb2} ${verb} allowed to ${suffix}`);
+    }
   }
 }

@@ -19,7 +19,7 @@ class InvitationReadService {
         this._redisService = _redisService;
         this._logger = _logger;
     }
-    // Fetch invitations for companys, allow them to filter and paginate efficiently
+    //Todo: Fetch invitations for companys, allow them to filter and paginate efficiently
     fetchMyInvitations(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -28,9 +28,8 @@ class InvitationReadService {
                     identifier: 'id',
                     value: user,
                 });
-                if (userDetails.account_type !== user_1.UserAccountType.COMPANY) {
-                    throw new utils_1.ForbiddenError('Access denied. Only companies can view their sent invitations');
-                }
+                // RBAC check
+                utils_1.Helper.checkUserType(userDetails.account_type, [user_1.UserAccountType.COMPANY], 'view their sent invitations');
                 const cacheKey = `my:${user}:invitations`;
                 const cacheResults = yield this._redisService.get(cacheKey);
                 if (cacheResults) {
@@ -54,9 +53,8 @@ class InvitationReadService {
                     identifier: 'id',
                     value: user,
                 });
-                if (userDetails.account_type !== user_1.UserAccountType.ADMIN) {
-                    throw new utils_1.ForbiddenError('Access denied. Only admins can view sent invitations');
-                }
+                // RBAC check
+                utils_1.Helper.checkUserType(userDetails.account_type, [user_1.UserAccountType.ADMIN], 'view all sent invitations');
                 const cacheKey = `all:invitations`;
                 const cacheResults = yield this._redisService.get(cacheKey);
                 if (cacheResults) {

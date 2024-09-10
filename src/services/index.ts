@@ -3,3 +3,7 @@ export * from './authRead.service';
 export * from './shared.service';
 export * from './redis.service';
 export * from './instance.service';
+export * from './foodMenuCreate.service';
+export * from './foodMenuRead.service';
+export * from './invitationCreate.service';
+export * from './invitationRead.service';

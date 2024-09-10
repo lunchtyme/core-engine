@@ -1,5 +1,33 @@
 import mongoose, { Schema } from 'mongoose';
 
+export enum FoodCategory {
+  APPETIZER = 'Appetizer',
+  MAIN_COURSE = 'Main Course',
+  DESSERT = 'Dessert',
+  BEVERAGE = 'Beverage',
+  SALAD = 'Salad',
+  SOUP = 'Soup',
+  PASTA = 'Pasta',
+  PIZZA = 'Pizza',
+  SEAFOOD = 'Seafood',
+  VEGETARIAN = 'Vegetarian',
+  VEGAN = 'Vegan',
+  GLUTEN_FREE = 'Gluten-Free',
+  SANDWICH = 'Sandwich',
+  GRILL = 'Grill',
+  STEAK = 'Steak',
+  BURGER = 'Burger',
+  SIDES = 'Sides',
+  BREAKFAST = 'Breakfast',
+  BRUNCH = 'Brunch',
+  SMOOTHIE = 'Smoothie',
+  COFFEE = 'Coffee',
+  TEA = 'Tea',
+  JUICE = 'Juice',
+  SNACK = 'Snack',
+  SPECIALS = 'Specials',
+}
+
 const foodMenuSchema = new Schema(
   {
     name: {
@@ -16,8 +44,9 @@ const foodMenuSchema = new Schema(
       required: true,
       default: 0.0,
     },
-    category: {
-      type: String,
+    categories: {
+      type: [String],
+      enum: Object.values(FoodCategory),
       required: true,
     },
     available: {

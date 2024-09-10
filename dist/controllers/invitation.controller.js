@@ -13,8 +13,9 @@ exports.fetchInvitationsController = exports.fetchMyInvitationsController = expo
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const sendInvitationController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const result = yield services_1.invitationCreateService.createOrResendInvitation(req.body);
+        const result = yield services_1.invitationCreateService.createOrResendInvitation(Object.assign(Object.assign({}, req.body), { user: (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub }));
         utils_1.Helper.formatAPIResponse(res, 'Invitation sent', result);
     }
     catch (error) {

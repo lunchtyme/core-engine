@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { UserAccountType } from '../../../typings/user';
+import { FoodCategory } from '../../../infrastructure';
 
 export const createAccountDTOValidator = Joi.object({
   email: Joi.string()
@@ -183,6 +184,26 @@ export const CreateInvitationDTOValidator = Joi.object({
       'any.required': 'Employee work email is required',
       'string.email': 'Enter a valid work email address',
       'string.base': 'Email must be a string',
+    }),
+  user: Joi.required(),
+});
+
+export const AddFoodToMenuDTOValidator = Joi.object({
+  name: Joi.string().required().messages({
+    'any.required': "Provide the name of the food you're adding",
+  }),
+  description: Joi.string().required().messages({
+    'any.required': "Provide a brief description of the food you're adding",
+  }),
+  price: Joi.string().required().messages({
+    'any.required': 'Add a price to the food menu',
+  }),
+  categories: Joi.array()
+    .items(Joi.string().valid(...Object.values(FoodCategory)))
+    .required()
+    .messages({
+      'any.required': 'Please provide one or more categories the food belongs to',
+      'any.only': 'Invalid category provided',
     }),
   user: Joi.required(),
 });

@@ -3,9 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const user_1 = require("../../../typings/user");
+const infrastructure_1 = require("../../../infrastructure");
 exports.createAccountDTOValidator = joi_1.default.object({
     email: joi_1.default.string()
         .email({
@@ -176,6 +177,25 @@ exports.CreateInvitationDTOValidator = joi_1.default.object({
         'any.required': 'Employee work email is required',
         'string.email': 'Enter a valid work email address',
         'string.base': 'Email must be a string',
+    }),
+    user: joi_1.default.required(),
+});
+exports.AddFoodToMenuDTOValidator = joi_1.default.object({
+    name: joi_1.default.string().required().messages({
+        'any.required': "Provide the name of the food you're adding",
+    }),
+    description: joi_1.default.string().required().messages({
+        'any.required': "Provide a brief description of the food you're adding",
+    }),
+    price: joi_1.default.string().required().messages({
+        'any.required': 'Add a price to the food menu',
+    }),
+    categories: joi_1.default.array()
+        .items(joi_1.default.string().valid(...Object.values(infrastructure_1.FoodCategory)))
+        .required()
+        .messages({
+        'any.required': 'Please provide one or more categories the food belongs to',
+        'any.only': 'Invalid category provided',
     }),
     user: joi_1.default.required(),
 });

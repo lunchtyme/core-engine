@@ -19,3 +19,7 @@ __exportStar(require("./authRead.service"), exports);
 __exportStar(require("./shared.service"), exports);
 __exportStar(require("./redis.service"), exports);
 __exportStar(require("./instance.service"), exports);
+__exportStar(require("./foodMenuCreate.service"), exports);
+__exportStar(require("./foodMenuRead.service"), exports);
+__exportStar(require("./invitationCreate.service"), exports);
+__exportStar(require("./invitationRead.service"), exports);

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { UserAccountType } from '../../typings/user';
+import { AuthUserClaim, UserAccountType } from '../../typings/user';
+import { FoodCategory } from '../../infrastructure';
 
 export interface CreateAccountDTO {
   email: string;
@@ -83,4 +84,12 @@ export interface StoreInvitationDTO {
   user: mongoose.Types.ObjectId;
   expires_at: Date;
   invitation_token: string;
+}
+
+export interface AddFoodToMenuDTO {
+  name: string;
+  description: string;
+  price: string;
+  categories: FoodCategory[];
+  user: AuthUserClaim;
 }

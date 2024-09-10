@@ -4,7 +4,10 @@ import { invitationCreateService, invitationReadService } from '../services';
 
 export const sendInvitationController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await invitationCreateService.createOrResendInvitation(req.body);
+    const result = await invitationCreateService.createOrResendInvitation({
+      ...req.body,
+      user: req.user?.sub,
+    });
     Helper.formatAPIResponse(res, 'Invitation sent', result);
   } catch (error) {
     next(error);

@@ -23,8 +23,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FoodMenuModel = void 0;
+exports.FoodMenuModel = exports.FoodCategory = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+var FoodCategory;
+(function (FoodCategory) {
+    FoodCategory["APPETIZER"] = "Appetizer";
+    FoodCategory["MAIN_COURSE"] = "Main Course";
+    FoodCategory["DESSERT"] = "Dessert";
+    FoodCategory["BEVERAGE"] = "Beverage";
+    FoodCategory["SALAD"] = "Salad";
+    FoodCategory["SOUP"] = "Soup";
+    FoodCategory["PASTA"] = "Pasta";
+    FoodCategory["PIZZA"] = "Pizza";
+    FoodCategory["SEAFOOD"] = "Seafood";
+    FoodCategory["VEGETARIAN"] = "Vegetarian";
+    FoodCategory["VEGAN"] = "Vegan";
+    FoodCategory["GLUTEN_FREE"] = "Gluten-Free";
+    FoodCategory["SANDWICH"] = "Sandwich";
+    FoodCategory["GRILL"] = "Grill";
+    FoodCategory["STEAK"] = "Steak";
+    FoodCategory["BURGER"] = "Burger";
+    FoodCategory["SIDES"] = "Sides";
+    FoodCategory["BREAKFAST"] = "Breakfast";
+    FoodCategory["BRUNCH"] = "Brunch";
+    FoodCategory["SMOOTHIE"] = "Smoothie";
+    FoodCategory["COFFEE"] = "Coffee";
+    FoodCategory["TEA"] = "Tea";
+    FoodCategory["JUICE"] = "Juice";
+    FoodCategory["SNACK"] = "Snack";
+    FoodCategory["SPECIALS"] = "Specials";
+})(FoodCategory || (exports.FoodCategory = FoodCategory = {}));
 const foodMenuSchema = new mongoose_1.Schema({
     name: {
         type: String,
@@ -40,8 +68,9 @@ const foodMenuSchema = new mongoose_1.Schema({
         required: true,
         default: 0.0,
     },
-    category: {
-        type: String,
+    categories: {
+        type: [String],
+        enum: Object.values(FoodCategory),
         required: true,
     },
     available: {

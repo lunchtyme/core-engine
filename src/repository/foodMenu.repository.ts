@@ -1,9 +1,13 @@
 import mongoose from 'mongoose';
-import { FoodMenuModel } from '../infrastructure';
+import { FoodMenuDocument, FoodMenuModel } from '../infrastructure';
 import { logger } from '../utils';
-import { AddFoodToMenuDTO } from '../services/dtos/request.dto';
+import { AddFoodToMenuDTO, FetchFoodMenuDTO } from '../services/dtos/request.dto';
+import { BaseRepository } from './base.repository';
 
-export class FoodMenuRepository {
+export class FoodMenuRepository extends BaseRepository<FoodMenuDocument> {
+  constructor() {
+    super(FoodMenuModel);
+  }
   async create(params: AddFoodToMenuDTO, session?: mongoose.ClientSession | null) {
     try {
       const { name, price, categories, user, description } = params;

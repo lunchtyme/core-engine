@@ -1,7 +1,9 @@
 import { Response } from 'express';
 import { parse } from 'tldts'; // Importing a library for accurate domain extraction
+import crypto from 'crypto';
 import { UserAccountType } from '../typings/user';
 import { ForbiddenError } from './errors';
+import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
 
 export type APIJSONResponseParams = {
   message: string;
@@ -65,4 +67,10 @@ export class Helper {
       throw new ForbiddenError(`Only ${allowedUserType}${verb2} ${verb} allowed to ${suffix}`);
     }
   }
+
+  static generateCacheKey = (params: FetchFoodMenuDTO): string => {
+    const { query, category, lastScore, lastId } = params;
+    const key = JSON.stringify({ query, category, lastScore, lastId });
+    return crypto.createHash('sha256').update(key).digest('hex');
+  };
 }

@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export enum FoodCategory {
   APPETIZER = 'Appetizer',
@@ -66,6 +66,17 @@ const foodMenuSchema = new Schema(
   },
 );
 
-foodMenuSchema.index({ name: 'text', description: 'text' }, { background: true });
+export interface FoodMenu {
+  name: string;
+  description: string;
+  price: mongoose.Types.Decimal128;
+  categories: FoodCategory[];
+  available: boolean;
+  added_by: mongoose.Types.ObjectId;
+  created_at?: Date;
+  updated_at?: Date;
+}
 
-export const FoodMenuModel = mongoose.model('FoodMenu', foodMenuSchema);
+foodMenuSchema.index({ name: 'text', description: 'text' }, { background: true });
+export interface FoodMenuDocument extends FoodMenu, Document {}
+export const FoodMenuModel = mongoose.model<FoodMenuDocument>('FoodMenu', foodMenuSchema);

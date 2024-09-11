@@ -39,6 +39,7 @@ class FoodMenuCreateService {
                 return result.id;
             }
             catch (error) {
+                this._logger.error('Error adding food menu', error);
                 throw error;
             }
         });

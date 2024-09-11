@@ -31,4 +31,4 @@ exports.authReadService = new authRead_service_1.AuthReadservice(userRepository,
 exports.invitationCreateService = new invitationCreate_service_1.InvitationCreateService(invitationRepository, exports.sharedServices, infrastructure_1.emailQueue, utils_1.logger);
 exports.invitationReadService = new invitationRead_service_1.InvitationReadService(invitationRepository, exports.sharedServices, exports.redisService, utils_1.logger);
 exports.foodMenuCreateService = new foodMenuCreate_service_1.FoodMenuCreateService(foodMenuRepository, utils_1.logger);
-exports.foodMenuReadService = new foodMenuRead_service_1.FoodMenuReadService(foodMenuRepository, utils_1.logger);
+exports.foodMenuReadService = new foodMenuRead_service_1.FoodMenuReadService(foodMenuRepository, exports.redisService, utils_1.logger);

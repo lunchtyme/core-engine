@@ -74,4 +74,8 @@ export const invitationReadService = new InvitationReadService(
 
 export const foodMenuCreateService = new FoodMenuCreateService(foodMenuRepository, logger);
 
-export const foodMenuReadService = new FoodMenuReadService(foodMenuRepository, logger);
+export const foodMenuReadService = new FoodMenuReadService(
+  foodMenuRepository,
+  redisService,
+  logger,
+);

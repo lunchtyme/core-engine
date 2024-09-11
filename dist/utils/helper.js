@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Helper = void 0;
 const tldts_1 = require("tldts"); // Importing a library for accurate domain extraction
+const crypto_1 = __importDefault(require("crypto"));
 const errors_1 = require("./errors");
 class Helper {
     static generateOTPCode() {
@@ -61,3 +65,8 @@ class Helper {
     }
 }
 exports.Helper = Helper;
+Helper.generateCacheKey = (params) => {
+    const { query, category, lastScore, lastId } = params;
+    const key = JSON.stringify({ query, category, lastScore, lastId });
+    return crypto_1.default.createHash('sha256').update(key).digest('hex');
+};

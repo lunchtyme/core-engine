@@ -33,6 +33,7 @@ export class FoodMenuCreateService {
       const result = await this._foodMenuRepo.create(addFoodMenuParams);
       return result.id;
     } catch (error) {
+      this._logger.error('Error adding food menu', error);
       throw error;
     }
   }

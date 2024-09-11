@@ -93,3 +93,14 @@ export interface AddFoodToMenuDTO {
   categories: FoodCategory[];
   user: AuthUserClaim;
 }
+
+export interface FetchDataDTO {
+  limit: number;
+  query?: string;
+}
+
+export interface FetchFoodMenuDTO extends FetchDataDTO {
+  category?: FoodCategory;
+  lastScore?: number;
+  lastId?: string;
+}

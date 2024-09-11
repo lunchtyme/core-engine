@@ -16,7 +16,11 @@ exports.FoodMenuRepository = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
-class FoodMenuRepository {
+const base_repository_1 = require("./base.repository");
+class FoodMenuRepository extends base_repository_1.BaseRepository {
+    constructor() {
+        super(infrastructure_1.FoodMenuModel);
+    }
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

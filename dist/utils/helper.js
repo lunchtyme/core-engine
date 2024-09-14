@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Helper = void 0;
 const tldts_1 = require("tldts"); // Importing a library for accurate domain extraction
 const crypto_1 = __importDefault(require("crypto"));
+const user_1 = require("../typings/user");
 const errors_1 = require("./errors");
 class Helper {
     static generateOTPCode() {
@@ -62,6 +63,22 @@ class Helper {
             const verb2 = allowedUserTypes.length === 1 ? '' : 's';
             throw new errors_1.ForbiddenError(`Only ${allowedUserType}${verb2} ${verb} allowed to ${suffix}`);
         }
+    }
+    static hydrateUsers(data) {
+        const list = data.list.map((user) => {
+            var _a, _b, _c;
+            // Determine the name based on the account type
+            const name = user.account_type === user_1.UserAccountType.COMPANY
+                ? (_a = user.account_details.name) !== null && _a !== void 0 ? _a : ''
+                : `${(_b = user.account_details.first_name) !== null && _b !== void 0 ? _b : ''} ${(_c = user.account_details.last_name) !== null && _c !== void 0 ? _c : ''}`.trim();
+            // Construct the unified user object
+            return Object.assign(Object.assign({}, user), { id: user._id, name, account_type: user.account_type });
+        });
+        return {
+            list,
+            lastScore: data.lastScore,
+            lastId: data.lastId,
+        };
     }
 }
 exports.Helper = Helper;

@@ -42,5 +42,15 @@ class CompanyRepository {
             }
         });
     }
+    getCompanyByUserId(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.CompanyModel.findOne({ user: userId }).exec();
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
 }
 exports.CompanyRepository = CompanyRepository;

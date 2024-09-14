@@ -56,6 +56,7 @@ SERVER.use('/auth', routers_1.authRouter);
 // Invitation Routes
 SERVER.use('/invitations', routers_1.invitationRouter);
 SERVER.use('/food-menu', routers_1.foodMenuRouter);
+SERVER.use('/users', routers_1.userRouter);
 // Global error interceptor
 SERVER.use(index_2.globalErrorMiddleware);
 // Not found route handler

@@ -129,7 +129,7 @@ export class AuthCreateservice {
 
       const userDetails: any = await this._sharedService.getUserWithDetails({
         identifier: 'id',
-        value: user._id,
+        value: user._id as mongoose.Types.ObjectId,
       });
 
       // Generate OTP and send verification email
@@ -229,13 +229,17 @@ export class AuthCreateservice {
         employee_work_email: value.email,
         invitation_code: value.invitation_code,
       });
+      const company = await this._companyRepo.getCompanyByUserId(
+        invitation.user as mongoose.Types.ObjectId,
+      );
       if (!invitation) {
         throw new BadRequestError('Invalid or expired invitation code');
       }
-      const companyId = invitation.user._id;
-      const companyEmail = invitation.user.email;
-      value.company = companyId;
-      const workMailMatched = await Helper.verifyCompanyDomain(companyEmail, value.emaul);
+      if (!company) {
+        throw new NotFoundError('Company not found');
+      }
+      value.company = company._id;
+      const workMailMatched = await Helper.verifyCompanyDomain(company.email, value.email);
       if (!workMailMatched) {
         throw new BadRequestError("The provided email doesn't match your company email");
       }
@@ -367,48 +371,48 @@ export class AuthCreateservice {
   async processUserOnboarding(params: OnboardingUserDTO) {
     const session = await mongoose.startSession();
     try {
-      const result = await session.withTransaction(async () => {
-        const user = await this._sharedService.getUser({
-          identifier: 'id',
-          value: params.user,
-        });
-        // Process address creation:
-        await this.createAddress(params, session);
-        switch (user.account_type) {
-          case UserAccountType.COMPANY:
-            await this.processCompanyOnboardingData(
-              {
-                ...params,
-                user: user._id,
-              } as CompanyOnboardingDTO,
-              session,
-            );
-            // Update user: set onboarded to true
-            user.has_completed_onboarding = true;
-            user.save({ session });
-            break;
-          case UserAccountType.INDIVIDUAL:
-            await this.processEmployeeOnboardingData(
-              {
-                ...params,
-                user: user._id,
-              } as EmployeeOnboardingDTO,
-              session,
-            );
-            // Update user: set onboarded to true
-            user.has_completed_onboarding = true;
-            user.save({ session });
-            break;
-          default:
-            throw new Error('Account type not recognized');
-        }
-        this._logger.info('Process user onboarding data transaction complete', user._id);
-        return user;
+      await session.startTransaction();
+      const user = await this._sharedService.getUser({
+        identifier: 'id',
+        value: params.user,
       });
-      this._logger.info('User onboarded', result._id);
-      return result._id;
+      // Process address creation:
+      await this.createAddress(params, session);
+      switch (user.account_type) {
+        case UserAccountType.COMPANY:
+          await this.processCompanyOnboardingData(
+            {
+              ...params,
+              user: user._id,
+            } as CompanyOnboardingDTO,
+            session,
+          );
+          // Update user: set onboarded to true
+          user.has_completed_onboarding = true;
+          user.save({ session });
+          break;
+        case UserAccountType.INDIVIDUAL:
+          await this.processEmployeeOnboardingData(
+            {
+              ...params,
+              user: user._id,
+            } as EmployeeOnboardingDTO,
+            session,
+          );
+          // Update user: set onboarded to true
+          user.has_completed_onboarding = true;
+          user.save({ session });
+          break;
+        default:
+          throw new Error('Account type not recognized');
+      }
+
+      this._logger.info('User onboarded', user._id);
+      await session.commitTransaction();
+      return user._id;
     } catch (error) {
       this._logger.error('Error processing user onboarding', error);
+      await session.abortTransaction();
       throw error;
     } finally {
       await session.endSession();

@@ -73,4 +73,39 @@ export class Helper {
     const key = JSON.stringify({ query, category, lastScore, lastId });
     return crypto.createHash('sha256').update(key).digest('hex');
   };
+
+  static hydrateUsers(data: Record<string, any>) {
+    const list = data.list.map((user: User) => {
+      // Determine the name based on the account type
+      const name =
+        user.account_type === UserAccountType.COMPANY
+          ? user.account_details.name ?? ''
+          : `${user.account_details.first_name ?? ''} ${
+              user.account_details.last_name ?? ''
+            }`.trim();
+
+      // Construct the unified user object
+      return {
+        ...user,
+        id: user._id,
+        name, // Use either company name or first + last name
+        account_type: user.account_type,
+      };
+    });
+
+    return {
+      list,
+      lastScore: data.lastScore,
+      lastId: data.lastId,
+    };
+  }
+}
+
+interface User {
+  id: string;
+  account_type: string;
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
+  [key: string]: any; // other fields
 }

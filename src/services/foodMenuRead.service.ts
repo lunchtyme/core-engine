@@ -13,20 +13,23 @@ export class FoodMenuReadService {
 
   async getAllMenu(params: FetchFoodMenuDTO) {
     try {
-     const cacheKey = Helper.generateCacheKey(params);
-     const cachedResult = await this._redisService.get(cacheKey);
-     if (cachedResult) {
-       this._logger.info('Returned cached food menu');
-       return JSON.parse(cachedResult);
-     }
-     const { query, category, ...filters } = params;
-     const excludeFields = ['__v', 'updated_at'];
-     const options = { ...filters, excludeFields };
-     const fetchPipeline = getFoodMenuQuery({ query, category });
-     this._logger.info('Fetching food menu from database');
-     const result = await this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, options);
-     await this._redisService.set(cacheKey, JSON.stringify(result), true, DEFAULT_CACHE_EXPIRY_IN_SECS);
-     return result;
+      const cacheKey = Helper.generateCacheKey(params);
+      const cachedResult = await this._redisService.get(cacheKey);
+      if (cachedResult) {
+        this._logger.info('Returned cached food menu');
+        return JSON.parse(cachedResult);
+      }
+      const { query, category, ...filters } = params;
+      const fetchPipeline = getFoodMenuQuery({ query, category });
+      const result = await this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, filters);
+      await this._redisService.set(
+        cacheKey,
+        JSON.stringify(result),
+        true,
+        DEFAULT_CACHE_EXPIRY_IN_SECS,
+      );
+      this._logger.info('Fetching food menu from database');
+      return result;
     } catch (error) {
       logger.error('Error fetching food list menu:', error);
       throw error;

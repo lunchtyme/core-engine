@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Helper } from '../utils';
-import { foodMenuCreateService, foodMenuReadService } from '../services';
+import { foodMenuCreateService, foodMenuReadService, userReadService } from '../services';
 import { AuthUserClaim } from '../typings/user';
 import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
 import { FoodCategory } from '../infrastructure';
@@ -34,7 +34,6 @@ export const fetchMenuController = async (req: Request, res: Response, next: Nex
       category: categoryEnum,
       query: (query as string) || undefined,
     };
-
     const result = await foodMenuReadService.getAllMenu(fetchFoodMenuDTO);
     Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
   } catch (error) {

@@ -1,14 +1,19 @@
 import mongoose from 'mongoose';
-import { UserModel } from '../infrastructure';
 import { CreateAccountDTO } from '../services/dtos/request.dto';
 import { logger } from '../utils';
+import { BaseRepository } from './base.repository';
+import { UserModel, UserModelDocument } from '../infrastructure';
 
 export type GetUserParams = {
   identifier: 'email' | 'id' | 'phone_number';
   value: string | mongoose.Types.ObjectId;
 };
 
-export class UserRepository {
+export class UserRepository extends BaseRepository<UserModelDocument> {
+  constructor() {
+    super(UserModel);
+  }
+
   async create(params: CreateAccountDTO, session?: mongoose.ClientSession | null) {
     try {
       const result = new UserModel(params);

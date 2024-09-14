@@ -104,3 +104,9 @@ export interface FetchFoodMenuDTO extends FetchDataDTO {
   lastScore?: number;
   lastId?: string;
 }
+
+export interface FetchUsersDTO extends FetchDataDTO {
+  user: AuthUserClaim;
+  lastScore?: number;
+  lastId?: string;
+}

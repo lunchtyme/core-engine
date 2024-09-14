@@ -17,6 +17,7 @@ import { InvitationCreateService } from './invitationCreate.service';
 import { InvitationReadService } from './invitationRead.service';
 import { RedisService } from './redis.service';
 import { SharedServices } from './shared.service';
+import { UserReadservice } from './userRead.service';
 
 // All repository instances
 const userRepository = new UserRepository();
@@ -76,6 +77,13 @@ export const foodMenuCreateService = new FoodMenuCreateService(foodMenuRepositor
 
 export const foodMenuReadService = new FoodMenuReadService(
   foodMenuRepository,
+  redisService,
+  logger,
+);
+
+export const userReadService = new UserReadservice(
+  userRepository,
+  companyRepository,
   redisService,
   logger,
 );

@@ -28,4 +28,12 @@ export class CompanyRepository {
       throw error;
     }
   }
+
+  async getCompanyByUserId(userId: mongoose.Types.ObjectId) {
+    try {
+      return await CompanyModel.findOne({ user: userId }).exec();
+    } catch (error) {
+      throw error;
+    }
+  }
 }

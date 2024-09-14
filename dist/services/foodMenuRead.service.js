@@ -39,12 +39,10 @@ class FoodMenuReadService {
                     return JSON.parse(cachedResult);
                 }
                 const { query, category } = params, filters = __rest(params, ["query", "category"]);
-                const excludeFields = ['__v', 'updated_at'];
-                const options = Object.assign(Object.assign({}, filters), { excludeFields });
                 const fetchPipeline = (0, getAllMenu_query_1.getFoodMenuQuery)({ query, category });
-                this._logger.info('Fetching food menu from database');
-                const result = yield this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, options);
+                const result = yield this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, filters);
                 yield this._redisService.set(cacheKey, JSON.stringify(result), true, utils_1.DEFAULT_CACHE_EXPIRY_IN_SECS);
+                this._logger.info('Fetching food menu from database');
                 return result;
             }
             catch (error) {

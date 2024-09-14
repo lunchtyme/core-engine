@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 import { UserAccountState, UserAccountType } from '../../../typings/user';
 
 const userSchema = new Schema(
@@ -75,4 +75,21 @@ userSchema.virtual('account_details', {
   justOne: true,
 });
 
-export const UserModel = mongoose.model('User', userSchema);
+export interface User {
+  email: string;
+  password: string;
+  account_type: UserAccountType;
+  account_ref: mongoose.Types.ObjectId;
+  email_verified: boolean;
+  verified: boolean;
+  account_state: UserAccountState;
+  dial_code: string;
+  phone_number: string;
+  time_zone: string;
+  has_completed_onboarding: boolean;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+export interface UserModelDocument extends User, Document {}
+export const UserModel = mongoose.model<UserModelDocument>('User', userSchema);

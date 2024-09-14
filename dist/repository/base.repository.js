@@ -20,7 +20,7 @@ class BaseRepository {
     }
     paginateAndAggregateCursor(pipeline_1, _a) {
         return __awaiter(this, arguments, void 0, function* (pipeline, { lastScore, lastId, limit, sortBy = { created_at: -1 }, // Default sort field
-        excludeFields = [], }) {
+        excludeFields = ['__v', 'updated_at', 'password'], }) {
             var _b, _c, _d;
             const cursorPipeline = [...pipeline];
             // Optional cursor pagination logic (only if lastScore and lastId are provided)

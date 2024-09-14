@@ -202,13 +202,15 @@ class AuthCreateservice {
                     employee_work_email: value.email,
                     invitation_code: value.invitation_code,
                 });
+                const company = yield this._companyRepo.getCompanyByUserId(invitation.user);
                 if (!invitation) {
                     throw new utils_1.BadRequestError('Invalid or expired invitation code');
                 }
-                const companyId = invitation.user._id;
-                const companyEmail = invitation.user.email;
-                value.company = companyId;
-                const workMailMatched = yield utils_1.Helper.verifyCompanyDomain(companyEmail, value.emaul);
+                if (!company) {
+                    throw new utils_1.NotFoundError('Company not found');
+                }
+                value.company = company._id;
+                const workMailMatched = yield utils_1.Helper.verifyCompanyDomain(company.email, value.email);
                 if (!workMailMatched) {
                     throw new utils_1.BadRequestError("The provided email doesn't match your company email");
                 }
@@ -344,37 +346,36 @@ class AuthCreateservice {
         return __awaiter(this, void 0, void 0, function* () {
             const session = yield mongoose_1.default.startSession();
             try {
-                const result = yield session.withTransaction(() => __awaiter(this, void 0, void 0, function* () {
-                    const user = yield this._sharedService.getUser({
-                        identifier: 'id',
-                        value: params.user,
-                    });
-                    // Process address creation:
-                    yield this.createAddress(params, session);
-                    switch (user.account_type) {
-                        case user_1.UserAccountType.COMPANY:
-                            yield this.processCompanyOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
-                            // Update user: set onboarded to true
-                            user.has_completed_onboarding = true;
-                            user.save({ session });
-                            break;
-                        case user_1.UserAccountType.INDIVIDUAL:
-                            yield this.processEmployeeOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
-                            // Update user: set onboarded to true
-                            user.has_completed_onboarding = true;
-                            user.save({ session });
-                            break;
-                        default:
-                            throw new Error('Account type not recognized');
-                    }
-                    this._logger.info('Process user onboarding data transaction complete', user._id);
-                    return user;
-                }));
-                this._logger.info('User onboarded', result._id);
-                return result._id;
+                yield session.startTransaction();
+                const user = yield this._sharedService.getUser({
+                    identifier: 'id',
+                    value: params.user,
+                });
+                // Process address creation:
+                yield this.createAddress(params, session);
+                switch (user.account_type) {
+                    case user_1.UserAccountType.COMPANY:
+                        yield this.processCompanyOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
+                        // Update user: set onboarded to true
+                        user.has_completed_onboarding = true;
+                        user.save({ session });
+                        break;
+                    case user_1.UserAccountType.INDIVIDUAL:
+                        yield this.processEmployeeOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
+                        // Update user: set onboarded to true
+                        user.has_completed_onboarding = true;
+                        user.save({ session });
+                        break;
+                    default:
+                        throw new Error('Account type not recognized');
+                }
+                this._logger.info('User onboarded', user._id);
+                yield session.commitTransaction();
+                return user._id;
             }
             catch (error) {
                 this._logger.error('Error processing user onboarding', error);
+                yield session.abortTransaction();
                 throw error;
             }
             finally {

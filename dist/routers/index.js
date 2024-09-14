@@ -17,3 +17,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./auth.router"), exports);
 __exportStar(require("./invitation.router"), exports);
 __exportStar(require("./foodMenu.router"), exports);
+__exportStar(require("./user.router"), exports);

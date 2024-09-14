@@ -14,9 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRepository = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
-class UserRepository {
+const base_repository_1 = require("./base.repository");
+const infrastructure_1 = require("../infrastructure");
+class UserRepository extends base_repository_1.BaseRepository {
+    constructor() {
+        super(infrastructure_1.UserModel);
+    }
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

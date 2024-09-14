@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.foodMenuReadService = exports.foodMenuCreateService = exports.invitationReadService = exports.invitationCreateService = exports.authReadService = exports.authCreateService = exports.redisService = exports.sharedServices = void 0;
+exports.userReadService = exports.foodMenuReadService = exports.foodMenuCreateService = exports.invitationReadService = exports.invitationCreateService = exports.authReadService = exports.authCreateService = exports.redisService = exports.sharedServices = void 0;
 const infrastructure_1 = require("../infrastructure");
 const repository_1 = require("../repository");
 const utils_1 = require("../utils");
@@ -12,6 +12,7 @@ const invitationCreate_service_1 = require("./invitationCreate.service");
 const invitationRead_service_1 = require("./invitationRead.service");
 const redis_service_1 = require("./redis.service");
 const shared_service_1 = require("./shared.service");
+const userRead_service_1 = require("./userRead.service");
 // All repository instances
 const userRepository = new repository_1.UserRepository();
 const companyRepository = new repository_1.CompanyRepository();
@@ -32,3 +33,4 @@ exports.invitationCreateService = new invitationCreate_service_1.InvitationCreat
 exports.invitationReadService = new invitationRead_service_1.InvitationReadService(invitationRepository, exports.sharedServices, exports.redisService, utils_1.logger);
 exports.foodMenuCreateService = new foodMenuCreate_service_1.FoodMenuCreateService(foodMenuRepository, utils_1.logger);
 exports.foodMenuReadService = new foodMenuRead_service_1.FoodMenuReadService(foodMenuRepository, exports.redisService, utils_1.logger);
+exports.userReadService = new userRead_service_1.UserReadservice(userRepository, companyRepository, exports.redisService, utils_1.logger);

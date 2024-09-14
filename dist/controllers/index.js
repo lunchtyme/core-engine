@@ -17,3 +17,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./auth.controller"), exports);
 __exportStar(require("./invitation.controller"), exports);
 __exportStar(require("./foodMenu.controller"), exports);
+__exportStar(require("./users.controller"), exports);

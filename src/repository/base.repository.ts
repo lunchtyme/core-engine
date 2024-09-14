@@ -26,7 +26,7 @@ export class BaseRepository<T extends Document> {
       lastId,
       limit,
       sortBy = { created_at: -1 }, // Default sort field
-      excludeFields = [],
+      excludeFields = ['__v', 'updated_at', 'password'],
     }: PaginateCursorParams,
   ): Promise<{ list: T[]; lastScore: number | null; lastId: string | null }> {
     const cursorPipeline: PipelineStage[] = [...pipeline];

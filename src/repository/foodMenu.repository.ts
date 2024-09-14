@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { FoodMenuDocument, FoodMenuModel } from '../infrastructure';
 import { logger } from '../utils';
-import { AddFoodToMenuDTO, FetchFoodMenuDTO } from '../services/dtos/request.dto';
+import { AddFoodToMenuDTO } from '../services/dtos/request.dto';
 import { BaseRepository } from './base.repository';
 
 export class FoodMenuRepository extends BaseRepository<FoodMenuDocument> {

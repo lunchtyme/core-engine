@@ -63,6 +63,9 @@ const foodMenuSchema = new mongoose_1.Schema({
         type: String,
         trim: true,
     },
+    food_image: {
+        type: String,
+    },
     price: {
         type: mongoose_1.Schema.Types.Decimal128,
         required: true,

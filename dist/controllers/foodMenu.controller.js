@@ -9,13 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchMenuController = exports.addFoodToMenuController = void 0;
+exports.updateFoodMenuAvaliabilityController = exports.fetchMenuController = exports.addFoodToMenuController = void 0;
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const infrastructure_1 = require("../infrastructure");
 const addFoodToMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield services_1.foodMenuCreateService.addFoodToMenu(Object.assign(Object.assign({}, req.body), { user: req.user }));
+        // Parse the categories string into an array
+        const categories = req.body.categories.split(',') || [];
+        const result = yield services_1.foodMenuCreateService.addFoodToMenu(Object.assign(Object.assign({}, req.body), { categories, user: req.user, food_image: req.file }));
         utils_1.Helper.formatAPIResponse(res, 'New food added to menu', result);
     }
     catch (error) {
@@ -45,3 +47,16 @@ const fetchMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.fetchMenuController = fetchMenuController;
+const updateFoodMenuAvaliabilityController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield services_1.foodMenuCreateService.updateFoodAvalibility({
+            foodMenuId: req.body.foodMenuId,
+            available: req.body.available,
+        });
+        utils_1.Helper.formatAPIResponse(res, 'Food menu availability updated', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.updateFoodMenuAvaliabilityController = updateFoodMenuAvaliabilityController;

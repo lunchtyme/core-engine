@@ -1,6 +1,18 @@
 import { Router } from 'express';
 import { resolveAuthContext } from '../middlewares';
-import { addFoodToMenuController, fetchMenuController } from '../controllers';
+import {
+  addFoodToMenuController,
+  fetchMenuController,
+  updateFoodMenuAvaliabilityController,
+} from '../controllers';
+import multer from 'multer';
+
+const multerUploader = multer({
+  limits: {
+    fileSize: 1024 * 1024 * 200, // 2 GB (adjust the size limit as needed)
+  },
+  dest: 'uploads/',
+});
 
 export const foodMenuRouter = Router();
 
@@ -10,7 +22,6 @@ export const foodMenuRouter = Router();
  *   name: FoodMenu
  *   description: Operations related to food menu management
  */
-
 /**
  * @swagger
  * /food-menu/new:
@@ -22,7 +33,7 @@ export const foodMenuRouter = Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -30,6 +41,7 @@ export const foodMenuRouter = Router();
  *               - description
  *               - price
  *               - categories
+ *               - food_image
  *             properties:
  *               name:
  *                 type: string
@@ -49,6 +61,10 @@ export const foodMenuRouter = Router();
  *                   type: string
  *                 description: One or more categories the food item belongs to
  *                 example: ["Appetizer", "Main Course"]
+ *               food_image:
+ *                 type: string
+ *                 format: binary
+ *                 description: The image of the food item
  *     responses:
  *       201:
  *         description: Food item added to the menu successfully
@@ -102,7 +118,13 @@ export const foodMenuRouter = Router();
  *                   type: string
  *                   example: "Invalid request data"
  */
-foodMenuRouter.post('/new', resolveAuthContext, addFoodToMenuController);
+
+foodMenuRouter.post(
+  '/new',
+  multerUploader.single('food_image'),
+  resolveAuthContext,
+  addFoodToMenuController,
+);
 
 /**
  * @swagger
@@ -165,3 +187,48 @@ foodMenuRouter.post('/new', resolveAuthContext, addFoodToMenuController);
  *         description: Internal server error
  */
 foodMenuRouter.get('/', resolveAuthContext, fetchMenuController);
+
+/**
+ * @swagger
+ * /food-menu:
+ *   patch:
+ *     summary: Update the availability of a food menu item
+ *     tags: [FoodMenu]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foodMenuId:
+ *                 type: string
+ *                 description: Unique identifier of the food menu item
+ *               available:
+ *                 type: boolean
+ *                 description: Whether the food menu item is available or not
+ *     responses:
+ *       200:
+ *         description: Food menu availability updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     foodMenuId:
+ *                       type: string
+ *                       description: Unique identifier of the updated food menu item
+ *                     available:
+ *                       type: boolean
+ *                       description: Updated availability status of the food menu item
+ */
+foodMenuRouter.patch('/', resolveAuthContext, updateFoodMenuAvaliabilityController);

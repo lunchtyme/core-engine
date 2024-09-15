@@ -4,6 +4,18 @@ import crypto from 'crypto';
 import { UserAccountType } from '../typings/user';
 import { ForbiddenError } from './errors';
 import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
+import { logger } from './logger';
+import { v2 } from 'cloudinary';
+import { loadEnv } from './loadEnv';
+
+loadEnv(process.env.NODE_ENV!);
+
+v2.config({
+  secure: true,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+  cloud_name: process.env.CLOUDINARY_NAME!,
+});
 
 export type APIJSONResponseParams = {
   message: string;
@@ -98,6 +110,21 @@ export class Helper {
       lastScore: data.lastScore,
       lastId: data.lastId,
     };
+  }
+
+  static async uploadImageToCloudinary(filePath: any) {
+    try {
+      // Upload the image
+      const result = await v2.uploader.upload(filePath, {
+        use_filename: false,
+        folder: 'lunchtyme',
+        unique_filename: false,
+      });
+      return result.secure_url;
+    } catch (error) {
+      logger.error('Error uploading image to cloudinary', { error });
+      throw error;
+    }
   }
 }
 

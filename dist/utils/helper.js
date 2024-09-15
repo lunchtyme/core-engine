@@ -17,6 +17,16 @@ const tldts_1 = require("tldts"); // Importing a library for accurate domain ext
 const crypto_1 = __importDefault(require("crypto"));
 const user_1 = require("../typings/user");
 const errors_1 = require("./errors");
+const logger_1 = require("./logger");
+const cloudinary_1 = require("cloudinary");
+const loadEnv_1 = require("./loadEnv");
+(0, loadEnv_1.loadEnv)(process.env.NODE_ENV);
+cloudinary_1.v2.config({
+    secure: true,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_NAME,
+});
 class Helper {
     static generateOTPCode() {
         return Math.floor(Math.random() * 900000)
@@ -79,6 +89,23 @@ class Helper {
             lastScore: data.lastScore,
             lastId: data.lastId,
         };
+    }
+    static uploadImageToCloudinary(filePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Upload the image
+                const result = yield cloudinary_1.v2.uploader.upload(filePath, {
+                    use_filename: false,
+                    folder: 'lunchtyme',
+                    unique_filename: false,
+                });
+                return result.secure_url;
+            }
+            catch (error) {
+                logger_1.logger.error('Error uploading image to cloudinary', { error });
+                throw error;
+            }
+        });
     }
 }
 exports.Helper = Helper;

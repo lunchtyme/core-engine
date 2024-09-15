@@ -20,15 +20,18 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserReadservice = void 0;
+exports.UserReadService = void 0;
 const utils_1 = require("../utils");
 const getAllUsers_query_1 = require("./queries/getAllUsers.query");
 const getEmployeeByCompany_query_1 = require("./queries/getEmployeeByCompany.query");
 const user_1 = require("../typings/user");
-class UserReadservice {
-    constructor(_userRepo, _companyRepo, _redisService, _logger) {
+class UserReadService {
+    constructor(_userRepo, _companyRepo, _orderRepo, _billingRepo, _individualRepo, _redisService, _logger) {
         this._userRepo = _userRepo;
         this._companyRepo = _companyRepo;
+        this._orderRepo = _orderRepo;
+        this._billingRepo = _billingRepo;
+        this._individualRepo = _individualRepo;
         this._redisService = _redisService;
         this._logger = _logger;
     }
@@ -85,5 +88,50 @@ class UserReadservice {
             }
         });
     }
+    // Employee overview analytics
+    getEmployeeOverviewAnalytics(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.INDIVIDUAL], 'access this resource');
+                const [orders, balance] = yield Promise.all([
+                    this._orderRepo.countEmployeeOrders(user.sub),
+                    this._individualRepo.getSpendBalance(user.sub),
+                ]);
+                return {
+                    orders,
+                    balance,
+                };
+            }
+            catch (error) {
+                this._logger.error('Error fetching employee overview analytics', { error, user });
+                throw error;
+            }
+        });
+    }
+    // Company overview analytics
+    getCompanyOverviewAnalytics(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.COMPANY], 'access this resource');
+                const companyInfo = yield this._companyRepo.getCompanyByUserId(user.sub);
+                const [orders, balance, amountSpent, employees] = yield Promise.all([
+                    this._orderRepo.countCompanyEmployeeOrders(companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo._id),
+                    this._companyRepo.getSpendBalance(user.sub),
+                    this._billingRepo.getTotalAmountSpentByMe(user.sub),
+                    this._individualRepo.countCompanyEmployees(companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo._id),
+                ]);
+                return {
+                    orders,
+                    balance,
+                    employees,
+                    amount_spent: amountSpent,
+                };
+            }
+            catch (error) {
+                this._logger.error('Error fetching employee overview analytics', { error, user });
+                throw error;
+            }
+        });
+    }
 }
-exports.UserReadservice = UserReadservice;
+exports.UserReadService = UserReadService;

@@ -12,6 +12,7 @@ const morgan_1 = __importDefault(require("morgan"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const routers_1 = require("./routers");
+const analytics_router_1 = require("./routers/analytics.router");
 (0, index_1.validateEnvVariables)();
 (0, index_1.loadEnv)(process.env.NODE_ENV);
 const SERVER = (0, express_1.default)();
@@ -57,6 +58,9 @@ SERVER.use('/auth', routers_1.authRouter);
 SERVER.use('/invitations', routers_1.invitationRouter);
 SERVER.use('/food-menu', routers_1.foodMenuRouter);
 SERVER.use('/users', routers_1.userRouter);
+SERVER.use('/billings', routers_1.billingRouter);
+SERVER.use('/analytics', analytics_router_1.analyticsRouter);
+SERVER.use('/orders', routers_1.orderRouter);
 // Global error interceptor
 SERVER.use(index_2.globalErrorMiddleware);
 // Not found route handler

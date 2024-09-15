@@ -39,6 +39,9 @@ const foodMenuSchema = new Schema(
       type: String,
       trim: true,
     },
+    food_image: {
+      type: String,
+    },
     price: {
       type: Schema.Types.Decimal128,
       required: true,
@@ -73,6 +76,7 @@ export interface FoodMenu {
   categories: FoodCategory[];
   available: boolean;
   added_by: mongoose.Types.ObjectId;
+  food_image: string;
   created_at?: Date;
   updated_at?: Date;
 }

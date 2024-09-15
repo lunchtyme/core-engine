@@ -18,3 +18,5 @@ __exportStar(require("./auth.router"), exports);
 __exportStar(require("./invitation.router"), exports);
 __exportStar(require("./foodMenu.router"), exports);
 __exportStar(require("./user.router"), exports);
+__exportStar(require("./billing.router"), exports);
+__exportStar(require("./order.router"), exports);

@@ -17,3 +17,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./database"), exports);
 __exportStar(require("./redis"), exports);
 __exportStar(require("./queue"), exports);
+__exportStar(require("./payment"), exports);

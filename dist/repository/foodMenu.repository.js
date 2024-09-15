@@ -24,18 +24,45 @@ class FoodMenuRepository extends base_repository_1.BaseRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, price, categories, user, description } = params;
+                const { name, price, categories, user, description, food_image } = params;
                 const result = new infrastructure_1.FoodMenuModel({
                     name,
                     price: new mongoose_1.default.Types.Decimal128(price),
                     categories,
                     description,
                     added_by: user,
+                    food_image: food_image,
                 });
                 return yield result.save({ session });
             }
             catch (error) {
                 utils_1.logger.error('Error saving food menu:', error);
+                throw error;
+            }
+        });
+    }
+    updateFoodAvailability(foodMenuId, available) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const foodItem = yield infrastructure_1.FoodMenuModel.findByIdAndUpdate(foodMenuId, { available }, { new: true });
+                if (!foodItem) {
+                    throw new utils_1.NotFoundError('Food item not found');
+                }
+                utils_1.logger.info('Food availability updated successfully');
+                return foodItem;
+            }
+            catch (error) {
+                utils_1.logger.error('Error updating food menu availability', { error, foodMenuId });
+                throw error;
+            }
+        });
+    }
+    getOne(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.FoodMenuModel.findById(id).exec();
+            }
+            catch (error) {
                 throw error;
             }
         });

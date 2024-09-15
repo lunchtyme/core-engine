@@ -6,3 +6,4 @@ export * from './admin.model';
 export * from './foodMenu.model';
 export * from './order.model';
 export * from './invitation.model';
+export * from './billing.model';

@@ -52,5 +52,65 @@ class CompanyRepository {
             }
         });
     }
+    getCompanyById(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.CompanyModel.findOne({ _id: companyId }).exec();
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    topupSpendBalance(params, session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { companyUserId, spend_balance } = params;
+            const updateQuery = { $inc: { spend_balance: spend_balance } };
+            const options = {};
+            if (session) {
+                options.session = session;
+            }
+            try {
+                const result = yield infrastructure_1.CompanyModel.updateOne({ user: companyUserId }, updateQuery, options);
+                return result.acknowledged;
+            }
+            catch (error) {
+                utils_1.logger.error('Error incrementing company spend balance in db:', { error, params });
+                throw error;
+            }
+        });
+    }
+    decreaseSpendBalance(params, session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { companyUserId, spend_balance } = params;
+            const updateQuery = { $inc: { spend_balance: `-${spend_balance}` } };
+            const options = {};
+            if (session) {
+                options.session = session;
+            }
+            try {
+                const result = yield infrastructure_1.CompanyModel.updateOne({ user: companyUserId }, updateQuery, options);
+                return result.acknowledged;
+            }
+            catch (error) {
+                utils_1.logger.error('Error decreasing company spend balance in db:', { error, params });
+                throw error;
+            }
+        });
+    }
+    getSpendBalance(companyUserId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const result = yield infrastructure_1.CompanyModel.findOne({ user: companyUserId }, 'spend_balance')
+                    .lean()
+                    .exec();
+                return (result === null || result === void 0 ? void 0 : result.spend_balance) ? result.spend_balance.toString() : '0.00';
+            }
+            catch (error) {
+                utils_1.logger.error('Error fetching company spend balance from db:', { error, companyUserId });
+                throw error;
+            }
+        });
+    }
 }
 exports.CompanyRepository = CompanyRepository;

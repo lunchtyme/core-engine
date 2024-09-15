@@ -36,4 +36,62 @@ export class CompanyRepository {
       throw error;
     }
   }
+
+  async getCompanyById(companyId: mongoose.Types.ObjectId) {
+    try {
+      return await CompanyModel.findOne({ _id: companyId }).exec();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async topupSpendBalance(
+    params: { companyUserId: mongoose.Types.ObjectId; spend_balance: mongoose.Types.Decimal128 },
+    session?: mongoose.ClientSession | null,
+  ) {
+    const { companyUserId, spend_balance } = params;
+    const updateQuery = { $inc: { spend_balance: spend_balance } };
+    const options: any = {};
+    if (session) {
+      options.session = session;
+    }
+    try {
+      const result = await CompanyModel.updateOne({ user: companyUserId }, updateQuery, options);
+      return result.acknowledged;
+    } catch (error) {
+      logger.error('Error incrementing company spend balance in db:', { error, params });
+      throw error;
+    }
+  }
+
+  async decreaseSpendBalance(
+    params: { companyUserId: mongoose.Types.ObjectId; spend_balance: mongoose.Types.Decimal128 },
+    session?: mongoose.ClientSession | null,
+  ) {
+    const { companyUserId, spend_balance } = params;
+    const updateQuery = { $inc: { spend_balance: `-${spend_balance}` } };
+    const options: any = {};
+    if (session) {
+      options.session = session;
+    }
+    try {
+      const result = await CompanyModel.updateOne({ user: companyUserId }, updateQuery, options);
+      return result.acknowledged;
+    } catch (error: any) {
+      logger.error('Error decreasing company spend balance in db:', { error, params });
+      throw error;
+    }
+  }
+
+  async getSpendBalance(companyUserId: mongoose.Types.ObjectId) {
+    try {
+      const result = await CompanyModel.findOne({ user: companyUserId }, 'spend_balance')
+        .lean()
+        .exec();
+      return result?.spend_balance ? result.spend_balance.toString() : '0.00';
+    } catch (error) {
+      logger.error('Error fetching company spend balance from db:', { error, companyUserId });
+      throw error;
+    }
+  }
 }

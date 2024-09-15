@@ -23,3 +23,4 @@ __exportStar(require("./order.repository"), exports);
 __exportStar(require("./user.repository"), exports);
 __exportStar(require("./admin.repository"), exports);
 __exportStar(require("./individual.repository"), exports);
+__exportStar(require("./billing.repository"), exports);

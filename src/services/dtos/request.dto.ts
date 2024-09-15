@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { AuthUserClaim, UserAccountType } from '../../typings/user';
-import { FoodCategory } from '../../infrastructure';
+import { BillingStatus, BillingType, FoodCategory } from '../../infrastructure';
 
 export interface CreateAccountDTO {
   email: string;
@@ -92,6 +92,7 @@ export interface AddFoodToMenuDTO {
   price: string;
   categories: FoodCategory[];
   user: AuthUserClaim;
+  food_image: Express.Multer.File | string;
 }
 
 export interface FetchDataDTO {
@@ -108,5 +109,33 @@ export interface FetchFoodMenuDTO extends FetchDataDTO {
 export interface FetchUsersDTO extends FetchDataDTO {
   user: AuthUserClaim;
   lastScore?: number;
+  lastId?: string;
+}
+
+export interface CreateBillingDTO {
+  amount: number | string;
+  user: AuthUserClaim | mongoose.Types.ObjectId;
+}
+
+export interface SaveBillingDTO extends CreateBillingDTO {
+  user: mongoose.Types.ObjectId;
+  amount: string;
+  reference_code: string;
+  type: BillingType;
+  email: string;
+}
+
+export interface FetchBillingsDTO extends FetchDataDTO {
+  user: AuthUserClaim;
+  lastId?: string;
+}
+
+export interface CreateOrderDTO {
+  user: AuthUserClaim;
+  foodItems: { food_menu: mongoose.Types.ObjectId; quantity: number }[];
+}
+
+export interface FetchOrderssDTO extends FetchDataDTO {
+  user: AuthUserClaim;
   lastId?: string;
 }

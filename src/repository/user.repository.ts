@@ -3,6 +3,7 @@ import { CreateAccountDTO } from '../services/dtos/request.dto';
 import { logger } from '../utils';
 import { BaseRepository } from './base.repository';
 import { UserModel, UserModelDocument } from '../infrastructure';
+import { UserAccountType } from '../typings/user';
 
 export type GetUserParams = {
   identifier: 'email' | 'id' | 'phone_number';
@@ -89,6 +90,35 @@ export class UserRepository extends BaseRepository<UserModelDocument> {
       return !!user;
     } catch (error) {
       logger.error('Error checking user exist from db:', error);
+      throw error;
+    }
+  }
+
+  // Admin: Count all non-admin users
+  async getAllUserCount() {
+    try {
+      return await UserModel.countDocuments({
+        account_type: { $ne: UserAccountType.ADMIN },
+      }).exec();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Admin: Count total employees
+  async getAllEmployeeCount() {
+    try {
+      return await UserModel.countDocuments({ account_type: UserAccountType.INDIVIDUAL }).exec();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Admin: Count total companies
+  async getAllCompanyCount() {
+    try {
+      return await UserModel.countDocuments({ account_type: UserAccountType.COMPANY }).exec();
+    } catch (error) {
       throw error;
     }
   }

@@ -9,11 +9,13 @@ exports.EMAIL_DATA = {
         employeeInvitation(companyName) {
             return `${companyName} is inviting you to join ${exports.APP_NAME}`;
         },
+        balanceTopup: 'Wallet topup successful',
     },
     template: {
         welcome: 'welcome',
         verifyEmail: 'verifyEmail',
         employeeInvitation: 'employeeInvitation',
+        balanceTopup: 'balanceTopup',
     },
 };
 exports.DEFAULT_CACHE_EXPIRY_IN_SECS = 180;

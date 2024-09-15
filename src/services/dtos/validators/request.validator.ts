@@ -206,4 +206,14 @@ export const AddFoodToMenuDTOValidator = Joi.object({
       'any.only': 'Invalid category provided',
     }),
   user: Joi.required(),
+  // food_image: Joi.required().messages({
+  //   'any.required': 'Please provide the food menu cover image',
+  // }),
+}).unknown();
+
+export const CreateBillingDTOValidator = Joi.object({
+  amount: Joi.string().required().messages({
+    'any.required': 'Provide amount you want to topup',
+  }),
+  user: Joi.required(),
 });

@@ -42,5 +42,74 @@ class IndividualRepository {
             }
         });
     }
+    getSpendBalance(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const result = yield infrastructure_1.IndividualModel.findOne({ user: userId }, 'spend_balance').lean().exec();
+                return (result === null || result === void 0 ? void 0 : result.spend_balance) ? result.spend_balance.toString() : '0.00';
+            }
+            catch (error) {
+                utils_1.logger.error('Error fetching employee spend balance from db:', { error, userId });
+                throw error;
+            }
+        });
+    }
+    countCompanyEmployees(companyId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Get all employees belonging to this company
+                return yield infrastructure_1.IndividualModel.countDocuments({ company: { $in: companyId } }).exec();
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    topupSpendBalance(params, session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { userId, amount } = params;
+            const updateQuery = { $inc: { spend_balance: amount } };
+            const options = {};
+            if (session) {
+                options.session = session;
+            }
+            try {
+                const result = yield infrastructure_1.IndividualModel.updateOne({ user: userId }, updateQuery, options);
+                return result.acknowledged;
+            }
+            catch (error) {
+                utils_1.logger.error('Error incrementing employee spend balance in db:', { error, params });
+                throw error;
+            }
+        });
+    }
+    decreaseSpendBalance(params, session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { userId, amount } = params;
+            const updateQuery = { $inc: { spend_balance: `-${amount}` } };
+            const options = {};
+            if (session) {
+                options.session = session;
+            }
+            try {
+                const result = yield infrastructure_1.IndividualModel.updateOne({ user: userId }, updateQuery, options);
+                return result.acknowledged;
+            }
+            catch (error) {
+                utils_1.logger.error('Error decreasing employee spend balance in db:', { error, params });
+                throw error;
+            }
+        });
+    }
+    getCompanyId(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.IndividualModel.findById(userId).exec();
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
 }
 exports.IndividualRepository = IndividualRepository;

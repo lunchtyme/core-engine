@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const user_1 = require("../../../typings/user");
 const infrastructure_1 = require("../../../infrastructure");
@@ -196,6 +196,15 @@ exports.AddFoodToMenuDTOValidator = joi_1.default.object({
         .messages({
         'any.required': 'Please provide one or more categories the food belongs to',
         'any.only': 'Invalid category provided',
+    }),
+    user: joi_1.default.required(),
+    // food_image: Joi.required().messages({
+    //   'any.required': 'Please provide the food menu cover image',
+    // }),
+}).unknown();
+exports.CreateBillingDTOValidator = joi_1.default.object({
+    amount: joi_1.default.string().required().messages({
+        'any.required': 'Provide amount you want to topup',
     }),
     user: joi_1.default.required(),
 });

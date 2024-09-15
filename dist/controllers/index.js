@@ -18,3 +18,6 @@ __exportStar(require("./auth.controller"), exports);
 __exportStar(require("./invitation.controller"), exports);
 __exportStar(require("./foodMenu.controller"), exports);
 __exportStar(require("./users.controller"), exports);
+__exportStar(require("./billing.controller"), exports);
+__exportStar(require("./analytics.controller"), exports);
+__exportStar(require("./order.controller"), exports);

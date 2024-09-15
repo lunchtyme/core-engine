@@ -6,7 +6,15 @@ import { DB } from './infrastructure';
 import morgan from 'morgan';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
-import { authRouter, foodMenuRouter, invitationRouter, userRouter } from './routers';
+import {
+  authRouter,
+  billingRouter,
+  foodMenuRouter,
+  invitationRouter,
+  orderRouter,
+  userRouter,
+} from './routers';
+import { analyticsRouter } from './routers/analytics.router';
 
 validateEnvVariables();
 loadEnv(process.env.NODE_ENV!);
@@ -53,6 +61,9 @@ SERVER.use('/auth', authRouter);
 SERVER.use('/invitations', invitationRouter);
 SERVER.use('/food-menu', foodMenuRouter);
 SERVER.use('/users', userRouter);
+SERVER.use('/billings', billingRouter);
+SERVER.use('/analytics', analyticsRouter);
+SERVER.use('/orders', orderRouter);
 // Global error interceptor
 SERVER.use(globalErrorMiddleware);
 // Not found route handler

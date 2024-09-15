@@ -22,3 +22,4 @@ __exportStar(require("./admin.model"), exports);
 __exportStar(require("./foodMenu.model"), exports);
 __exportStar(require("./order.model"), exports);
 __exportStar(require("./invitation.model"), exports);
+__exportStar(require("./billing.model"), exports);

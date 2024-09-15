@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -54,6 +54,22 @@ const orderSchema = new Schema(
   },
 );
 
+interface OrderItem {
+  food_menu: mongoose.Schema.Types.ObjectId;
+  quantity: number;
+}
+
+interface Order {
+  customer_id: mongoose.Schema.Types.ObjectId;
+  food_items: OrderItem[];
+  total_amount: mongoose.Types.Decimal128;
+  status: OrderStatus;
+  order_date: Date;
+  createdAt?: Date; // Optional, based on timestamps setting
+  updatedAt?: Date; // Optional, based on timestamps setting
+}
+
 orderSchema.index({ status: 1, order_date: 1 }, { background: true });
 
-export const OrderModel = mongoose.model('Order', orderSchema);
+export interface OrderDocument extends Order, Document {}
+export const OrderModel = mongoose.model<OrderDocument>('Order', orderSchema);

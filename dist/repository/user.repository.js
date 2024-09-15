@@ -17,6 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const utils_1 = require("../utils");
 const base_repository_1 = require("./base.repository");
 const infrastructure_1 = require("../infrastructure");
+const user_1 = require("../typings/user");
 class UserRepository extends base_repository_1.BaseRepository {
     constructor() {
         super(infrastructure_1.UserModel);
@@ -98,6 +99,41 @@ class UserRepository extends base_repository_1.BaseRepository {
             }
             catch (error) {
                 utils_1.logger.error('Error checking user exist from db:', error);
+                throw error;
+            }
+        });
+    }
+    // Admin: Count all non-admin users
+    getAllUserCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.UserModel.countDocuments({
+                    account_type: { $ne: user_1.UserAccountType.ADMIN },
+                }).exec();
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    // Admin: Count total employees
+    getAllEmployeeCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.UserModel.countDocuments({ account_type: user_1.UserAccountType.INDIVIDUAL }).exec();
+            }
+            catch (error) {
+                throw error;
+            }
+        });
+    }
+    // Admin: Count total companies
+    getAllCompanyCount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield infrastructure_1.UserModel.countDocuments({ account_type: user_1.UserAccountType.COMPANY }).exec();
+            }
+            catch (error) {
                 throw error;
             }
         });

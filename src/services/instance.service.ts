@@ -102,10 +102,8 @@ export const userReadService = new UserReadService(
 
 export const billingCreateService = new BillingCreateService(
   companyRepository,
-  individualRepository,
   billingRepository,
   sharedServices,
-  redisService,
   emailQueue,
   logger,
 );
@@ -127,6 +125,9 @@ export const orderCreateService = new OrderCreateService(
   foodMenuRepository,
   individualRepository,
   companyRepository,
+  billingCreateService,
+  emailQueue,
+  sharedServices,
   logger,
 );
 export const orderReadService = new OrderReadService(orderRepository, logger);

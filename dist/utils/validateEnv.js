@@ -12,6 +12,11 @@ const requiredEnvVariables = [
     'MAIL_USER',
     'MAIL_PASS',
     'REDIS_URL',
+    'PAYSTACK_SECRET_KEY',
+    'PAYSTACK_URL',
+    'CLOUDINARY_API_SECRET',
+    'CLOUDINARY_NAME',
+    'CLOUDINARY_API_KEY',
     // Add all other required environment variables here
 ];
 function validateEnvVariables() {

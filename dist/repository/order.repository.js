@@ -17,12 +17,13 @@ class OrderRepository extends base_repository_1.BaseRepository {
     constructor() {
         super(infrastructure_1.OrderModel);
     }
-    create(customerId, foodItems, totalAmount, session) {
+    create(customerId, foodItems, totalAmount, orderId, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const result = new infrastructure_1.OrderModel({
                     customer_id: customerId,
                     food_items: foodItems,
+                    order_id: orderId,
                     total_amount: totalAmount,
                 });
                 return yield result.save({ session });

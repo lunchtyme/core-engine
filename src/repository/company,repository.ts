@@ -88,6 +88,7 @@ export class CompanyRepository {
       const result = await CompanyModel.findOne({ user: companyUserId }, 'spend_balance')
         .lean()
         .exec();
+
       return result?.spend_balance ? result.spend_balance.toString() : '0.00';
     } catch (error) {
       logger.error('Error fetching company spend balance from db:', { error, companyUserId });

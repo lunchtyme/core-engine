@@ -10,13 +10,14 @@ export class BillingRepository extends BaseRepository<BillingDocument> {
   }
   async create(params: SaveBillingDTO, session?: mongoose.ClientSession | null) {
     try {
-      const { user, amount, reference_code, type, email } = params;
+      const { user, amount, reference_code, type, email, status } = params;
       const result = new BillingModel({
         user,
         reference_code,
         email,
         type,
         amount: new mongoose.Types.Decimal128(amount),
+        status: status && status,
       });
 
       return await result.save({ session });

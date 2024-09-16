@@ -123,6 +123,7 @@ export interface SaveBillingDTO extends CreateBillingDTO {
   reference_code: string;
   type: BillingType;
   email: string;
+  status?: BillingStatus;
 }
 
 export interface FetchBillingsDTO extends FetchDataDTO {

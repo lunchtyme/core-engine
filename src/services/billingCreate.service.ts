@@ -1,20 +1,6 @@
-import {
-  AdminRepository,
-  BillingRepository,
-  CompanyRepository,
-  IndividualRepository,
-  UserRepository,
-} from '../repository';
+import { BillingRepository, CompanyRepository } from '../repository';
 import { SharedServices } from './shared.service';
-import {
-  BadRequestError,
-  DEFAULT_CACHE_EXPIRY_IN_SECS,
-  EMAIL_DATA,
-  Helper,
-  loadEnv,
-  logger,
-  SendEmailParams,
-} from '../utils';
+import { BadRequestError, EMAIL_DATA, Helper, loadEnv, logger, SendEmailParams } from '../utils';
 import { RedisService } from './redis.service';
 import { CreateBillingDTO, SaveBillingDTO } from './dtos/request.dto';
 import { BillingStatus, BillingType, emailQueue, PaystackRequest } from '../infrastructure';
@@ -32,10 +18,8 @@ loadEnv(process.env.NODE_ENV!);
 export class BillingCreateService {
   constructor(
     private readonly _companyRepo: CompanyRepository,
-    private readonly _individualRepo: IndividualRepository,
     private readonly _billingRepo: BillingRepository,
     private readonly _sharedService: SharedServices,
-    private readonly _redisService: RedisService,
     private readonly _emailQueue: typeof emailQueue,
     private readonly _logger: typeof logger,
   ) {}
@@ -91,10 +75,69 @@ export class BillingCreateService {
   }
 
   // System
-  async chargeWallet() {
+  async chargeCompanyWallet(
+    params: {
+      amount: string;
+      companyUserId: mongoose.Types.ObjectId;
+      email: string;
+    },
+    session?: mongoose.ClientSession | null,
+  ) {
+    const { companyUserId, email } = params;
     try {
+      // Get balance and check  if it's sufficient for order charge
+      const companyWalletBalance = await this._companyRepo.getSpendBalance(companyUserId);
+      const companyInfo = await this._companyRepo.getCompanyByUserId(companyUserId);
+      const isSufficientForCharge = parseFloat(companyWalletBalance) >= parseFloat(params.amount);
+
+      if (!isSufficientForCharge) {
+        // Send mail to company
+        const emailPayload: SendEmailParams = {
+          receiver: companyInfo?.email as string,
+          subject: EMAIL_DATA.subject.chargeFail,
+          template: EMAIL_DATA.template.chargeFail,
+          context: {
+            email: companyInfo?.email,
+            amount: params.amount,
+            name: companyInfo?.name,
+          },
+        };
+
+        this._emailQueue.add('mailer', emailPayload, {
+          delay: 2000,
+          attempts: 5,
+          removeOnComplete: true,
+        });
+
+        throw new BadRequestError(
+          'Insufficient wallet balance: the remaining balance could not cover your order request',
+        );
+      }
+
+      const amountInDecimal128 = new mongoose.Types.Decimal128(params.amount);
+      // Dedut from wallet
+      await this._companyRepo.decreaseSpendBalance(
+        {
+          companyUserId,
+          spend_balance: amountInDecimal128,
+        },
+        session,
+      );
+
+      // Create billing record
+      const reference = await this._billingRepo.generateUniqueRefCode(13); // Ensures each reference code is unique
+      const billingRecordParams: SaveBillingDTO = {
+        email,
+        user: companyUserId,
+        reference_code: reference,
+        amount: params.amount,
+        type: BillingType.ORDER_CHARGE,
+        status: BillingStatus.PAID,
+      };
+
+      return await this._billingRepo.create(billingRecordParams, session);
     } catch (error) {
-      this._logger.error('Error fetching employee lists', error);
+      this._logger.error('Error charging company wallet', { error, params });
       throw error;
     }
   }

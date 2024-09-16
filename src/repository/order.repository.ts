@@ -12,12 +12,14 @@ export class OrderRepository extends BaseRepository<OrderDocument> {
     customerId: string,
     foodItems: { food_menu: mongoose.Types.ObjectId; quantity: number }[],
     totalAmount: mongoose.Types.Decimal128,
+    orderId: string,
     session?: mongoose.ClientSession | null,
   ) {
     try {
       const result = new OrderModel({
         customer_id: customerId,
         food_items: foodItems,
+        order_id: orderId,
         total_amount: totalAmount,
       });
 

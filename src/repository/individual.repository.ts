@@ -89,9 +89,9 @@ export class IndividualRepository {
     }
   }
 
-  async getCompanyId(userId: mongoose.Types.ObjectId) {
+  async getOneByUserId(userId: mongoose.Types.ObjectId) {
     try {
-      return await IndividualModel.findById(userId).exec();
+      return await IndividualModel.findOne({ user: userId }).exec();
     } catch (error) {
       throw error;
     }

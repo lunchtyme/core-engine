@@ -32,6 +32,7 @@ const orderSchema = new Schema(
       required: true,
       default: 0.0,
     },
+    order_id: { type: String, required: true },
     status: {
       type: String,
       enum: [
@@ -63,6 +64,7 @@ interface Order {
   customer_id: mongoose.Schema.Types.ObjectId;
   food_items: OrderItem[];
   total_amount: mongoose.Types.Decimal128;
+  order_id: string;
   status: OrderStatus;
   order_date: Date;
   createdAt?: Date; // Optional, based on timestamps setting

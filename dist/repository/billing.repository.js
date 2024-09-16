@@ -24,13 +24,14 @@ class BillingRepository extends base_repository_1.BaseRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { user, amount, reference_code, type, email } = params;
+                const { user, amount, reference_code, type, email, status } = params;
                 const result = new infrastructure_1.BillingModel({
                     user,
                     reference_code,
                     email,
                     type,
                     amount: new mongoose_1.default.Types.Decimal128(amount),
+                    status: status && status,
                 });
                 return yield result.save({ session });
             }

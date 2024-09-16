@@ -13,7 +13,7 @@
 <tr id="text-snippet" class="space-t-1 space-b-1" style="Margin:0;margin-top:1rem;margin-bottom:1rem;display: block;">
   <td style="Margin:0;padding:0;">
     <p class="email-text" style="Margin:0;padding:0;color:var(--para-text-color, #616467);font-size:1rem;">
-      Welcome to Lunchtyme. We're so happy to have you join us.
+      This is to notify you that your wallet was charge<b>#{{amount}}</b>{{when}} for an order by your employee.
     </p>
   </td>
 </tr>
@@ -23,31 +23,52 @@
 <tr id="text-snippet" class="space-t-1 space-b-1" style="Margin:0;margin-top:1rem;margin-bottom:1rem;display: block;">
   <td style="Margin:0;padding:0;">
     <p class="email-text" style="Margin:0;padding:0;color:var(--para-text-color, #616467);font-size:1rem;">
-      Please use the OTP below to verify your email address:
+      Below is a breakdown of the order.
     </p>
   </td>
 </tr>
 <!-- End of text snippet -->
 
-<!-- Text snippet -->
-<tr id="text-snippet" class="space-t-1 space-b-1" style="Margin:0;margin-top:1rem;margin-bottom:1rem;display: block;">
+
+<tr id="order-items" class="space-t-1 space-b-1" style="Margin:0;margin-top:1rem;margin-bottom:1rem;display: block;">
   <td style="Margin:0;padding:0;">
-    <p class="email-text"
-      style="Margin:0;font-weight:bolder;padding:0;color:var(--para-text-color, #616467);font-size:1rem;">
-      {{OTP}}
+    <table style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th style="border: 1px solid #ccc; padding: 8px;">Item</th>
+          <th style="border: 1px solid #ccc; padding: 8px;">Qty</th>
+          <th style="border: 1px solid #ccc; padding: 8px;">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each items}}
+        <tr>
+          <td style="border: 1px solid #ccc; padding: 8px;">{{name}}</td>
+          <td style="border: 1px solid #ccc; padding: 8px;">{{quantity}}</td>
+          <td style="border: 1px solid #ccc; padding: 8px;">{{price}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </td>
+</tr>
+
+<tr id="order-total" class="space-t-1 space-b-1" style="Margin:0;margin-top:1rem;margin-bottom:1rem;display: block;">
+  <td style="Margin:0;padding:0;">
+    <p class="email-text" style="Margin:0;padding:0;color:var(--para-text-color, #616467);font-size:1rem;">
+      <b>Total:</b>{{amount}}
     </p>
   </td>
 </tr>
-<!-- End of text snippet -->
 
 <!-- Text snippet -->
 <tr id="text-snippet" class="space-t-1 space-b-1" style="Margin:0;margin-top:1rem;margin-bottom:1rem;display: block;">
   <td style="Margin:0;padding:0;">
     <p class="email-text" style="Margin:0;padding:0;color:var(--para-text-color, #616467);font-size:1rem;">
-      This OTP will expire thirty minutes after this email was sent.
-    </p>
+      Thank you for your patronage.
   </td>
 </tr>
 <!-- End of text snippet -->
+
 
 {{> footer}}

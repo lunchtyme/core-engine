@@ -24,12 +24,10 @@ const calendar_1 = __importDefault(require("dayjs/plugin/calendar"));
 dayjs_1.default.extend(calendar_1.default);
 (0, utils_1.loadEnv)(process.env.NODE_ENV);
 class BillingCreateService {
-    constructor(_companyRepo, _individualRepo, _billingRepo, _sharedService, _redisService, _emailQueue, _logger) {
+    constructor(_companyRepo, _billingRepo, _sharedService, _emailQueue, _logger) {
         this._companyRepo = _companyRepo;
-        this._individualRepo = _individualRepo;
         this._billingRepo = _billingRepo;
         this._sharedService = _sharedService;
-        this._redisService = _redisService;
         this._emailQueue = _emailQueue;
         this._logger = _logger;
     }
@@ -84,12 +82,53 @@ class BillingCreateService {
         });
     }
     // System
-    chargeWallet() {
+    chargeCompanyWallet(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
+            const { companyUserId, email } = params;
             try {
+                // Get balance and check  if it's sufficient for order charge
+                const companyWalletBalance = yield this._companyRepo.getSpendBalance(companyUserId);
+                const companyInfo = yield this._companyRepo.getCompanyByUserId(companyUserId);
+                const isSufficientForCharge = parseFloat(companyWalletBalance) >= parseFloat(params.amount);
+                if (!isSufficientForCharge) {
+                    // Send mail to company
+                    const emailPayload = {
+                        receiver: companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo.email,
+                        subject: utils_1.EMAIL_DATA.subject.chargeFail,
+                        template: utils_1.EMAIL_DATA.template.chargeFail,
+                        context: {
+                            email: companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo.email,
+                            amount: params.amount,
+                            name: companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo.name,
+                        },
+                    };
+                    this._emailQueue.add('mailer', emailPayload, {
+                        delay: 2000,
+                        attempts: 5,
+                        removeOnComplete: true,
+                    });
+                    throw new utils_1.BadRequestError('Insufficient wallet balance: the remaining balance could not cover your order request');
+                }
+                const amountInDecimal128 = new mongoose_1.default.Types.Decimal128(params.amount);
+                // Dedut from wallet
+                yield this._companyRepo.decreaseSpendBalance({
+                    companyUserId,
+                    spend_balance: amountInDecimal128,
+                }, session);
+                // Create billing record
+                const reference = yield this._billingRepo.generateUniqueRefCode(13); // Ensures each reference code is unique
+                const billingRecordParams = {
+                    email,
+                    user: companyUserId,
+                    reference_code: reference,
+                    amount: params.amount,
+                    type: infrastructure_1.BillingType.ORDER_CHARGE,
+                    status: infrastructure_1.BillingStatus.PAID,
+                };
+                return yield this._billingRepo.create(billingRecordParams, session);
             }
             catch (error) {
-                this._logger.error('Error fetching employee lists', error);
+                this._logger.error('Error charging company wallet', { error, params });
                 throw error;
             }
         });

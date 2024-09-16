@@ -101,10 +101,10 @@ class IndividualRepository {
             }
         });
     }
-    getCompanyId(userId) {
+    getOneByUserId(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield infrastructure_1.IndividualModel.findById(userId).exec();
+                return yield infrastructure_1.IndividualModel.findOne({ user: userId }).exec();
             }
             catch (error) {
                 throw error;

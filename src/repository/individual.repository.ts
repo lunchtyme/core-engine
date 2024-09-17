@@ -100,7 +100,7 @@ export class IndividualRepository {
 
   async getLunchTimeRecords() {
     try {
-      return await IndividualModel.aggregate(getEmployeesLunchTime2hoursFromNowQuery()).exec();
+      return await IndividualModel.find({}).populate('user').exec();
     } catch (error) {
       logger.error('Error fetching employee lunch times', { error });
       throw error;

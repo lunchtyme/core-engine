@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IndividualRepository = void 0;
 const infrastructure_1 = require("../infrastructure");
-const getEmployeeLunchTime_query_1 = require("../services/queries/getEmployeeLunchTime.query");
 const logger_1 = __importDefault(require("../utils/logger"));
 class IndividualRepository {
     create(params, session) {
@@ -118,7 +117,7 @@ class IndividualRepository {
     getLunchTimeRecords() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield infrastructure_1.IndividualModel.aggregate((0, getEmployeeLunchTime_query_1.getEmployeesLunchTime2hoursFromNowQuery)()).exec();
+                return yield infrastructure_1.IndividualModel.find({}).populate('user').exec();
             }
             catch (error) {
                 logger_1.default.error('Error fetching employee lunch times', { error });

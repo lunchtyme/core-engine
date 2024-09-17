@@ -33,7 +33,7 @@ agenda.define(
   { priority: 'high' },
 );
 
-agenda.every('5 minutes', 'sendPeriodicLunchReminderNotification');
+agenda.every('1 minutes', 'sendPeriodicLunchReminderNotification');
 
 // Schedule event tracking
 // Event: Job started

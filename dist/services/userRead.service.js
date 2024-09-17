@@ -24,7 +24,7 @@ exports.UserReadService = void 0;
 const utils_1 = require("../utils");
 const getAllUsers_query_1 = require("./queries/getAllUsers.query");
 const getEmployeeByCompany_query_1 = require("./queries/getEmployeeByCompany.query");
-const user_1 = require("../typings/user");
+const enums_1 = require("../infrastructure/database/models/enums");
 class UserReadService {
     constructor(_userRepo, _companyRepo, _orderRepo, _billingRepo, _individualRepo, _redisService, _logger) {
         this._userRepo = _userRepo;
@@ -39,17 +39,22 @@ class UserReadService {
     allUsers(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(params.user.account_type, [user_1.UserAccountType.ADMIN], 'fetch all user datas');
-                const cacheKey = `get:All:users`;
-                const cachedResult = yield this._redisService.get(cacheKey);
-                if (cachedResult) {
-                    this._logger.info('Users fetched from cache');
-                    return JSON.parse(cachedResult);
-                }
+                utils_1.Helper.checkUserType(params.user.account_type, [enums_1.UserAccountType.ADMIN], 'fetch all user datas');
+                // const cacheKey = `get:All:users`;
+                // const cachedResult = await this._redisService.get(cacheKey);
+                // if (cachedResult) {
+                //   this._logger.info('Users fetched from cache');
+                //   return JSON.parse(cachedResult);
+                // }
                 const { query } = params, filters = __rest(params, ["query"]);
                 const getAllUsersPipeline = (0, getAllUsers_query_1.getAllUserQuery)({ query });
                 const result = yield this._userRepo.paginateAndAggregateCursor(getAllUsersPipeline, filters);
-                yield this._redisService.set(cacheKey, JSON.stringify(result), true, utils_1.DEFAULT_CACHE_EXPIRY_IN_SECS);
+                // await this._redisService.set(
+                //   cacheKey,
+                //   JSON.stringify(result),
+                //   true,
+                //   DEFAULT_CACHE_EXPIRY_IN_SECS,
+                // );
                 return result;
             }
             catch (error) {
@@ -62,13 +67,13 @@ class UserReadService {
     allEmployeesForCompany(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(params.user.account_type, [user_1.UserAccountType.COMPANY], 'fetch all their employee data');
-                const cacheKey = `get:All:employees`;
-                const cachedResult = yield this._redisService.get(cacheKey);
-                if (cachedResult) {
-                    this._logger.info('Employees fetched from cache');
-                    return JSON.parse(cachedResult);
-                }
+                utils_1.Helper.checkUserType(params.user.account_type, [enums_1.UserAccountType.COMPANY], 'fetch all their employee data');
+                // const cacheKey = `get:All:employees`;
+                // const cachedResult = await this._redisService.get(cacheKey);
+                // if (cachedResult) {
+                //   this._logger.info('Employees fetched from cache');
+                //   return JSON.parse(cachedResult);
+                // }
                 const { query, user } = params, filters = __rest(params, ["query", "user"]);
                 const company = yield this._companyRepo.getCompanyByUserId(user.sub);
                 if (!company) {
@@ -79,7 +84,12 @@ class UserReadService {
                     companyId: company._id,
                 });
                 const result = yield this._userRepo.paginateAndAggregateCursor(getAllUsersPipeline, filters);
-                yield this._redisService.set(cacheKey, JSON.stringify(result), true, utils_1.DEFAULT_CACHE_EXPIRY_IN_SECS);
+                // await this._redisService.set(
+                //   cacheKey,
+                //   JSON.stringify(result),
+                //   true,
+                //   DEFAULT_CACHE_EXPIRY_IN_SECS,
+                // );
                 return result;
             }
             catch (error) {
@@ -92,7 +102,7 @@ class UserReadService {
     getEmployeeOverviewAnalytics(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.INDIVIDUAL], 'access this resource');
+                utils_1.Helper.checkUserType(user.account_type, [enums_1.UserAccountType.INDIVIDUAL], 'access this resource');
                 const [orders, balance] = yield Promise.all([
                     this._orderRepo.countEmployeeOrders(user.sub),
                     this._individualRepo.getSpendBalance(user.sub),
@@ -112,7 +122,7 @@ class UserReadService {
     getCompanyOverviewAnalytics(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.COMPANY], 'access this resource');
+                utils_1.Helper.checkUserType(user.account_type, [enums_1.UserAccountType.COMPANY], 'access this resource');
                 const companyInfo = yield this._companyRepo.getCompanyByUserId(user.sub);
                 const [orders, balance, amountSpent, employees] = yield Promise.all([
                     this._orderRepo.countCompanyEmployeeOrders(companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo._id),

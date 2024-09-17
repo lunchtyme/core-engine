@@ -15,11 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Helper = void 0;
 const tldts_1 = require("tldts"); // Importing a library for accurate domain extraction
 const crypto_1 = __importDefault(require("crypto"));
-const user_1 = require("../typings/user");
 const errors_1 = require("./errors");
-const logger_1 = require("./logger");
 const cloudinary_1 = require("cloudinary");
 const loadEnv_1 = require("./loadEnv");
+const enums_1 = require("../infrastructure/database/models/enums");
+const logger_1 = __importDefault(require("./logger"));
 (0, loadEnv_1.loadEnv)(process.env.NODE_ENV);
 cloudinary_1.v2.config({
     secure: true,
@@ -78,7 +78,7 @@ class Helper {
         const list = data.list.map((user) => {
             var _a, _b, _c;
             // Determine the name based on the account type
-            const name = user.account_type === user_1.UserAccountType.COMPANY
+            const name = user.account_type === enums_1.UserAccountType.COMPANY
                 ? (_a = user.account_details.name) !== null && _a !== void 0 ? _a : ''
                 : `${(_b = user.account_details.first_name) !== null && _b !== void 0 ? _b : ''} ${(_c = user.account_details.last_name) !== null && _c !== void 0 ? _c : ''}`.trim();
             // Construct the unified user object
@@ -102,7 +102,7 @@ class Helper {
                 return result.secure_url;
             }
             catch (error) {
-                logger_1.logger.error('Error uploading image to cloudinary', { error });
+                logger_1.default.error('Error uploading image to cloudinary', { error });
                 throw error;
             }
         });

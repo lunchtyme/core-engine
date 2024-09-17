@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { Helper, logger } from '../utils';
+import { Helper } from '../utils';
 import { CreateBillingDTO, FetchBillingsDTO } from '../services/dtos/request.dto';
-import { AuthUserClaim } from '../typings/user';
+
 import { billingCreateService, billingReadService } from '../services';
+import { AuthUserClaim } from '../typings/user';
+import logger from '../utils/logger';
 
 export const topUpWalletBalanceController = async (
   req: Request,
@@ -27,10 +29,10 @@ export const processPaystackWebhookController = async (req: Request, res: Respon
       body: req.body,
       signature: req.headers['x-paystack-signature'] as string,
     });
-    return res.send(200);
+    return res.sendStatus(200);
   } catch (error) {
     logger.error('Error processing webhook event', { error });
-    return res.send(500);
+    return res.sendStatus(500);
   }
 };
 

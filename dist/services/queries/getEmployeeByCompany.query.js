@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getEmployeeAccountsByCompany = void 0;
-const user_1 = require("../../typings/user");
+const enums_1 = require("../../infrastructure/database/models/enums");
 const getEmployeeAccountsByCompany = (filter) => {
     const { query, companyId } = filter;
     const aggregationPipeline = [];
     // Match users with account_type as Individual
     aggregationPipeline.push({
-        $match: { account_type: user_1.UserAccountType.INDIVIDUAL },
+        $match: { account_type: enums_1.UserAccountType.INDIVIDUAL },
     });
     // If there's a text query, match and sort by textScore
     if (query) {

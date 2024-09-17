@@ -5,8 +5,10 @@ import {
   UserRepository,
 } from '../repository';
 import { SharedServices } from './shared.service';
-import { DEFAULT_CACHE_EXPIRY_IN_SECS, logger } from '../utils';
+import { DEFAULT_CACHE_EXPIRY_IN_SECS } from '../utils';
 import { RedisService } from './redis.service';
+import logger from '../utils/logger';
+import { UserAccountType } from '../infrastructure';
 
 export class AuthReadservice {
   constructor(
@@ -27,8 +29,18 @@ export class AuthReadservice {
       if (cacheLookupResult) {
         return JSON.parse(cacheLookupResult);
       }
-      const user = await this._userRepo.getUser({ identifier: 'id', value: user_id });
+      const user: any = await this._userRepo.getUserWithDetails({
+        identifier: 'id',
+        value: user_id,
+      });
+      const name =
+        user?.account_type === UserAccountType.COMPANY
+          ? user?.account_details?.name ?? ''
+          : `${user?.account_details?.first_name ?? ''} ${
+              user?.account_details?.last_name ?? ''
+            }`.trim();
       const hydratedUser = {
+        name,
         id: user?._id,
         account_type: user?.account_type,
         account_state: user?.account_state,

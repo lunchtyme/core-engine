@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvitationReadService = void 0;
 const utils_1 = require("../utils");
-const user_1 = require("../typings/user");
+const infrastructure_1 = require("../infrastructure");
 class InvitationReadService {
     constructor(_invitationRepo, _sharedService, _redisService, _logger) {
         this._invitationRepo = _invitationRepo;
@@ -29,14 +29,14 @@ class InvitationReadService {
                     value: user,
                 });
                 // RBAC check
-                utils_1.Helper.checkUserType(userDetails.account_type, [user_1.UserAccountType.COMPANY], 'view their sent invitations');
-                const cacheKey = `my:${user}:invitations`;
-                const cacheResults = yield this._redisService.get(cacheKey);
-                if (cacheResults) {
-                    return JSON.parse(cacheResults);
-                }
+                utils_1.Helper.checkUserType(userDetails.account_type, [infrastructure_1.UserAccountType.COMPANY], 'view their sent invitations');
+                // const cacheKey = `my:${user}:invitations`;
+                // const cacheResults = await this._redisService.get(cacheKey);
+                // if (cacheResults) {
+                //   return JSON.parse(cacheResults);
+                // }
                 const results = yield this._invitationRepo.fetchMyInvitations(user);
-                yield this._redisService.set(cacheKey, JSON.stringify(results), true, 600);
+                // await this._redisService.set(cacheKey, JSON.stringify(results), true, 600);
                 return results;
             }
             catch (error) {
@@ -54,7 +54,7 @@ class InvitationReadService {
                     value: user,
                 });
                 // RBAC check
-                utils_1.Helper.checkUserType(userDetails.account_type, [user_1.UserAccountType.ADMIN], 'view all sent invitations');
+                utils_1.Helper.checkUserType(userDetails.account_type, [infrastructure_1.UserAccountType.ADMIN], 'view all sent invitations');
                 const cacheKey = `all:invitations`;
                 const cacheResults = yield this._redisService.get(cacheKey);
                 if (cacheResults) {

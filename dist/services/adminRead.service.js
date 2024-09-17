@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminReadService = void 0;
+const enums_1 = require("../infrastructure/database/models/enums");
 const utils_1 = require("../utils");
-const user_1 = require("../typings/user");
 class AdminReadService {
     constructor(_userRepo, _orderRepo, _logger) {
         this._userRepo = _userRepo;
@@ -21,7 +21,7 @@ class AdminReadService {
     getOverviewAnalytics(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.ADMIN], 'access this resource');
+                utils_1.Helper.checkUserType(user.account_type, [enums_1.UserAccountType.ADMIN], 'access this resource');
                 const [users, orders, employees, companies] = yield Promise.all([
                     this._userRepo.getAllUserCount(),
                     this._orderRepo.getAllOrderCount(),

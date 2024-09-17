@@ -1,14 +1,8 @@
-import { emailQueue } from '../infrastructure';
+import { emailQueue, UserAccountType } from '../infrastructure';
 import { InvitationRepository } from '../repository';
-import { UserAccountType } from '../typings/user';
-import {
-  BadRequestError,
-  CLIENT_BASE_URL,
-  EMAIL_DATA,
-  Helper,
-  logger,
-  SendEmailParams,
-} from '../utils';
+
+import { BadRequestError, CLIENT_BASE_URL, EMAIL_DATA, Helper, SendEmailParams } from '../utils';
+import logger from '../utils/logger';
 import { CreateInvitationDTO } from './dtos/request.dto';
 import { CreateInvitationDTOValidator } from './dtos/validators';
 import { SharedServices } from './shared.service';

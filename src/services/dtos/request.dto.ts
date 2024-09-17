@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
-import { AuthUserClaim, UserAccountType } from '../../typings/user';
 import { BillingStatus, BillingType, FoodCategory } from '../../infrastructure';
+import { UserAccountType } from '../../infrastructure/database/models/enums';
+import { AuthUserClaim } from '../../typings/user';
 
 export interface CreateAccountDTO {
   email: string;
@@ -91,7 +92,7 @@ export interface AddFoodToMenuDTO {
   description: string;
   price: string;
   categories: FoodCategory[];
-  user: AuthUserClaim;
+  user: AuthUserClaim | mongoose.Types.ObjectId;
   food_image: Express.Multer.File | string;
 }
 
@@ -104,6 +105,7 @@ export interface FetchFoodMenuDTO extends FetchDataDTO {
   category?: FoodCategory;
   lastScore?: number;
   lastId?: string;
+  user: AuthUserClaim;
 }
 
 export interface FetchUsersDTO extends FetchDataDTO {

@@ -8,10 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CompanyRepository = void 0;
 const infrastructure_1 = require("../infrastructure");
-const utils_1 = require("../utils");
+const logger_1 = __importDefault(require("../utils/logger"));
 class CompanyRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -20,7 +23,7 @@ class CompanyRepository {
                 return yield result.save({ session });
             }
             catch (error) {
-                utils_1.logger.error('Error storing company to db:', error);
+                logger_1.default.error('Error storing company to db:', error);
                 throw error;
             }
         });
@@ -37,7 +40,7 @@ class CompanyRepository {
                 return result.acknowledged;
             }
             catch (error) {
-                utils_1.logger.error('Error updating company user in db:', error);
+                logger_1.default.error('Error updating company user in db:', error);
                 throw error;
             }
         });
@@ -75,7 +78,7 @@ class CompanyRepository {
                 return result.acknowledged;
             }
             catch (error) {
-                utils_1.logger.error('Error incrementing company spend balance in db:', { error, params });
+                logger_1.default.error('Error incrementing company spend balance in db:', { error, params });
                 throw error;
             }
         });
@@ -93,7 +96,7 @@ class CompanyRepository {
                 return result.acknowledged;
             }
             catch (error) {
-                utils_1.logger.error('Error decreasing company spend balance in db:', { error, params });
+                logger_1.default.error('Error decreasing company spend balance in db:', { error, params });
                 throw error;
             }
         });
@@ -107,7 +110,7 @@ class CompanyRepository {
                 return (result === null || result === void 0 ? void 0 : result.spend_balance) ? result.spend_balance.toString() : '0.00';
             }
             catch (error) {
-                utils_1.logger.error('Error fetching company spend balance from db:', { error, companyUserId });
+                logger_1.default.error('Error fetching company spend balance from db:', { error, companyUserId });
                 throw error;
             }
         });

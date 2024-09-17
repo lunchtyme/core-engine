@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { CreateCompanyAccountDTO } from '../services/dtos/request.dto';
 import { CompanyModel } from '../infrastructure';
-import { logger } from '../utils';
+import logger from '../utils/logger';
 
 export class CompanyRepository {
   async create(params: CreateCompanyAccountDTO, session?: mongoose.ClientSession | null) {

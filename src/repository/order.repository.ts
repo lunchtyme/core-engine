@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { IndividualModel, OrderDocument, OrderModel, OrderStatus } from '../infrastructure';
 import { BaseRepository } from './base.repository';
-import { logger } from '../utils';
+import logger from '../utils/logger';
 
 export class OrderRepository extends BaseRepository<OrderDocument> {
   constructor() {

@@ -12,7 +12,6 @@ const morgan_1 = __importDefault(require("morgan"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const routers_1 = require("./routers");
-const analytics_router_1 = require("./routers/analytics.router");
 (0, index_1.validateEnvVariables)();
 (0, index_1.loadEnv)(process.env.NODE_ENV);
 const SERVER = (0, express_1.default)();
@@ -23,6 +22,8 @@ SERVER.use((0, morgan_1.default)('dev'));
 SERVER.use((0, cors_1.default)({}));
 // Connect database
 infrastructure_1.DB.connect();
+// Start scheduler
+// agenda.start();
 // Swagger
 const swaggerOptions = {
     definition: {
@@ -50,21 +51,16 @@ const swaggerOptions = {
     apis: ['./src/routers/*.ts'],
 };
 const swaggerSpec = (0, swagger_jsdoc_1.default)(swaggerOptions);
-// API Docs
 SERVER.use('/docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
-// Auth Routes
 SERVER.use('/auth', routers_1.authRouter);
-// Invitation Routes
 SERVER.use('/invitations', routers_1.invitationRouter);
 SERVER.use('/food-menu', routers_1.foodMenuRouter);
 SERVER.use('/users', routers_1.userRouter);
 SERVER.use('/billings', routers_1.billingRouter);
-SERVER.use('/analytics', analytics_router_1.analyticsRouter);
+SERVER.use('/analytics', routers_1.analyticsRouter);
 SERVER.use('/orders', routers_1.orderRouter);
-// Global error interceptor
-SERVER.use(index_2.globalErrorMiddleware);
-// Not found route handler
 SERVER.use(index_2.notFoundMiddleware);
+SERVER.use(index_2.globalErrorMiddleware);
 SERVER.listen(PORT, () => {
     console.log(`API server listening for requests on port: ${PORT}`);
 });

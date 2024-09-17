@@ -21,9 +21,9 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderReadService = void 0;
-const user_1 = require("../typings/user");
 const utils_1 = require("../utils");
 const getOrderHistory_query_1 = require("./queries/getOrderHistory.query");
+const enums_1 = require("../infrastructure/database/models/enums");
 class OrderReadService {
     constructor(_orderRepo, _logger) {
         this._orderRepo = _orderRepo;
@@ -33,8 +33,8 @@ class OrderReadService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { user } = params, filters = __rest(params, ["user"]);
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.INDIVIDUAL, user_1.UserAccountType.ADMIN], 'fetch order history');
-                let getBillingQuery = user.account_type === user_1.UserAccountType.INDIVIDUAL
+                utils_1.Helper.checkUserType(user.account_type, [enums_1.UserAccountType.INDIVIDUAL, enums_1.UserAccountType.ADMIN], 'fetch order history');
+                let getBillingQuery = user.account_type === enums_1.UserAccountType.INDIVIDUAL
                     ? (0, getOrderHistory_query_1.getOrderHistoryQuery)({
                         employeeId: user.sub,
                     })

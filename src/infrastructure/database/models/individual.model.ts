@@ -37,5 +37,6 @@ individualSchema.index(
   { email: 'text', first_name: 'text', last_name: 'text' },
   { background: true },
 );
+individualSchema.index({ lunch_time: 1 }, { background: true });
 
 export const IndividualModel = mongoose.model('Individual', individualSchema);

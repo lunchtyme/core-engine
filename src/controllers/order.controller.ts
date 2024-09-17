@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { Helper } from '../utils';
-import { AuthUserClaim } from '../typings/user';
+
 import { CreateOrderDTO, FetchOrderssDTO, orderCreateService, orderReadService } from '../services';
+import { AuthUserClaim } from '../typings/user';
 
 export const createOrderController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -42,6 +43,7 @@ export const updateOrderStatusController = async (
     const result = await orderCreateService.updateOrderStatus({
       newStatus: req.body.newStatus,
       orderId: req.body.orderId,
+      user: req.user as AuthUserClaim,
     });
     Helper.formatAPIResponse(res, 'Order status updated', result);
   } catch (error) {

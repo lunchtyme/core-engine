@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 import { InvitationRepository } from '../repository';
-import { Helper, logger } from '../utils';
+import { Helper } from '../utils';
 import { RedisService } from './redis.service';
 import { SharedServices } from './shared.service';
-import { UserAccountType } from '../typings/user';
+import { UserAccountType } from '../infrastructure';
+import logger from '../utils/logger';
 
 export class InvitationReadService {
   constructor(
@@ -27,13 +28,13 @@ export class InvitationReadService {
         [UserAccountType.COMPANY],
         'view their sent invitations',
       );
-      const cacheKey = `my:${user}:invitations`;
-      const cacheResults = await this._redisService.get(cacheKey);
-      if (cacheResults) {
-        return JSON.parse(cacheResults);
-      }
+      // const cacheKey = `my:${user}:invitations`;
+      // const cacheResults = await this._redisService.get(cacheKey);
+      // if (cacheResults) {
+      //   return JSON.parse(cacheResults);
+      // }
       const results = await this._invitationRepo.fetchMyInvitations(user);
-      await this._redisService.set(cacheKey, JSON.stringify(results), true, 600);
+      // await this._redisService.set(cacheKey, JSON.stringify(results), true, 600);
       return results;
     } catch (error) {
       this._logger.error('Failed to fetch invitations', error);

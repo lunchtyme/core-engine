@@ -8,11 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderRepository = void 0;
 const infrastructure_1 = require("../infrastructure");
 const base_repository_1 = require("./base.repository");
-const utils_1 = require("../utils");
+const logger_1 = __importDefault(require("../utils/logger"));
 class OrderRepository extends base_repository_1.BaseRepository {
     constructor() {
         super(infrastructure_1.OrderModel);
@@ -75,11 +78,11 @@ class OrderRepository extends base_repository_1.BaseRepository {
                 if (!order) {
                     throw new Error('Order not found');
                 }
-                utils_1.logger.info('Order status updated successfully');
+                logger_1.default.info('Order status updated successfully');
                 return order;
             }
             catch (error) {
-                utils_1.logger.error('Error updating order status availability', { error, orderId });
+                logger_1.default.error('Error updating order status availability', { error, orderId });
                 throw error;
             }
         });

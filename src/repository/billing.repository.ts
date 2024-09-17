@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { BillingDocument, BillingModel, BillingStatus, IndividualModel } from '../infrastructure';
-import { Helper, logger } from '../utils';
+import { Helper } from '../utils';
 import { BaseRepository } from './base.repository';
 import { SaveBillingDTO } from '../services';
+import logger from '../utils/logger';
 
 export class BillingRepository extends BaseRepository<BillingDocument> {
   constructor() {

@@ -47,6 +47,7 @@ const updateOrderStatusController = (req, res, next) => __awaiter(void 0, void 0
         const result = yield services_1.orderCreateService.updateOrderStatus({
             newStatus: req.body.newStatus,
             orderId: req.body.orderId,
+            user: req.user,
         });
         utils_1.Helper.formatAPIResponse(res, 'Order status updated', result);
     }

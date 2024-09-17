@@ -1,4 +1,4 @@
-import { UserAccountType } from '../../typings/user';
+import { UserAccountType } from '../../infrastructure';
 
 export const getAllUserQuery = (filter: { query?: string }) => {
   const { query } = filter;

@@ -17,6 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
 const base_repository_1 = require("./base.repository");
+const logger_1 = __importDefault(require("../utils/logger"));
 class FoodMenuRepository extends base_repository_1.BaseRepository {
     constructor() {
         super(infrastructure_1.FoodMenuModel);
@@ -36,7 +37,7 @@ class FoodMenuRepository extends base_repository_1.BaseRepository {
                 return yield result.save({ session });
             }
             catch (error) {
-                utils_1.logger.error('Error saving food menu:', error);
+                logger_1.default.error('Error saving food menu:', error);
                 throw error;
             }
         });
@@ -48,11 +49,11 @@ class FoodMenuRepository extends base_repository_1.BaseRepository {
                 if (!foodItem) {
                     throw new utils_1.NotFoundError('Food item not found');
                 }
-                utils_1.logger.info('Food availability updated successfully');
+                logger_1.default.info('Food availability updated successfully');
                 return foodItem;
             }
             catch (error) {
-                utils_1.logger.error('Error updating food menu availability', { error, foodMenuId });
+                logger_1.default.error('Error updating food menu availability', { error, foodMenuId });
                 throw error;
             }
         });

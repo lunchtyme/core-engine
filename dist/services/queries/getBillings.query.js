@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBillingHistoryQuery = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const getBillingHistoryQuery = (filter) => {
     const { companyUserId } = filter;
     const aggregationPipeline = [];
@@ -23,7 +27,7 @@ const getBillingHistoryQuery = (filter) => {
     if (companyUserId) {
         aggregationPipeline.push({
             $match: {
-                user: companyUserId, // Match the user field directly in Billing model
+                user: new mongoose_1.default.Types.ObjectId(companyUserId), // Match the user field directly in Billing model
             },
         });
     }

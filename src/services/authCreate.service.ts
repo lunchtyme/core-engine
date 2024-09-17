@@ -8,7 +8,6 @@ import {
   InvitationRepository,
   UserRepository,
 } from '../repository';
-import { UserAccountType } from '../typings/user';
 import {
   CompanyOnboardingDTO,
   ConfirmEmailDTO,
@@ -25,14 +24,7 @@ import {
 import { SharedServices } from './shared.service';
 import { hash, verify } from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import {
-  BadRequestError,
-  EMAIL_DATA,
-  Helper,
-  logger,
-  NotFoundError,
-  SendEmailParams,
-} from '../utils';
+import { BadRequestError, EMAIL_DATA, Helper, NotFoundError, SendEmailParams } from '../utils';
 import { RedisService } from './redis.service';
 import {
   companyOnboardingDTOValidator,
@@ -47,6 +39,8 @@ import {
   resendEmailVerificationCodeDTOValidator,
 } from './dtos/validators';
 import { emailQueue, InvitationStatus } from '../infrastructure';
+import { UserAccountType } from '../infrastructure/database/models/enums';
+import logger from '../utils/logger';
 
 export class AuthCreateservice {
   constructor(
@@ -281,14 +275,22 @@ export class AuthCreateservice {
       }
       // TODO: Probably check if user has verified their email and provide follow up flow
       // ...any other required business logic
-      const jwtClaim = { sub: user._id, account_type: user.account_type };
+      const jwtClaim = {
+        sub: user._id,
+        account_type: user.account_type,
+        onboarded: user.has_completed_onboarding,
+      };
       const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN!,
       });
       this._logger.info('User login successful', user._id);
-      return { accessTokenHash, onboarded: user.has_completed_onboarding };
+      return {
+        accessTokenHash,
+        onboarded: user.has_completed_onboarding,
+        account_type: user.account_type,
+      };
     } catch (error) {
-      this._logger.error('Error logging user in', error);
+      this._logger.error('Error logging user in', { error });
       throw error;
     }
   }

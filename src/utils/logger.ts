@@ -1,9 +1,9 @@
 import winston from 'winston';
 
-export const logger = winston.createLogger({
+const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
+  defaultMeta: { service: 'lunchtyme-API' },
   transports: [
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
     new winston.transports.File({ filename: 'combined.log' }),
@@ -17,3 +17,4 @@ if (process.env.NODE_ENV !== 'production') {
     }),
   );
 }
+export default logger;

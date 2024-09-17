@@ -1,6 +1,6 @@
 import Joi from 'joi';
-import { UserAccountType } from '../../../typings/user';
-import { FoodCategory } from '../../../infrastructure';
+
+import { FoodCategory, UserAccountType } from '../../../infrastructure';
 
 export const createAccountDTOValidator = Joi.object({
   email: Joi.string()

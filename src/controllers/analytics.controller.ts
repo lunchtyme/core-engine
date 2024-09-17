@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { Helper } from '../utils';
-import { AuthUserClaim } from '../typings/user';
+
 import { adminReadService, userReadService } from '../services';
+import { AuthUserClaim } from '../typings/user';
 
 export const adminAnalyticsController = async (req: Request, res: Response, next: NextFunction) => {
   try {

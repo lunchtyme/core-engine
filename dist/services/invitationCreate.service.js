@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InvitationCreateService = void 0;
-const user_1 = require("../typings/user");
+const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
 const validators_1 = require("./dtos/validators");
 class InvitationCreateService {
@@ -34,7 +34,7 @@ class InvitationCreateService {
                     this._invitationRepo.validInvitationExists({ employee_work_email, user }),
                 ]);
                 // RBAC check
-                utils_1.Helper.checkUserType(company.account_type, [user_1.UserAccountType.COMPANY], 'send employee invitations');
+                utils_1.Helper.checkUserType(company.account_type, [infrastructure_1.UserAccountType.COMPANY], 'send employee invitations');
                 if (validInvitationExists) {
                     throw new utils_1.BadRequestError("You've have a pending invitation for this employee set already");
                 }

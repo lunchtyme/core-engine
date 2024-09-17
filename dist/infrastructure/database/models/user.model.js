@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const user_1 = require("../../../typings/user");
+const enums_1 = require("./enums");
 const userSchema = new mongoose_1.Schema({
     email: {
         type: String,
@@ -38,7 +38,7 @@ const userSchema = new mongoose_1.Schema({
     },
     account_type: {
         type: String,
-        enum: [user_1.UserAccountType.ADMIN, user_1.UserAccountType.COMPANY, user_1.UserAccountType.INDIVIDUAL],
+        enum: [enums_1.UserAccountType.ADMIN, enums_1.UserAccountType.COMPANY, enums_1.UserAccountType.INDIVIDUAL],
         required: true,
     },
     account_ref: {
@@ -56,12 +56,12 @@ const userSchema = new mongoose_1.Schema({
     account_state: {
         type: String,
         enum: [
-            user_1.UserAccountState.ACTIVE,
-            user_1.UserAccountState.LOCKED,
-            user_1.UserAccountState.INACTIVE,
-            user_1.UserAccountState.SUSPENDED,
+            enums_1.UserAccountState.ACTIVE,
+            enums_1.UserAccountState.LOCKED,
+            enums_1.UserAccountState.INACTIVE,
+            enums_1.UserAccountState.SUSPENDED,
         ],
-        default: user_1.UserAccountState.ACTIVE,
+        default: enums_1.UserAccountState.ACTIVE,
         required: true,
     },
     dial_code: {
@@ -85,6 +85,9 @@ const userSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 userSchema.index({ email: 1, account_ref: 1, account_state: 1, account_type: 1 }, { background: true });
+userSchema.index({
+    time_zone: 1,
+}, { background: true });
 userSchema.virtual('account_details', {
     ref: (doc) => doc.account_type,
     localField: 'account_ref',

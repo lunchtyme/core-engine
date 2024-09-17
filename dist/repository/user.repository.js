@@ -14,10 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRepository = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const utils_1 = require("../utils");
 const base_repository_1 = require("./base.repository");
 const infrastructure_1 = require("../infrastructure");
-const user_1 = require("../typings/user");
+const enums_1 = require("../infrastructure/database/models/enums");
+const logger_1 = __importDefault(require("../utils/logger"));
 class UserRepository extends base_repository_1.BaseRepository {
     constructor() {
         super(infrastructure_1.UserModel);
@@ -29,7 +29,7 @@ class UserRepository extends base_repository_1.BaseRepository {
                 return yield result.save({ session });
             }
             catch (error) {
-                utils_1.logger.error('Error storing user to db:', error);
+                logger_1.default.error('Error storing user to db:', error);
                 throw error;
             }
         });
@@ -52,7 +52,7 @@ class UserRepository extends base_repository_1.BaseRepository {
                 return yield infrastructure_1.UserModel.findOne(getUserFilterOptions).exec();
             }
             catch (error) {
-                utils_1.logger.error('Error getting user data from db:', error);
+                logger_1.default.error('Error getting user data from db:', error);
                 throw error;
             }
         });
@@ -78,7 +78,7 @@ class UserRepository extends base_repository_1.BaseRepository {
                     .exec();
             }
             catch (error) {
-                utils_1.logger.error('Error getting user data from db:', error);
+                logger_1.default.error('Error getting user data from db:', error);
                 throw error;
             }
         });
@@ -98,7 +98,7 @@ class UserRepository extends base_repository_1.BaseRepository {
                 return !!user;
             }
             catch (error) {
-                utils_1.logger.error('Error checking user exist from db:', error);
+                logger_1.default.error('Error checking user exist from db:', error);
                 throw error;
             }
         });
@@ -108,7 +108,7 @@ class UserRepository extends base_repository_1.BaseRepository {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 return yield infrastructure_1.UserModel.countDocuments({
-                    account_type: { $ne: user_1.UserAccountType.ADMIN },
+                    account_type: { $ne: enums_1.UserAccountType.ADMIN },
                 }).exec();
             }
             catch (error) {
@@ -120,7 +120,7 @@ class UserRepository extends base_repository_1.BaseRepository {
     getAllEmployeeCount() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield infrastructure_1.UserModel.countDocuments({ account_type: user_1.UserAccountType.INDIVIDUAL }).exec();
+                return yield infrastructure_1.UserModel.countDocuments({ account_type: enums_1.UserAccountType.INDIVIDUAL }).exec();
             }
             catch (error) {
                 throw error;
@@ -131,7 +131,7 @@ class UserRepository extends base_repository_1.BaseRepository {
     getAllCompanyCount() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield infrastructure_1.UserModel.countDocuments({ account_type: user_1.UserAccountType.COMPANY }).exec();
+                return yield infrastructure_1.UserModel.countDocuments({ account_type: enums_1.UserAccountType.COMPANY }).exec();
             }
             catch (error) {
                 throw error;

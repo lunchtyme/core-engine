@@ -1,10 +1,10 @@
-import { JwtPayload } from 'jsonwebtoken';
-import { AuthUserClaim } from './user';
-
+// custom-express.d.ts
 declare global {
   namespace Express {
-    export interface Request {
-      user?: AuthUserClaim | string | JwtPayload;
+    interface Request {
+      user?: AuthUserClaim | string; // Remove JwtPayload if not needed globally
     }
   }
 }
+
+export {};

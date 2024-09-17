@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthReadservice = void 0;
 const utils_1 = require("../utils");
+const infrastructure_1 = require("../infrastructure");
 class AuthReadservice {
     constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _sharedService, _redisService, _logger) {
         this._userRepo = _userRepo;
@@ -23,6 +24,7 @@ class AuthReadservice {
     }
     me(user_id) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c, _d, _e, _f;
             try {
                 //check cache for data
                 const meCacheKey = `me:${user_id}`;
@@ -30,8 +32,15 @@ class AuthReadservice {
                 if (cacheLookupResult) {
                     return JSON.parse(cacheLookupResult);
                 }
-                const user = yield this._userRepo.getUser({ identifier: 'id', value: user_id });
+                const user = yield this._userRepo.getUserWithDetails({
+                    identifier: 'id',
+                    value: user_id,
+                });
+                const name = (user === null || user === void 0 ? void 0 : user.account_type) === infrastructure_1.UserAccountType.COMPANY
+                    ? (_b = (_a = user === null || user === void 0 ? void 0 : user.account_details) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : ''
+                    : `${(_d = (_c = user === null || user === void 0 ? void 0 : user.account_details) === null || _c === void 0 ? void 0 : _c.first_name) !== null && _d !== void 0 ? _d : ''} ${(_f = (_e = user === null || user === void 0 ? void 0 : user.account_details) === null || _e === void 0 ? void 0 : _e.last_name) !== null && _f !== void 0 ? _f : ''}`.trim();
                 const hydratedUser = {
+                    name,
                     id: user === null || user === void 0 ? void 0 : user._id,
                     account_type: user === null || user === void 0 ? void 0 : user.account_type,
                     account_state: user === null || user === void 0 ? void 0 : user.account_state,

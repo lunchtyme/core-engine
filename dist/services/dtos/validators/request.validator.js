@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
-const user_1 = require("../../../typings/user");
 const infrastructure_1 = require("../../../infrastructure");
 exports.createAccountDTOValidator = joi_1.default.object({
     email: joi_1.default.string()
@@ -31,11 +30,11 @@ exports.createAccountDTOValidator = joi_1.default.object({
         'string.pattern.base': 'Provide a valid and secure password characters',
     }),
     account_type: joi_1.default.string()
-        .valid(...Object.values(user_1.UserAccountType)) // Ensures the string matches one of the enum values
+        .valid(...Object.values(infrastructure_1.UserAccountType)) // Ensures the string matches one of the enum values
         .required()
         .messages({
         'any.required': 'Account type is required',
-        'any.only': `Account type must be one of the following: ${Object.values(user_1.UserAccountType).join(', ')}`,
+        'any.only': `Account type must be one of the following: ${Object.values(infrastructure_1.UserAccountType).join(', ')}`,
     }),
     dial_code: joi_1.default.string()
         .pattern(/^\+\d+$/)

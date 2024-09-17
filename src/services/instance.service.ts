@@ -10,7 +10,7 @@ import {
   OrderRepository,
   UserRepository,
 } from '../repository';
-import { logger } from '../utils';
+import logger from '../utils/logger';
 import { AdminReadService } from './adminRead.service';
 import { AuthCreateservice } from './authCreate.service';
 import { AuthReadservice } from './authRead.service';
@@ -38,7 +38,12 @@ const billingRepository = new BillingRepository();
 const orderRepository = new OrderRepository();
 
 // Shared services instance
-export const sharedServices = new SharedServices(userRepository);
+export const sharedServices = new SharedServices(
+  userRepository,
+  individualRepository,
+  emailQueue,
+  logger,
+);
 
 // Redis service instance
 export const redisService = new RedisService(redisCache);

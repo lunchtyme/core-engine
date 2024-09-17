@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BillingCreateService = void 0;
 const utils_1 = require("../utils");
 const infrastructure_1 = require("../infrastructure");
-const user_1 = require("../typings/user");
 const dtos_1 = require("./dtos");
 const node_crypto_1 = __importDefault(require("node:crypto"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -35,14 +34,14 @@ class BillingCreateService {
     topupWalletBalance(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { amount, user } = params;
+                const { sub, account_type } = user;
+                utils_1.Helper.checkUserType(account_type, [infrastructure_1.UserAccountType.COMPANY], 'topup their wallet balance');
                 const { error } = dtos_1.CreateBillingDTOValidator.validate(params);
                 if (error) {
                     this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
-                const { amount, user } = params;
-                const { sub, account_type } = user;
-                utils_1.Helper.checkUserType(account_type, [user_1.UserAccountType.COMPANY], 'topup their wallet balance');
                 const userData = yield this._sharedService.getUserWithDetails({
                     identifier: 'id',
                     value: sub,

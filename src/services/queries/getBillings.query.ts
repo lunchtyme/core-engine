@@ -25,7 +25,7 @@ export const getBillingHistoryQuery = (filter: { companyUserId?: mongoose.Types.
   if (companyUserId) {
     aggregationPipeline.push({
       $match: {
-        user: companyUserId, // Match the user field directly in Billing model
+        user: new mongoose.Types.ObjectId(companyUserId), // Match the user field directly in Billing model
       },
     });
   }

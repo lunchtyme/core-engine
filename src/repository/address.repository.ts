@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { CreateAddressDTO } from '../services/dtos/request.dto';
-import { logger } from '../utils';
 import { AddressModel } from '../infrastructure';
+import logger from '../utils/logger';
 
 export class AddressRepository {
   async create(params: CreateAddressDTO, session?: mongoose.ClientSession | null) {

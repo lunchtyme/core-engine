@@ -20,3 +20,4 @@ __exportStar(require("./foodMenu.router"), exports);
 __exportStar(require("./user.router"), exports);
 __exportStar(require("./billing.router"), exports);
 __exportStar(require("./order.router"), exports);
+__exportStar(require("./analytics.router"), exports);

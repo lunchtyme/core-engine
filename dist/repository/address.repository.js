@@ -8,10 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddressRepository = void 0;
-const utils_1 = require("../utils");
 const infrastructure_1 = require("../infrastructure");
+const logger_1 = __importDefault(require("../utils/logger"));
 class AddressRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -20,7 +23,7 @@ class AddressRepository {
                 return yield result.save({ session });
             }
             catch (error) {
-                utils_1.logger.error('Error storing address to db:', error);
+                logger_1.default.error('Error storing address to db:', error);
                 throw error;
             }
         });
@@ -32,7 +35,7 @@ class AddressRepository {
                 return !!address;
             }
             catch (error) {
-                utils_1.logger.error('Error checking user exist from db:', error);
+                logger_1.default.error('Error checking user exist from db:', error);
                 throw error;
             }
         });

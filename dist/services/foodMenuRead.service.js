@@ -19,9 +19,14 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoodMenuReadService = void 0;
+const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
+const logger_1 = __importDefault(require("../utils/logger"));
 const getAllMenu_query_1 = require("./queries/getAllMenu.query");
 class FoodMenuReadService {
     constructor(_foodMenuRepo, _redisService, _logger) {
@@ -32,21 +37,27 @@ class FoodMenuReadService {
     getAllMenu(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cacheKey = utils_1.Helper.generateCacheKey(params);
-                const cachedResult = yield this._redisService.get(cacheKey);
-                if (cachedResult) {
-                    this._logger.info('Returned cached food menu');
-                    return JSON.parse(cachedResult);
-                }
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.COMPANY, infrastructure_1.UserAccountType.INDIVIDUAL], 'fetch food menus');
+                // const cacheKey = Helper.generateCacheKey(params);
+                // const cachedResult = await this._redisService.get(cacheKey);
+                // if (cachedResult) {
+                //   this._logger.info('Returned cached food menu');
+                //   return JSON.parse(cachedResult);
+                // }
                 const { query, category } = params, filters = __rest(params, ["query", "category"]);
                 const fetchPipeline = (0, getAllMenu_query_1.getFoodMenuQuery)({ query, category });
                 const result = yield this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, filters);
-                yield this._redisService.set(cacheKey, JSON.stringify(result), true, utils_1.DEFAULT_CACHE_EXPIRY_IN_SECS);
+                // await this._redisService.set(
+                //   cacheKey,
+                //   JSON.stringify(result),
+                //   true,
+                //   DEFAULT_CACHE_EXPIRY_IN_SECS,
+                // );
                 this._logger.info('Fetching food menu from database');
                 return result;
             }
             catch (error) {
-                utils_1.logger.error('Error fetching food list menu:', error);
+                logger_1.default.error('Error fetching food list menu:', error);
                 throw error;
             }
         });

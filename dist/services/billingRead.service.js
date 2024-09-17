@@ -21,9 +21,9 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BillingReadService = void 0;
-const utils_1 = require("../utils");
-const user_1 = require("../typings/user");
 const getBillings_query_1 = require("./queries/getBillings.query");
+const enums_1 = require("../infrastructure/database/models/enums");
+const utils_1 = require("../utils");
 class BillingReadService {
     constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _billingRepo, _sharedService, _redisService, _logger) {
         this._userRepo = _userRepo;
@@ -40,8 +40,8 @@ class BillingReadService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { user } = params, filters = __rest(params, ["user"]);
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.COMPANY, user_1.UserAccountType.ADMIN], 'fetch billings data');
-                let getBillingQuery = user.account_type === user_1.UserAccountType.COMPANY
+                utils_1.Helper.checkUserType(user.account_type, [enums_1.UserAccountType.COMPANY, enums_1.UserAccountType.ADMIN], 'fetch billings data');
+                let getBillingQuery = user.account_type === enums_1.UserAccountType.COMPANY
                     ? (0, getBillings_query_1.getBillingHistoryQuery)({
                         companyUserId: user.sub,
                     })
@@ -50,7 +50,9 @@ class BillingReadService {
                 return result;
             }
             catch (error) {
-                this._logger.error('Error billings data', error);
+                console.log(this._logger);
+                console.log(error);
+                // this._logger.error('Error billings data', error);
                 throw error;
             }
         });

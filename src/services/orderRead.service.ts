@@ -1,8 +1,11 @@
+import mongoose from 'mongoose';
 import { OrderRepository } from '../repository';
-import { UserAccountType } from '../typings/user';
-import { Helper, logger } from '../utils';
+
+import { Helper } from '../utils';
 import { FetchOrderssDTO } from './dtos/request.dto';
 import { getOrderHistoryQuery } from './queries/getOrderHistory.query';
+import { UserAccountType } from '../infrastructure/database/models/enums';
+import logger from '../utils/logger';
 
 export class OrderReadService {
   constructor(
@@ -21,7 +24,7 @@ export class OrderReadService {
       let getBillingQuery =
         user.account_type === UserAccountType.INDIVIDUAL
           ? getOrderHistoryQuery({
-              employeeId: user.sub,
+              employeeId: user.sub as mongoose.Types.ObjectId,
             })
           : getOrderHistoryQuery({});
       const result = await this._orderRepo.paginateAndAggregateCursor(getBillingQuery, filters);

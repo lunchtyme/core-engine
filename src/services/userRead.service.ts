@@ -5,13 +5,15 @@ import {
   OrderRepository,
   UserRepository,
 } from '../repository';
-import { DEFAULT_CACHE_EXPIRY_IN_SECS, Helper, logger, NotFoundError } from '../utils';
+import { DEFAULT_CACHE_EXPIRY_IN_SECS, Helper, NotFoundError } from '../utils';
 import { RedisService } from './redis.service';
 import { FetchUsersDTO } from './dtos/request.dto';
 import { getAllUserQuery } from './queries/getAllUsers.query';
 import mongoose from 'mongoose';
 import { getEmployeeAccountsByCompany } from './queries/getEmployeeByCompany.query';
-import { AuthUserClaim, UserAccountType } from '../typings/user';
+import { UserAccountType } from '../infrastructure/database/models/enums';
+import { AuthUserClaim } from '../typings/user';
+import logger from '../utils/logger';
 
 export class UserReadService {
   constructor(
@@ -32,21 +34,21 @@ export class UserReadService {
         [UserAccountType.ADMIN],
         'fetch all user datas',
       );
-      const cacheKey = `get:All:users`;
-      const cachedResult = await this._redisService.get(cacheKey);
-      if (cachedResult) {
-        this._logger.info('Users fetched from cache');
-        return JSON.parse(cachedResult);
-      }
+      // const cacheKey = `get:All:users`;
+      // const cachedResult = await this._redisService.get(cacheKey);
+      // if (cachedResult) {
+      //   this._logger.info('Users fetched from cache');
+      //   return JSON.parse(cachedResult);
+      // }
       const { query, ...filters } = params;
       const getAllUsersPipeline = getAllUserQuery({ query });
       const result = await this._userRepo.paginateAndAggregateCursor(getAllUsersPipeline, filters);
-      await this._redisService.set(
-        cacheKey,
-        JSON.stringify(result),
-        true,
-        DEFAULT_CACHE_EXPIRY_IN_SECS,
-      );
+      // await this._redisService.set(
+      //   cacheKey,
+      //   JSON.stringify(result),
+      //   true,
+      //   DEFAULT_CACHE_EXPIRY_IN_SECS,
+      // );
       return result;
     } catch (error) {
       this._logger.error('Error fetching users lists', error);
@@ -62,12 +64,12 @@ export class UserReadService {
         [UserAccountType.COMPANY],
         'fetch all their employee data',
       );
-      const cacheKey = `get:All:employees`;
-      const cachedResult = await this._redisService.get(cacheKey);
-      if (cachedResult) {
-        this._logger.info('Employees fetched from cache');
-        return JSON.parse(cachedResult);
-      }
+      // const cacheKey = `get:All:employees`;
+      // const cachedResult = await this._redisService.get(cacheKey);
+      // if (cachedResult) {
+      //   this._logger.info('Employees fetched from cache');
+      //   return JSON.parse(cachedResult);
+      // }
       const { query, user, ...filters } = params;
       const company = await this._companyRepo.getCompanyByUserId(
         user.sub as mongoose.Types.ObjectId,
@@ -80,12 +82,12 @@ export class UserReadService {
         companyId: company._id,
       });
       const result = await this._userRepo.paginateAndAggregateCursor(getAllUsersPipeline, filters);
-      await this._redisService.set(
-        cacheKey,
-        JSON.stringify(result),
-        true,
-        DEFAULT_CACHE_EXPIRY_IN_SECS,
-      );
+      // await this._redisService.set(
+      //   cacheKey,
+      //   JSON.stringify(result),
+      //   true,
+      //   DEFAULT_CACHE_EXPIRY_IN_SECS,
+      // );
       return result;
     } catch (error) {
       this._logger.error('Error fetching employee lists', error);
@@ -98,8 +100,8 @@ export class UserReadService {
     try {
       Helper.checkUserType(user.account_type, [UserAccountType.INDIVIDUAL], 'access this resource');
       const [orders, balance] = await Promise.all([
-        this._orderRepo.countEmployeeOrders(user.sub),
-        this._individualRepo.getSpendBalance(user.sub),
+        this._orderRepo.countEmployeeOrders(user.sub as mongoose.Types.ObjectId),
+        this._individualRepo.getSpendBalance(user.sub as mongoose.Types.ObjectId),
       ]);
       return {
         orders,
@@ -115,11 +117,13 @@ export class UserReadService {
   async getCompanyOverviewAnalytics(user: AuthUserClaim) {
     try {
       Helper.checkUserType(user.account_type, [UserAccountType.COMPANY], 'access this resource');
-      const companyInfo = await this._companyRepo.getCompanyByUserId(user.sub);
+      const companyInfo = await this._companyRepo.getCompanyByUserId(
+        user.sub as mongoose.Types.ObjectId,
+      );
       const [orders, balance, amountSpent, employees] = await Promise.all([
         this._orderRepo.countCompanyEmployeeOrders(companyInfo?._id as mongoose.Types.ObjectId),
-        this._companyRepo.getSpendBalance(user.sub),
-        this._billingRepo.getTotalAmountSpentByMe(user.sub),
+        this._companyRepo.getSpendBalance(user.sub as mongoose.Types.ObjectId),
+        this._billingRepo.getTotalAmountSpentByMe(user.sub as mongoose.Types.ObjectId),
         this._individualRepo.countCompanyEmployees(companyInfo?._id as mongoose.Types.ObjectId),
       ]);
       return {

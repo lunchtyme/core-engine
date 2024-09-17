@@ -1,61 +1,19 @@
 {
   "compilerOptions": {
     "rootDir": "src",
-    "moduleResolution": "node",
     "outDir": "dist",
+    "moduleResolution": "node",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": true,
     "module": "CommonJS",
     "target": "ES6",
-    "allowJs": true,
-    "paths": {
-      "@utils": [
-        "./src/utils"
-      ],
-      "@utils/*": [
-        "./src/utils/*"
-      ],
-      "@middlewares": [
-        "./src/middlewares"
-      ],
-      "@middlewares/*": [
-        "./src/middlewares/*"
-      ],
-      "@repository": [
-        "./src/repository"
-      ],
-      "@repository/*": [
-        "./src/repository/*"
-      ],
-      "@services": [
-        "./src/services"
-      ],
-      "@services/*": [
-        "./src/services/*"
-      ],
-      "@infra": [
-        "./src/infrastructure"
-      ],
-      "@infra/*": [
-        "./src/infrastructure/*"
-      ],
-      "@routers": [
-        "./src/routers"
-      ],
-      "@routers/*": [
-        "./src/routers/*"
-      ],
-      "@controllers": [
-        "./src/controllers"
-      ],
-      "@controllers/*": [
-        "./src/controllers/*"
-      ],
-    }
+    "allowJs": true
   },
+  "include": [
+    "src/**/*",
+    "typings/**/*.d.ts" // Ensure typings are included
+  ],
   "exclude": [
     "dist"
   ]

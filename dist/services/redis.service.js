@@ -8,9 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisService = void 0;
-const utils_1 = require("../utils");
+const logger_1 = __importDefault(require("../utils/logger"));
 class RedisService {
     /**
      * Constructs a new RedisCacheAdapter instance.
@@ -32,7 +35,7 @@ class RedisService {
                 return yield this.redisClient.get(key);
             }
             catch (error) {
-                utils_1.logger.error('Error getting value for redis via key:', error);
+                logger_1.default.error('Error getting value for redis via key:', error);
                 throw error;
             }
         });
@@ -60,7 +63,7 @@ class RedisService {
                 }
             }
             catch (error) {
-                utils_1.logger.error('Error setting redis value:', error);
+                logger_1.default.error('Error setting redis value:', error);
                 throw error;
             }
         });
@@ -71,7 +74,7 @@ class RedisService {
                 yield this.redisClient.del(key);
             }
             catch (error) {
-                utils_1.logger.error('Error deleting value from redis store:', error);
+                logger_1.default.error('Error deleting value from redis store:', error);
                 throw error;
             }
         });

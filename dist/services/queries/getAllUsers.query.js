@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllUserQuery = void 0;
-const user_1 = require("../../typings/user");
+const infrastructure_1 = require("../../infrastructure");
 const getAllUserQuery = (filter) => {
     const { query } = filter;
     const aggregationPipeline = [];
@@ -20,7 +20,7 @@ const getAllUserQuery = (filter) => {
     // Exclude 'ADMIN' account types
     aggregationPipeline.push({
         $match: {
-            account_type: { $ne: user_1.UserAccountType.ADMIN }, // Exclude Admin accounts
+            account_type: { $ne: infrastructure_1.UserAccountType.ADMIN }, // Exclude Admin accounts
         },
     });
     // Add lookups for companies and individuals only (no admin lookup)
@@ -46,11 +46,11 @@ const getAllUserQuery = (filter) => {
                 $switch: {
                     branches: [
                         {
-                            case: { $eq: ['$account_type', user_1.UserAccountType.COMPANY] },
+                            case: { $eq: ['$account_type', infrastructure_1.UserAccountType.COMPANY] },
                             then: { $arrayElemAt: ['$company_account_details', 0] },
                         },
                         {
-                            case: { $eq: ['$account_type', user_1.UserAccountType.INDIVIDUAL] },
+                            case: { $eq: ['$account_type', infrastructure_1.UserAccountType.INDIVIDUAL] },
                             then: { $arrayElemAt: ['$individual_account_details', 0] },
                         },
                     ],

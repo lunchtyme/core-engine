@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateEnvVariables = validateEnvVariables;
+// Add all other required environment variables here
 const requiredEnvVariables = [
     'MONGO_URI',
     'NODE_ENV',
@@ -17,7 +18,8 @@ const requiredEnvVariables = [
     'CLOUDINARY_API_SECRET',
     'CLOUDINARY_NAME',
     'CLOUDINARY_API_KEY',
-    // Add all other required environment variables here
+    'AGENDA_MONGO_URI',
+    'AGENDA_DASHBOARD_PORT',
 ];
 function validateEnvVariables() {
     const missingVariables = [];

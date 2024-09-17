@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderCreateService = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const user_1 = require("../typings/user");
 const utils_1 = require("../utils");
 const infrastructure_1 = require("../infrastructure");
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -36,7 +35,7 @@ class OrderCreateService {
             const session = yield mongoose_1.default.startSession();
             try {
                 const { foodItems, user } = params;
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.INDIVIDUAL], 'create an order');
+                utils_1.Helper.checkUserType(user.account_type, [infrastructure_1.UserAccountType.INDIVIDUAL], 'create an order');
                 if (!user.sub || !mongoose_1.default.Types.ObjectId.isValid(user.sub)) {
                     throw new utils_1.BadRequestError('Invalid customer ID');
                 }
@@ -142,6 +141,7 @@ class OrderCreateService {
     updateOrderStatus(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.ADMIN]);
                 const order = yield this._orderRepo.updateOrderStatus(params.orderId, params.newStatus);
                 const [employeeData, employeeInfo] = yield Promise.all([
                     this._sharedService.getUser({
@@ -152,7 +152,7 @@ class OrderCreateService {
                 ]);
                 // Use switch to choose right subject
                 let msg = `has been updated`;
-                switch (status) {
+                switch (order.status) {
                     case infrastructure_1.OrderStatus.CONFIRMED:
                         msg = ' has been confirmed for delivery';
                         break;

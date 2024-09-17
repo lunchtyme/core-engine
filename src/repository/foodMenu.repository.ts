@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { FoodMenuDocument, FoodMenuModel } from '../infrastructure';
-import { logger, NotFoundError } from '../utils';
+import { NotFoundError } from '../utils';
 import { AddFoodToMenuDTO } from '../services/dtos/request.dto';
 import { BaseRepository } from './base.repository';
+import logger from '../utils/logger';
 
 export class FoodMenuRepository extends BaseRepository<FoodMenuDocument> {
   constructor() {

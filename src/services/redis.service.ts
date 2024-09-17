@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis';
-import { logger } from '../utils';
+import logger from '../utils/logger';
 
 export class RedisService {
   /**

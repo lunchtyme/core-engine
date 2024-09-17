@@ -48,12 +48,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthCreateservice = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const user_1 = require("../typings/user");
 const argon2_1 = require("argon2");
 const jwt = __importStar(require("jsonwebtoken"));
 const utils_1 = require("../utils");
 const validators_1 = require("./dtos/validators");
 const infrastructure_1 = require("../infrastructure");
+const enums_1 = require("../infrastructure/database/models/enums");
 class AuthCreateservice {
     constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _invitationRepo, _addressRepo, _sharedService, _redisService, _emailQueue, _logger) {
         this._userRepo = _userRepo;
@@ -91,13 +91,13 @@ class AuthCreateservice {
                     const user = yield this._userRepo.create(Object.assign(Object.assign({}, value), { password: hashedPassword }), session);
                     let accountCreateResult;
                     switch (params.account_type) {
-                        case user_1.UserAccountType.COMPANY:
+                        case enums_1.UserAccountType.COMPANY:
                             accountCreateResult = yield this.registerCompany(Object.assign(Object.assign({}, params), { user: user._id }), session);
                             break;
-                        case user_1.UserAccountType.INDIVIDUAL:
+                        case enums_1.UserAccountType.INDIVIDUAL:
                             accountCreateResult = yield this.registerIndividual(Object.assign(Object.assign({}, params), { user: user._id }), session);
                             break;
-                        case user_1.UserAccountType.ADMIN:
+                        case enums_1.UserAccountType.ADMIN:
                             accountCreateResult = yield this.registerAdmin(Object.assign(Object.assign({}, params), { user: user._id }), session);
                             break;
                         default:
@@ -125,7 +125,7 @@ class AuthCreateservice {
                     context: {
                         OTP,
                         email: user.email,
-                        name: user.account_type === user_1.UserAccountType.COMPANY
+                        name: user.account_type === enums_1.UserAccountType.COMPANY
                             ? userDetails.account_details.name
                             : userDetails.account_details.first_name,
                     },
@@ -251,15 +251,23 @@ class AuthCreateservice {
                 }
                 // TODO: Probably check if user has verified their email and provide follow up flow
                 // ...any other required business logic
-                const jwtClaim = { sub: user._id, account_type: user.account_type };
+                const jwtClaim = {
+                    sub: user._id,
+                    account_type: user.account_type,
+                    onboarded: user.has_completed_onboarding,
+                };
                 const accessTokenHash = jwt.sign(jwtClaim, process.env.JWT_SECRET, {
                     expiresIn: process.env.JWT_EXPIRES_IN,
                 });
                 this._logger.info('User login successful', user._id);
-                return { accessTokenHash, onboarded: user.has_completed_onboarding };
+                return {
+                    accessTokenHash,
+                    onboarded: user.has_completed_onboarding,
+                    account_type: user.account_type,
+                };
             }
             catch (error) {
-                this._logger.error('Error logging user in', error);
+                this._logger.error('Error logging user in', { error });
                 throw error;
             }
         });
@@ -323,7 +331,7 @@ class AuthCreateservice {
                     template: utils_1.EMAIL_DATA.template.welcome,
                     context: {
                         email: user.email,
-                        name: user.account_type === user_1.UserAccountType.COMPANY
+                        name: user.account_type === enums_1.UserAccountType.COMPANY
                             ? user.account_details.name
                             : user.account_details.first_name,
                     },
@@ -354,13 +362,13 @@ class AuthCreateservice {
                 // Process address creation:
                 yield this.createAddress(params, session);
                 switch (user.account_type) {
-                    case user_1.UserAccountType.COMPANY:
+                    case enums_1.UserAccountType.COMPANY:
                         yield this.processCompanyOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
                         // Update user: set onboarded to true
                         user.has_completed_onboarding = true;
                         user.save({ session });
                         break;
-                    case user_1.UserAccountType.INDIVIDUAL:
+                    case enums_1.UserAccountType.INDIVIDUAL:
                         yield this.processEmployeeOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
                         // Update user: set onboarded to true
                         user.has_completed_onboarding = true;

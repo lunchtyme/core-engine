@@ -1,15 +1,22 @@
 import { BillingRepository, CompanyRepository } from '../repository';
 import { SharedServices } from './shared.service';
-import { BadRequestError, EMAIL_DATA, Helper, loadEnv, logger, SendEmailParams } from '../utils';
-import { RedisService } from './redis.service';
+import { BadRequestError, EMAIL_DATA, Helper, loadEnv, SendEmailParams } from '../utils';
 import { CreateBillingDTO, SaveBillingDTO } from './dtos/request.dto';
-import { BillingStatus, BillingType, emailQueue, PaystackRequest } from '../infrastructure';
-import { AuthUserClaim, UserAccountType } from '../typings/user';
+import {
+  BillingStatus,
+  BillingType,
+  emailQueue,
+  PaystackRequest,
+  UserAccountType,
+} from '../infrastructure';
+
 import { CreateBillingDTOValidator } from './dtos';
 import crypto from 'node:crypto';
 import mongoose from 'mongoose';
 import dayjs from 'dayjs';
 import calendar from 'dayjs/plugin/calendar';
+import { AuthUserClaim } from '../typings/user';
+import logger from '../utils/logger';
 
 dayjs.extend(calendar);
 
@@ -27,14 +34,14 @@ export class BillingCreateService {
   // Company
   async topupWalletBalance(params: CreateBillingDTO) {
     try {
+      const { amount, user } = params;
+      const { sub, account_type } = user as AuthUserClaim;
+      Helper.checkUserType(account_type, [UserAccountType.COMPANY], 'topup their wallet balance');
       const { error } = CreateBillingDTOValidator.validate(params);
       if (error) {
         this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-      const { amount, user } = params;
-      const { sub, account_type } = user as AuthUserClaim;
-      Helper.checkUserType(account_type, [UserAccountType.COMPANY], 'topup their wallet balance');
       const userData: any = await this._sharedService.getUserWithDetails({
         identifier: 'id',
         value: sub,

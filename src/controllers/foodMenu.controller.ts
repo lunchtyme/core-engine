@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { Helper } from '../utils';
 import { foodMenuCreateService, foodMenuReadService, userReadService } from '../services';
-import { AuthUserClaim } from '../typings/user';
+
 import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
 import { FoodCategory } from '../infrastructure';
+import { AuthUserClaim } from '../typings/user';
 
 export const addFoodToMenuController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -39,6 +40,7 @@ export const fetchMenuController = async (req: Request, res: Response, next: Nex
       lastId: (lastId as string) || undefined,
       category: categoryEnum,
       query: (query as string) || undefined,
+      user: req.user as AuthUserClaim,
     };
     const result = await foodMenuReadService.getAllMenu(fetchFoodMenuDTO);
     Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
@@ -56,6 +58,7 @@ export const updateFoodMenuAvaliabilityController = async (
     const result = await foodMenuCreateService.updateFoodAvalibility({
       foodMenuId: req.body.foodMenuId,
       available: req.body.available,
+      user: req.user as AuthUserClaim,
     });
 
     Helper.formatAPIResponse(res, 'Food menu availability updated', result);

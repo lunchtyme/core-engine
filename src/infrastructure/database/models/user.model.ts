@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { UserAccountState, UserAccountType } from '../../../typings/user';
+import { UserAccountState, UserAccountType } from './enums';
 
 const userSchema = new Schema(
   {
@@ -67,6 +67,12 @@ userSchema.index(
   { email: 1, account_ref: 1, account_state: 1, account_type: 1 },
   { background: true },
 );
+userSchema.index(
+  {
+    time_zone: 1,
+  },
+  { background: true },
+);
 
 userSchema.virtual('account_details', {
   ref: (doc: any) => doc.account_type,
@@ -75,7 +81,7 @@ userSchema.virtual('account_details', {
   justOne: true,
 });
 
-export interface User {
+export interface IUser {
   email: string;
   password: string;
   account_type: UserAccountType;
@@ -91,5 +97,5 @@ export interface User {
   updated_at?: Date;
 }
 
-export interface UserModelDocument extends User, Document {}
+export interface UserModelDocument extends IUser, Document {}
 export const UserModel = mongoose.model<UserModelDocument>('User', userSchema);

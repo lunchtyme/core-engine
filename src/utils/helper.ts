@@ -1,12 +1,12 @@
 import { Response } from 'express';
 import { parse } from 'tldts'; // Importing a library for accurate domain extraction
 import crypto from 'crypto';
-import { UserAccountType } from '../typings/user';
 import { ForbiddenError } from './errors';
 import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
-import { logger } from './logger';
 import { v2 } from 'cloudinary';
 import { loadEnv } from './loadEnv';
+import { UserAccountType } from '../infrastructure/database/models/enums';
+import logger from './logger';
 
 loadEnv(process.env.NODE_ENV!);
 

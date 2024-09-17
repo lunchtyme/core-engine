@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { CreateAdminAccountDTO } from '../services/dtos/request.dto';
 import { AdminModel } from '../infrastructure';
-import { logger } from '../utils';
+import logger from '../utils/logger';
 
 export class AdminRepository {
   async create(params: CreateAdminAccountDTO, session?: mongoose.ClientSession | null) {

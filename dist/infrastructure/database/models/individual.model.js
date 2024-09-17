@@ -55,4 +55,5 @@ const individualSchema = new mongoose_1.Schema({
     toObject: { virtuals: true },
 });
 individualSchema.index({ email: 'text', first_name: 'text', last_name: 'text' }, { background: true });
+individualSchema.index({ lunch_time: 1 }, { background: true });
 exports.IndividualModel = mongoose_1.default.model('Individual', individualSchema);

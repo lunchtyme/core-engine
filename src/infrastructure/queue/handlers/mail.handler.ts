@@ -1,6 +1,7 @@
 import { Worker as TaskHandler } from 'bullmq';
 import { queueConnection } from '../connect';
-import { logger, sendEmail } from '../../../utils';
+import { sendEmail } from '../../../utils';
+import logger from '../../../utils/logger';
 
 export const mailTaskHandler = new TaskHandler(
   'emailQueue',

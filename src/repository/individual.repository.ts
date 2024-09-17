@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import { CreateIndividualAccountDTO } from '../services/dtos/request.dto';
 import { IndividualModel } from '../infrastructure';
-import { logger } from '../utils';
+import { getEmployeesLunchTime2hoursFromNowQuery } from '../services/queries/getEmployeeLunchTime.query';
+import logger from '../utils/logger';
 
 export class IndividualRepository {
   async create(params: CreateIndividualAccountDTO, session?: mongoose.ClientSession | null) {
@@ -93,6 +94,15 @@ export class IndividualRepository {
     try {
       return await IndividualModel.findOne({ user: userId }).exec();
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async getLunchTimeRecords() {
+    try {
+      return await IndividualModel.aggregate(getEmployeesLunchTime2hoursFromNowQuery()).exec();
+    } catch (error) {
+      logger.error('Error fetching employee lunch times', { error });
       throw error;
     }
   }

@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import { CreateAccountDTO } from '../services/dtos/request.dto';
-import { logger } from '../utils';
 import { BaseRepository } from './base.repository';
 import { UserModel, UserModelDocument } from '../infrastructure';
-import { UserAccountType } from '../typings/user';
+import { UserAccountType } from '../infrastructure/database/models/enums';
+import logger from '../utils/logger';
 
 export type GetUserParams = {
   identifier: 'email' | 'id' | 'phone_number';

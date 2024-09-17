@@ -17,6 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
 const base_repository_1 = require("./base.repository");
+const logger_1 = __importDefault(require("../utils/logger"));
 class BillingRepository extends base_repository_1.BaseRepository {
     constructor() {
         super(infrastructure_1.BillingModel);
@@ -36,7 +37,7 @@ class BillingRepository extends base_repository_1.BaseRepository {
                 return yield result.save({ session });
             }
             catch (error) {
-                utils_1.logger.error('Error saving billing info:', { error, params });
+                logger_1.default.error('Error saving billing info:', { error, params });
                 throw error;
             }
         });
@@ -68,7 +69,7 @@ class BillingRepository extends base_repository_1.BaseRepository {
                 return result.acknowledged;
             }
             catch (error) {
-                utils_1.logger.error('Error updating billing status:', { error, params });
+                logger_1.default.error('Error updating billing status:', { error, params });
                 throw error;
             }
         });

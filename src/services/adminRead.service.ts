@@ -1,6 +1,8 @@
+import { UserAccountType } from '../infrastructure/database/models/enums';
 import { OrderRepository, UserRepository } from '../repository';
-import { Helper, logger } from '../utils';
-import { AuthUserClaim, UserAccountType } from '../typings/user';
+import { AuthUserClaim } from '../typings/user';
+import { Helper } from '../utils';
+import logger from '../utils/logger';
 
 export class AdminReadService {
   constructor(

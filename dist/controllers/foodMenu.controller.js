@@ -38,6 +38,7 @@ const fetchMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0
             lastId: lastId || undefined,
             category: categoryEnum,
             query: query || undefined,
+            user: req.user,
         };
         const result = yield services_1.foodMenuReadService.getAllMenu(fetchFoodMenuDTO);
         utils_1.Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
@@ -52,6 +53,7 @@ const updateFoodMenuAvaliabilityController = (req, res, next) => __awaiter(void 
         const result = yield services_1.foodMenuCreateService.updateFoodAvalibility({
             foodMenuId: req.body.foodMenuId,
             available: req.body.available,
+            user: req.user,
         });
         utils_1.Helper.formatAPIResponse(res, 'Food menu availability updated', result);
     }

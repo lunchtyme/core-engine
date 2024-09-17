@@ -6,11 +6,14 @@ import {
   UserRepository,
 } from '../repository';
 import { SharedServices } from './shared.service';
-import { DEFAULT_CACHE_EXPIRY_IN_SECS, Helper, logger } from '../utils';
 import { RedisService } from './redis.service';
-import { AuthUserClaim, UserAccountType } from '../typings/user';
+
 import { FetchBillingsDTO } from './dtos';
 import { getBillingHistoryQuery } from './queries/getBillings.query';
+import { UserAccountType } from '../infrastructure/database/models/enums';
+import { AuthUserClaim } from '../typings/user';
+import { Helper } from '../utils';
+import logger from '../utils/logger';
 
 export class BillingReadService {
   constructor(
@@ -42,7 +45,9 @@ export class BillingReadService {
       const result = await this._billingRepo.paginateAndAggregateCursor(getBillingQuery, filters);
       return result;
     } catch (error) {
-      this._logger.error('Error billings data', error);
+      console.log(this._logger);
+      console.log(error);
+      // this._logger.error('Error billings data', error);
       throw error;
     }
   }

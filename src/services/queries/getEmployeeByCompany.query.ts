@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { UserAccountType } from '../../typings/user';
+import { UserAccountType } from '../../infrastructure/database/models/enums';
 
 export const getEmployeeAccountsByCompany = (filter: {
   query?: string;

@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoodMenuCreateService = void 0;
-const user_1 = require("../typings/user");
 const utils_1 = require("../utils");
 const validators_1 = require("./dtos/validators");
+const infrastructure_1 = require("../infrastructure");
 class FoodMenuCreateService {
     constructor(_foodMenuRepo, _logger) {
         this._foodMenuRepo = _foodMenuRepo;
@@ -21,13 +21,13 @@ class FoodMenuCreateService {
     addFoodToMenu(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.ADMIN], 'add food menus');
                 const { value, error } = validators_1.AddFoodToMenuDTOValidator.validate(params);
                 if (error) {
                     this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { user, price, description, name, categories } = value;
-                utils_1.Helper.checkUserType(user.account_type, [user_1.UserAccountType.ADMIN], 'add food menus');
                 // Only accept certain text file e.g (jpeg, webp, png e.t.c)
                 const allowedMimeTypes = ['image/jpeg', 'image/webp', 'image/png'];
                 const file = params.food_image;
@@ -61,6 +61,7 @@ class FoodMenuCreateService {
     updateFoodAvalibility(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.ADMIN], 'update food menu availability');
                 return yield this._foodMenuRepo.updateFoodAvailability(params.foodMenuId, params.available);
             }
             catch (error) {

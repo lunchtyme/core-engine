@@ -5,14 +5,15 @@ import {
   IndividualRepository,
   OrderRepository,
 } from '../repository';
-import { UserAccountType } from '../typings/user';
-import { BadRequestError, EMAIL_DATA, Helper, logger, SendEmailParams } from '../utils';
+import { BadRequestError, EMAIL_DATA, Helper, SendEmailParams } from '../utils';
 import { CreateOrderDTO } from './dtos/request.dto';
-import { emailQueue, OrderStatus } from '../infrastructure';
+import { emailQueue, OrderStatus, UserAccountType } from '../infrastructure';
 import { BillingCreateService } from './billingCreate.service';
 import dayjs from 'dayjs';
 import calendar from 'dayjs/plugin/calendar';
 import { SharedServices } from './shared.service';
+import logger from '../utils/logger';
+import { AuthUserClaim } from '../typings/user';
 
 dayjs.extend(calendar);
 
@@ -161,8 +162,13 @@ export class OrderCreateService {
     }
   }
 
-  async updateOrderStatus(params: { orderId: mongoose.Types.ObjectId; newStatus: OrderStatus }) {
+  async updateOrderStatus(params: {
+    orderId: mongoose.Types.ObjectId;
+    newStatus: OrderStatus;
+    user: AuthUserClaim;
+  }) {
     try {
+      Helper.checkUserType(params.user.account_type, [UserAccountType.ADMIN]);
       const order = await this._orderRepo.updateOrderStatus(params.orderId, params.newStatus);
 
       const [employeeData, employeeInfo] = await Promise.all([
@@ -175,7 +181,7 @@ export class OrderCreateService {
 
       // Use switch to choose right subject
       let msg = `has been updated`;
-      switch (status) {
+      switch (order.status) {
         case OrderStatus.CONFIRMED:
           msg = ' has been confirmed for delivery';
           break;

@@ -1,3 +1,4 @@
+import moment from 'moment-timezone';
 import { emailQueue } from '../infrastructure';
 import { GetUserParams, IndividualRepository, UserRepository } from '../repository';
 import { CLIENT_BASE_URL, EMAIL_DATA, NotFoundError, SendEmailParams } from '../utils';
@@ -49,33 +50,10 @@ export class SharedServices {
       //   removeOnComplete: true,
       //   delay: 2000,
       // });
-      // const lunchTime = '16:00 PM';
-      // const timeZone = 'Africa/Lagos';
-
-      // // Parse the lunch_time in a specific time zone
-      // const lunchMoment = moment.tz(lunchTime, 'hh:mm A', timeZone);
-
-      // // Get the current time in the same time zone
-      // const currentMoment = moment().tz(timeZone);
-
-      // // Check if it's 2 hours before lunch time
-      // const timeDiff = lunchMoment.diff(currentMoment, 'hours');
-
-      // console.log(`Lunch is in ${timeDiff} hours`);
-
-      // if (currentMoment.isSame(lunchMoment.subtract(2, 'hours'))) {
-      //   console.log('It is 2 hours before lunch time');
-      // }
-      // console.log('Hello World Agendas');
 
       const records = await this._individualRepo.getLunchTimeRecords();
-
-      console.log(records);
-      if (records.length) {
-        for (const record of records) {
-          console.log(record);
-        }
-      }
+      const list = await this.filterLunchRecords(records);
+      console.log(list);
     } catch (error) {
       this._logger.error(
         'Error fetching and sending email to employees whose their lunch time is 2 hours from now',
@@ -83,5 +61,28 @@ export class SharedServices {
       );
       throw error;
     }
+  }
+
+  // Function to filter records
+  private async filterLunchRecords(records: any) {
+    return records.filter((record: any) => {
+      const userTimeZone = record.user.time_zone;
+
+      // Parse lunch_time in the user's time zone
+      const [hour, minutePart] = record.lunch_time.split(':');
+      const [minute, period] = minutePart.split(' '); // Handle AM/PM
+      const hour24 = period === 'PM' ? (parseInt(hour) % 12) + 12 : parseInt(hour) % 12;
+      const lunchMoment = moment.tz({ hour: hour24, minute: parseInt(minute) }, userTimeZone);
+
+      // Get current time and target window in the user's time zone
+      const now = moment().tz(userTimeZone);
+      const targetTime = now.clone().add(10, 'minutes');
+      const bufferMinutes = 5;
+      const startTime = targetTime.clone().subtract(bufferMinutes, 'minutes');
+      const endTime = targetTime.clone().add(bufferMinutes, 'minutes');
+
+      // Check if lunch time is within the target window
+      return lunchMoment.isBetween(startTime, endTime);
+    });
   }
 }

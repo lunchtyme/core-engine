@@ -8,8 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SharedServices = void 0;
+const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const utils_1 = require("../utils");
 class SharedServices {
     constructor(_userRepo, _individualRepo, _emailQueue, _logger) {
@@ -59,31 +63,35 @@ class SharedServices {
                 //   removeOnComplete: true,
                 //   delay: 2000,
                 // });
-                // const lunchTime = '16:00 PM';
-                // const timeZone = 'Africa/Lagos';
-                // // Parse the lunch_time in a specific time zone
-                // const lunchMoment = moment.tz(lunchTime, 'hh:mm A', timeZone);
-                // // Get the current time in the same time zone
-                // const currentMoment = moment().tz(timeZone);
-                // // Check if it's 2 hours before lunch time
-                // const timeDiff = lunchMoment.diff(currentMoment, 'hours');
-                // console.log(`Lunch is in ${timeDiff} hours`);
-                // if (currentMoment.isSame(lunchMoment.subtract(2, 'hours'))) {
-                //   console.log('It is 2 hours before lunch time');
-                // }
-                // console.log('Hello World Agendas');
                 const records = yield this._individualRepo.getLunchTimeRecords();
-                console.log(records);
-                if (records.length) {
-                    for (const record of records) {
-                        console.log(record);
-                    }
-                }
+                const list = yield this.filterLunchRecords(records);
+                console.log(list);
             }
             catch (error) {
                 this._logger.error('Error fetching and sending email to employees whose their lunch time is 2 hours from now', { error });
                 throw error;
             }
+        });
+    }
+    // Function to filter records
+    filterLunchRecords(records) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return records.filter((record) => {
+                const userTimeZone = record.user.time_zone;
+                // Parse lunch_time in the user's time zone
+                const [hour, minutePart] = record.lunch_time.split(':');
+                const [minute, period] = minutePart.split(' '); // Handle AM/PM
+                const hour24 = period === 'PM' ? (parseInt(hour) % 12) + 12 : parseInt(hour) % 12;
+                const lunchMoment = moment_timezone_1.default.tz({ hour: hour24, minute: parseInt(minute) }, userTimeZone);
+                // Get current time and target window in the user's time zone
+                const now = (0, moment_timezone_1.default)().tz(userTimeZone);
+                const targetTime = now.clone().add(10, 'minutes');
+                const bufferMinutes = 5;
+                const startTime = targetTime.clone().subtract(bufferMinutes, 'minutes');
+                const endTime = targetTime.clone().add(bufferMinutes, 'minutes');
+                // Check if lunch time is within the target window
+                return lunchMoment.isBetween(startTime, endTime);
+            });
         });
     }
 }

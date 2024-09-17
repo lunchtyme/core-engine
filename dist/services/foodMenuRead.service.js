@@ -37,21 +37,10 @@ class FoodMenuReadService {
     getAllMenu(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.COMPANY, infrastructure_1.UserAccountType.INDIVIDUAL], 'fetch food menus');
-                // const cacheKey = Helper.generateCacheKey(params);
-                // const cachedResult = await this._redisService.get(cacheKey);
-                // if (cachedResult) {
-                //   this._logger.info('Returned cached food menu');
-                //   return JSON.parse(cachedResult);
-                // }
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.COMPANY, infrastructure_1.UserAccountType.INDIVIDUAL, infrastructure_1.UserAccountType.ADMIN], 'fetch food menus');
                 const { query, category } = params, filters = __rest(params, ["query", "category"]);
                 const fetchPipeline = (0, getAllMenu_query_1.getFoodMenuQuery)({ query, category });
                 const result = yield this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, filters);
-                // await this._redisService.set(
-                //   cacheKey,
-                //   JSON.stringify(result),
-                //   true,
-                //   DEFAULT_CACHE_EXPIRY_IN_SECS,
                 // );
                 this._logger.info('Fetching food menu from database');
                 return result;

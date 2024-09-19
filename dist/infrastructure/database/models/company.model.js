@@ -41,11 +41,11 @@ const companySchema = new mongoose_1.Schema({
     },
     size: {
         type: String,
-        required: true,
+        // required: true,
     },
     max_spend_amount_per_employee: {
         type: mongoose_1.Schema.Types.Decimal128,
-        required: true,
+        // required: true,
         default: 0.0,
     },
     spend_balance: {

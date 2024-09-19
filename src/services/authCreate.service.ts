@@ -373,48 +373,44 @@ export class AuthCreateservice {
   async processUserOnboarding(params: OnboardingUserDTO) {
     const session = await mongoose.startSession();
     try {
-      await session.startTransaction();
       const user = await this._sharedService.getUser({
         identifier: 'id',
         value: params.user,
       });
       // Process address creation:
-      await this.createAddress(params, session);
-      switch (user.account_type) {
-        case UserAccountType.COMPANY:
-          await this.processCompanyOnboardingData(
-            {
-              ...params,
-              user: user._id,
-            } as CompanyOnboardingDTO,
-            session,
-          );
-          // Update user: set onboarded to true
-          user.has_completed_onboarding = true;
-          user.save({ session });
-          break;
-        case UserAccountType.INDIVIDUAL:
-          await this.processEmployeeOnboardingData(
-            {
-              ...params,
-              user: user._id,
-            } as EmployeeOnboardingDTO,
-            session,
-          );
-          // Update user: set onboarded to true
-          user.has_completed_onboarding = true;
-          user.save({ session });
-          break;
-        default:
-          throw new Error('Account type not recognized');
-      }
+      const result = await session.withTransaction(async () => {
+        await this.createAddress(params, session);
+        switch (user.account_type) {
+          case UserAccountType.COMPANY:
+            await this.processCompanyOnboardingData(
+              {
+                ...params,
+                user: user._id,
+              } as CompanyOnboardingDTO,
+              session,
+            );
+            break;
+          case UserAccountType.INDIVIDUAL:
+            await this.processEmployeeOnboardingData(
+              {
+                ...params,
+                user: user._id,
+              } as EmployeeOnboardingDTO,
+              session,
+            );
+            break;
+          default:
+            throw new Error('Account type not recognized');
+        }
+      });
 
+      // Update user: set onboarded to true
+      user.has_completed_onboarding = true;
+      user.save({ session });
       this._logger.info('User onboarded', user._id);
-      await session.commitTransaction();
       return user._id;
     } catch (error) {
       this._logger.error('Error processing user onboarding', error);
-      await session.abortTransaction();
       throw error;
     } finally {
       await session.endSession();

@@ -38,9 +38,10 @@ import {
   loginDTOValidator,
   resendEmailVerificationCodeDTOValidator,
 } from './dtos/validators';
-import { emailQueue, InvitationStatus } from '../infrastructure';
+import { InvitationStatus } from '../infrastructure';
 import { UserAccountType } from '../infrastructure/database/models/enums';
 import logger from '../utils/logger';
+import { emailQueue } from '../infrastructure/queue/emailQueue';
 
 export class AuthCreateservice {
   constructor(
@@ -335,6 +336,12 @@ export class AuthCreateservice {
               : user.account_details.first_name,
         },
       };
+
+      emailQueue.add('mailer', emailPayload, {
+        delay: 2000,
+        attempts: 5,
+        removeOnComplete: true,
+      });
       this._logger.info('Email verification successfully', user.email);
       return user._id;
     } catch (error) {

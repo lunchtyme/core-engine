@@ -15,7 +15,7 @@ export const mailTaskHandler = new TaskHandler(
     }
   },
   {
-    connection: queueConnection,
+    connection: queueConnection, // New connection instance
   },
 );
 

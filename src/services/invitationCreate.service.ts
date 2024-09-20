@@ -1,4 +1,5 @@
-import { emailQueue, UserAccountType } from '../infrastructure';
+import { UserAccountType } from '../infrastructure';
+import { emailQueue } from '../infrastructure/queue/emailQueue';
 import { InvitationRepository } from '../repository';
 
 import { BadRequestError, CLIENT_BASE_URL, EMAIL_DATA, Helper, SendEmailParams } from '../utils';
@@ -36,11 +37,11 @@ export class InvitationCreateService {
       if (validInvitationExists) {
         throw new BadRequestError("You've have a pending invitation for this employee set already");
       }
-      const invitatationCode = await this._invitationRepo.generateUniqueInvitationToken();
+      const invitationCode = await this._invitationRepo.generateUniqueInvitationToken();
       const result = await this._invitationRepo.upsert({
         employee_work_email,
         user,
-        invitation_token: invitatationCode,
+        invitation_token: invitationCode,
         expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // Expires in 3 days
       });
       const companyName = (company as any).account_details.name;
@@ -50,8 +51,8 @@ export class InvitationCreateService {
         template: EMAIL_DATA.template.employeeInvitation,
         context: {
           companyName,
-          invitatationCode,
-          signupURL: `${CLIENT_BASE_URL}/auth/signup`,
+          invitationCode,
+          signupURL: `${CLIENT_BASE_URL}/signup`,
           email: employee_work_email,
         },
       };

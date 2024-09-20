@@ -12,28 +12,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mailTaskHandler = void 0;
+exports.scheduleTaskHandler = void 0;
 const bullmq_1 = require("bullmq");
 const connect_1 = require("../connect");
-const utils_1 = require("../../../utils");
 const logger_1 = __importDefault(require("../../../utils/logger"));
-exports.mailTaskHandler = new bullmq_1.Worker('emailQueue', (job) => __awaiter(void 0, void 0, void 0, function* () {
-    logger_1.default.info('Processing email job:', job.id);
+const services_1 = require("../../../services");
+exports.scheduleTaskHandler = new bullmq_1.Worker('processedAtQueue', (job) => __awaiter(void 0, void 0, void 0, function* () {
+    logger_1.default.info('Updating processed at:', job.id);
     try {
-        yield (0, utils_1.sendEmail)(job.data);
+        yield services_1.individualRepository.updateProcessedAt(job.data);
     }
     catch (error) {
-        logger_1.default.error('Error processing email job', error);
+        logger_1.default.error('Error updating processed at', error);
         throw error;
     }
 }), {
-    connection: connect_1.queueConnection, // New connection instance
+    connection: connect_1.queueConnection,
 });
-exports.mailTaskHandler.on('completed', (job) => {
-    logger_1.default.info(`Email worker done processing job ${job.id}`);
-    console.log(`Email worker done processing job ${job.id}`);
+exports.scheduleTaskHandler.on('completed', (job) => {
+    logger_1.default.info(`processed_at worker done processing job ${job.id}`);
+    console.log(`processed_at worker done processing job ${job.id}`);
 });
-exports.mailTaskHandler.on('error', (err) => {
-    logger_1.default.error('Email worker error:', err);
-    console.error('Email worker error:', err.message);
+exports.scheduleTaskHandler.on('error', (err) => {
+    logger_1.default.error('processed_at worker error:', err);
+    console.error('processed_at worker error:', err.message);
 });

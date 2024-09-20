@@ -27,7 +27,6 @@ export class AdminReadService {
         companies,
       };
     } catch (error) {
-      console.log(error);
       this._logger.error('Error fetching admin overview analytics', { error, user });
       throw error;
     }

@@ -9,7 +9,6 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const getOrderHistoryQuery = (filter) => {
     const { employeeId } = filter;
     const aggregationPipeline = [];
-    console.log(employeeId);
     // Lookup to fetch employee details based on the user field
     aggregationPipeline.push({
         $lookup: {

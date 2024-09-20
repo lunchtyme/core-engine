@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 export const getOrderHistoryQuery = (filter: { employeeId?: mongoose.Types.ObjectId }) => {
   const { employeeId } = filter;
   const aggregationPipeline: any[] = [];
-  console.log(employeeId);
 
   // Lookup to fetch employee details based on the user field
   aggregationPipeline.push({

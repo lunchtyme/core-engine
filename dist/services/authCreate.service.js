@@ -54,6 +54,7 @@ const utils_1 = require("../utils");
 const validators_1 = require("./dtos/validators");
 const infrastructure_1 = require("../infrastructure");
 const enums_1 = require("../infrastructure/database/models/enums");
+const emailQueue_1 = require("../infrastructure/queue/emailQueue");
 class AuthCreateservice {
     constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _invitationRepo, _addressRepo, _sharedService, _redisService, _emailQueue, _logger) {
         this._userRepo = _userRepo;
@@ -312,6 +313,11 @@ class AuthCreateservice {
                             : user.account_details.first_name,
                     },
                 };
+                emailQueue_1.emailQueue.add('mailer', emailPayload, {
+                    delay: 2000,
+                    attempts: 5,
+                    removeOnComplete: true,
+                });
                 this._logger.info('Email verification successfully', user.email);
                 return user._id;
             }
@@ -354,7 +360,7 @@ class AuthCreateservice {
                             : user.account_details.first_name,
                     },
                 };
-                infrastructure_1.emailQueue.add('mailer', emailPayload, {
+                emailQueue_1.emailQueue.add('mailer', emailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,

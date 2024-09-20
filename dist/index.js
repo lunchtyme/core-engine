@@ -23,7 +23,7 @@ SERVER.use((0, cors_1.default)({}));
 // Connect database
 infrastructure_1.DB.connect();
 // Start scheduler
-infrastructure_1.agenda.start();
+// agenda.start();
 // Swagger
 const swaggerOptions = {
     definition: {

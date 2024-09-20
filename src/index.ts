@@ -27,7 +27,7 @@ SERVER.use(cors({}));
 // Connect database
 DB.connect();
 // Start scheduler
-agenda.start();
+// agenda.start();
 // Swagger
 const swaggerOptions = {
   definition: {

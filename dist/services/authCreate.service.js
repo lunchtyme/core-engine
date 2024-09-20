@@ -282,7 +282,10 @@ class AuthCreateservice {
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email, otp } = value;
-                const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
+                const user = yield this._sharedService.getUserWithDetails({
+                    identifier: 'email',
+                    value: email,
+                });
                 if (!user) {
                     throw new utils_1.NotFoundError('User not found');
                 }
@@ -298,6 +301,17 @@ class AuthCreateservice {
                 user.verified = true;
                 yield user.save();
                 // Send success email if needed
+                const emailPayload = {
+                    receiver: user.email,
+                    subject: utils_1.EMAIL_DATA.subject.welcome,
+                    template: utils_1.EMAIL_DATA.template.welcome,
+                    context: {
+                        email: user.email,
+                        name: user.account_type === enums_1.UserAccountType.COMPANY
+                            ? user.account_details.name
+                            : user.account_details.first_name,
+                    },
+                };
                 this._logger.info('Email verification successfully', user.email);
                 return user._id;
             }
@@ -317,7 +331,10 @@ class AuthCreateservice {
                     throw new utils_1.BadRequestError(error.message);
                 }
                 const { email } = value;
-                const user = yield this._sharedService.getUser({ identifier: 'email', value: email });
+                const user = yield this._sharedService.getUserWithDetails({
+                    identifier: 'email',
+                    value: email,
+                });
                 if (!user) {
                     throw new utils_1.NotFoundError('User not found');
                 }
@@ -327,9 +344,10 @@ class AuthCreateservice {
                 yield this._redisService.set(cacheKey, OTP, true, 600);
                 const emailPayload = {
                     receiver: user.email,
-                    subject: utils_1.EMAIL_DATA.subject.welcome,
-                    template: utils_1.EMAIL_DATA.template.welcome,
+                    subject: utils_1.EMAIL_DATA.subject.verifyEmail,
+                    template: utils_1.EMAIL_DATA.template.verifyEmail,
                     context: {
+                        OTP,
                         email: user.email,
                         name: user.account_type === enums_1.UserAccountType.COMPANY
                             ? user.account_details.name
@@ -359,7 +377,7 @@ class AuthCreateservice {
                     value: params.user,
                 });
                 // Process address creation:
-                const result = yield session.withTransaction(() => __awaiter(this, void 0, void 0, function* () {
+                yield session.withTransaction(() => __awaiter(this, void 0, void 0, function* () {
                     yield this.createAddress(params, session);
                     switch (user.account_type) {
                         case enums_1.UserAccountType.COMPANY:

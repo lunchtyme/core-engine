@@ -304,7 +304,10 @@ export class AuthCreateservice {
         throw new BadRequestError(error.message);
       }
       const { email, otp } = value;
-      const user = await this._sharedService.getUser({ identifier: 'email', value: email });
+      const user: any = await this._sharedService.getUserWithDetails({
+        identifier: 'email',
+        value: email,
+      });
       if (!user) {
         throw new NotFoundError('User not found');
       }
@@ -320,6 +323,18 @@ export class AuthCreateservice {
       user.verified = true;
       await user.save();
       // Send success email if needed
+      const emailPayload: SendEmailParams = {
+        receiver: user.email,
+        subject: EMAIL_DATA.subject.welcome,
+        template: EMAIL_DATA.template.welcome,
+        context: {
+          email: user.email,
+          name:
+            user.account_type === UserAccountType.COMPANY
+              ? user.account_details.name
+              : user.account_details.first_name,
+        },
+      };
       this._logger.info('Email verification successfully', user.email);
       return user._id;
     } catch (error) {
@@ -337,7 +352,10 @@ export class AuthCreateservice {
         throw new BadRequestError(error.message);
       }
       const { email } = value;
-      const user: any = await this._sharedService.getUser({ identifier: 'email', value: email });
+      const user: any = await this._sharedService.getUserWithDetails({
+        identifier: 'email',
+        value: email,
+      });
       if (!user) {
         throw new NotFoundError('User not found');
       }
@@ -345,11 +363,13 @@ export class AuthCreateservice {
       const OTP = Helper.generateOTPCode();
       const cacheKey = `${user._id}:verify:mail`;
       await this._redisService.set(cacheKey, OTP, true, 600);
+
       const emailPayload: SendEmailParams = {
         receiver: user.email,
-        subject: EMAIL_DATA.subject.welcome,
-        template: EMAIL_DATA.template.welcome,
+        subject: EMAIL_DATA.subject.verifyEmail,
+        template: EMAIL_DATA.template.verifyEmail,
         context: {
+          OTP,
           email: user.email,
           name:
             user.account_type === UserAccountType.COMPANY
@@ -378,7 +398,7 @@ export class AuthCreateservice {
         value: params.user,
       });
       // Process address creation:
-      const result = await session.withTransaction(async () => {
+      await session.withTransaction(async () => {
         await this.createAddress(params, session);
         switch (user.account_type) {
           case UserAccountType.COMPANY:

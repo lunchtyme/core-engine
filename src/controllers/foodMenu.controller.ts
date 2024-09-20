@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Helper } from '../utils';
+import { BadRequestError, Helper } from '../utils';
 import { foodMenuCreateService, foodMenuReadService, userReadService } from '../services';
 
 import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
@@ -9,7 +9,14 @@ import { AuthUserClaim } from '../typings/user';
 export const addFoodToMenuController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Parse the categories string into an array
-    const categories = req.body.categories.split(',') || [];
+    let categories;
+    if (Array.isArray(req.body.categories)) {
+      categories = req.body.categories;
+    } else if (typeof req.body.categories === 'string') {
+      categories = req.body.categories.split(',') || [];
+    } else {
+      throw new BadRequestError('Invalid categories provided');
+    }
 
     const result = await foodMenuCreateService.addFoodToMenu({
       ...req.body,

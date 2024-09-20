@@ -135,13 +135,13 @@ exports.createAddressDTOValidator = joi_1.default.object({
         'any.required': 'Please provide your address zipcode',
     }),
     user: joi_1.default.required(),
-    address_line_2: joi_1.default.string().optional(),
+    // address_line_2: Joi.string().optional(),
 }).unknown();
 exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator
     .keys({
     max_spend_amount_per_employee: joi_1.default.number().positive().required().messages({
         'number.positive': 'Spend budget must be a positive number',
-        'any.required': 'Please specify spend budget for each employee you invite',
+        'any.required': 'Please specify spend budget for each employees you invite',
     }),
     size: joi_1.default.string()
         .pattern(/^\d+-(\d+|\+|\d+\+)$/)

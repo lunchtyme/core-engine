@@ -8,6 +8,7 @@ const addressSchema = new Schema(
     },
     address_line_2: {
       type: String,
+      required: false,
       default: null,
     },
     city: {

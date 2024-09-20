@@ -140,14 +140,14 @@ export const createAddressDTOValidator = Joi.object({
     'any.required': 'Please provide your address zipcode',
   }),
   user: Joi.required(),
-  address_line_2: Joi.string().optional(),
+  // address_line_2: Joi.string().optional(),
 }).unknown();
 
 export const companyOnboardingDTOValidator = createAddressDTOValidator
   .keys({
     max_spend_amount_per_employee: Joi.number().positive().required().messages({
       'number.positive': 'Spend budget must be a positive number',
-      'any.required': 'Please specify spend budget for each employee you invite',
+      'any.required': 'Please specify spend budget for each employees you invite',
     }),
     size: Joi.string()
       .pattern(/^\d+-(\d+|\+|\d+\+)$/)

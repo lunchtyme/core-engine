@@ -39,7 +39,7 @@ exports.agenda.define('sendPeriodicLunchReminderNotification', (job) => __awaite
         throw error;
     }
 }), { priority: 'high' });
-exports.agenda.every('1 minutes', 'sendPeriodicLunchReminderNotification');
+exports.agenda.every('5 minutes', 'sendPeriodicLunchReminderNotification');
 // Schedule event tracking
 // Event: Job started
 exports.agenda.on('start', (job) => {

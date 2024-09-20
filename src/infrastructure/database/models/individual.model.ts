@@ -25,6 +25,7 @@ const individualSchema = new Schema(
       default: 0.0,
     },
     lunch_time: { type: String },
+    processed_at: { type: Date, default: null },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },

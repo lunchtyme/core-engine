@@ -50,9 +50,7 @@ class BillingReadService {
                 return result;
             }
             catch (error) {
-                console.log(this._logger);
-                console.log(error);
-                // this._logger.error('Error billings data', error);
+                this._logger.error('Error billings data', error);
                 throw error;
             }
         });

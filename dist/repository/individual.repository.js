@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IndividualRepository = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const infrastructure_1 = require("../infrastructure");
 const logger_1 = __importDefault(require("../utils/logger"));
 class IndividualRepository {
@@ -121,6 +122,16 @@ class IndividualRepository {
             }
             catch (error) {
                 logger_1.default.error('Error fetching employee lunch times', { error });
+                throw error;
+            }
+        });
+    }
+    updateProcessedAt(record) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield infrastructure_1.IndividualModel.updateOne({ _id: new mongoose_1.default.Types.ObjectId(record.record._id) }, { $set: { processed_at: new Date() } });
+            }
+            catch (error) {
                 throw error;
             }
         });

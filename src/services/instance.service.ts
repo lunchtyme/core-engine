@@ -1,4 +1,6 @@
-import { emailQueue, redisCache } from '../infrastructure';
+import { redisCache } from '../infrastructure';
+import { emailQueue } from '../infrastructure/queue/emailQueue';
+import { processAtQueue } from '../infrastructure/queue/processAtQueue';
 import {
   AddressRepository,
   AdminRepository,
@@ -27,21 +29,22 @@ import { SharedServices } from './shared.service';
 import { UserReadService } from './userRead.service';
 
 // All repository instances
-const userRepository = new UserRepository();
-const companyRepository = new CompanyRepository();
-const adminRepository = new AdminRepository();
-const individualRepository = new IndividualRepository();
-const addressRepository = new AddressRepository();
-const invitationRepository = new InvitationRepository();
-const foodMenuRepository = new FoodMenuRepository();
-const billingRepository = new BillingRepository();
-const orderRepository = new OrderRepository();
+export const userRepository = new UserRepository();
+export const companyRepository = new CompanyRepository();
+export const adminRepository = new AdminRepository();
+export const individualRepository = new IndividualRepository();
+export const addressRepository = new AddressRepository();
+export const invitationRepository = new InvitationRepository();
+export const foodMenuRepository = new FoodMenuRepository();
+export const billingRepository = new BillingRepository();
+export const orderRepository = new OrderRepository();
 
 // Shared services instance
 export const sharedServices = new SharedServices(
   userRepository,
   individualRepository,
   emailQueue,
+  processAtQueue,
   logger,
 );
 

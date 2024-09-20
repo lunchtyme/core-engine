@@ -7,13 +7,14 @@ import {
 } from '../repository';
 import { BadRequestError, EMAIL_DATA, Helper, SendEmailParams } from '../utils';
 import { CreateOrderDTO } from './dtos/request.dto';
-import { emailQueue, OrderStatus, UserAccountType } from '../infrastructure';
+import { OrderStatus, UserAccountType } from '../infrastructure';
 import { BillingCreateService } from './billingCreate.service';
 import dayjs from 'dayjs';
 import calendar from 'dayjs/plugin/calendar';
 import { SharedServices } from './shared.service';
 import logger from '../utils/logger';
 import { AuthUserClaim } from '../typings/user';
+import { emailQueue } from '../infrastructure/queue/emailQueue';
 
 dayjs.extend(calendar);
 

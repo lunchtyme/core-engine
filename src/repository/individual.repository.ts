@@ -106,4 +106,15 @@ export class IndividualRepository {
       throw error;
     }
   }
+
+  async updateProcessedAt(record: any) {
+    try {
+      await IndividualModel.updateOne(
+        { _id: new mongoose.Types.ObjectId(record.record._id) },
+        { $set: { processed_at: new Date() } },
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
 }

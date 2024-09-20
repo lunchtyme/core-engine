@@ -2,13 +2,7 @@ import { BillingRepository, CompanyRepository } from '../repository';
 import { SharedServices } from './shared.service';
 import { BadRequestError, EMAIL_DATA, Helper, loadEnv, SendEmailParams } from '../utils';
 import { CreateBillingDTO, SaveBillingDTO } from './dtos/request.dto';
-import {
-  BillingStatus,
-  BillingType,
-  emailQueue,
-  PaystackRequest,
-  UserAccountType,
-} from '../infrastructure';
+import { BillingStatus, BillingType, PaystackRequest, UserAccountType } from '../infrastructure';
 
 import { CreateBillingDTOValidator } from './dtos';
 import crypto from 'node:crypto';
@@ -17,6 +11,7 @@ import dayjs from 'dayjs';
 import calendar from 'dayjs/plugin/calendar';
 import { AuthUserClaim } from '../typings/user';
 import logger from '../utils/logger';
+import { emailQueue } from '../infrastructure/queue/emailQueue';
 
 dayjs.extend(calendar);
 

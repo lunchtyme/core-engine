@@ -36,7 +36,6 @@ class AdminReadService {
                 };
             }
             catch (error) {
-                console.log(error);
                 this._logger.error('Error fetching admin overview analytics', { error, user });
                 throw error;
             }

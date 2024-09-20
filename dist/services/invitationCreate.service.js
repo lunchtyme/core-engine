@@ -38,11 +38,11 @@ class InvitationCreateService {
                 if (validInvitationExists) {
                     throw new utils_1.BadRequestError("You've have a pending invitation for this employee set already");
                 }
-                const invitatationCode = yield this._invitationRepo.generateUniqueInvitationToken();
+                const invitationCode = yield this._invitationRepo.generateUniqueInvitationToken();
                 const result = yield this._invitationRepo.upsert({
                     employee_work_email,
                     user,
-                    invitation_token: invitatationCode,
+                    invitation_token: invitationCode,
                     expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // Expires in 3 days
                 });
                 const companyName = company.account_details.name;
@@ -52,8 +52,8 @@ class InvitationCreateService {
                     template: utils_1.EMAIL_DATA.template.employeeInvitation,
                     context: {
                         companyName,
-                        invitatationCode,
-                        signupURL: `${utils_1.CLIENT_BASE_URL}/auth/signup`,
+                        invitationCode,
+                        signupURL: `${utils_1.CLIENT_BASE_URL}/signup`,
                         email: employee_work_email,
                     },
                 };

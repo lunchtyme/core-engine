@@ -63,10 +63,14 @@ const sendEmail = (params) => __awaiter(void 0, void 0, void 0, function* () {
             logger_1.default.error('Error creating mail transporter:');
             throw new Error('Failed to create mail transporter');
         }
+        let sender = process.env.MAIL_SENDER_FROM;
+        if (from) {
+            sender = from;
+        }
         const mailOption = {
             subject,
             html,
-            from: from !== undefined ? from : process.env.MAIL_SENDER_FROM,
+            from: sender,
             to: receiver,
         };
         yield mailTransporter.sendMail(mailOption);

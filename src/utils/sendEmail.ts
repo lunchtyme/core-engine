@@ -71,10 +71,16 @@ export const sendEmail = async (params: SendEmailParams) => {
       throw new Error('Failed to create mail transporter');
     }
 
+    let sender = process.env.MAIL_SENDER_FROM!;
+
+    if (from) {
+      sender = from;
+    }
+
     const mailOption: SendMailOptions = {
       subject,
       html,
-      from: from !== undefined ? from : process.env.MAIL_SENDER_FROM!,
+      from: sender,
       to: receiver,
     };
 

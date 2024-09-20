@@ -56,7 +56,7 @@ export class InvitationCreateService {
         receiver: employee_work_email,
         subject: EMAIL_DATA.subject.employeeInvitation(companyName),
         template: EMAIL_DATA.template.employeeInvitation,
-        from: `${companyName} (via ${APP_NAME}) <noreply@lunchtyme.store>`,
+        from: `"${companyName} \(via ${APP_NAME}\)" <noreply@lunchtyme.store>`,
         context: {
           companyName,
           invitationCode,

@@ -31,7 +31,7 @@ const hbsConverter = new handlebars_converter_1.HandlebarsConverter({
 });
 const sendEmail = (params) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { receiver, subject, template, context } = params;
+        const { receiver, subject, template, context, from } = params;
         if (!receiver ||
             typeof receiver !== 'string' ||
             receiver === '' ||
@@ -66,7 +66,7 @@ const sendEmail = (params) => __awaiter(void 0, void 0, void 0, function* () {
         const mailOption = {
             subject,
             html,
-            from: process.env.MAIL_SENDER_FROM,
+            from: from !== undefined ? from : process.env.MAIL_SENDER_FROM,
             to: receiver,
         };
         yield mailTransporter.sendMail(mailOption);

@@ -60,6 +60,7 @@ class SharedServices {
                         receiver: user.email,
                         subject: utils_1.EMAIL_DATA.subject.dailyNotification,
                         template: utils_1.EMAIL_DATA.template.dailyNotification,
+                        from: 'Lunchtyme Notifications <notifications@lunchtyme.store>',
                         context: {
                             name: `${record.first_name} ${record.last_name}`,
                             email: user.email,

@@ -16,7 +16,16 @@ const infrastructure_1 = require("../infrastructure");
 const addFoodToMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Parse the categories string into an array
-        const categories = req.body.categories.split(',') || [];
+        let categories;
+        if (Array.isArray(req.body.categories)) {
+            categories = req.body.categories;
+        }
+        else if (typeof req.body.categories === 'string') {
+            categories = req.body.categories.split(',') || [];
+        }
+        else {
+            throw new utils_1.BadRequestError('Invalid categories provided');
+        }
         const result = yield services_1.foodMenuCreateService.addFoodToMenu(Object.assign(Object.assign({}, req.body), { categories, user: req.user, food_image: req.file }));
         utils_1.Helper.formatAPIResponse(res, 'New food added to menu', result);
     }

@@ -6,7 +6,7 @@ export const EMAIL_DATA = {
     welcome: `Welcome to ${APP_NAME}`,
     verifyEmail: `Verify your email address`,
     employeeInvitation(companyName: string) {
-      return `${companyName} (via ${APP_NAME})`;
+      return `${companyName} is inviting you to join ${APP_NAME}`;
     },
     balanceTopup: 'Wallet topup successful',
     orderReciept(orderId: string) {

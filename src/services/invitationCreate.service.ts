@@ -2,7 +2,14 @@ import { UserAccountType } from '../infrastructure';
 import { emailQueue } from '../infrastructure/queue/emailQueue';
 import { InvitationRepository } from '../repository';
 
-import { BadRequestError, CLIENT_BASE_URL, EMAIL_DATA, Helper, SendEmailParams } from '../utils';
+import {
+  APP_NAME,
+  BadRequestError,
+  CLIENT_BASE_URL,
+  EMAIL_DATA,
+  Helper,
+  SendEmailParams,
+} from '../utils';
 import logger from '../utils/logger';
 import { CreateInvitationDTO } from './dtos/request.dto';
 import { CreateInvitationDTOValidator } from './dtos/validators';
@@ -49,6 +56,7 @@ export class InvitationCreateService {
         receiver: employee_work_email,
         subject: EMAIL_DATA.subject.employeeInvitation(companyName),
         template: EMAIL_DATA.template.employeeInvitation,
+        from: `${companyName} (via ${APP_NAME}) <noreply@lunchtyme.store>`,
         context: {
           companyName,
           invitationCode,

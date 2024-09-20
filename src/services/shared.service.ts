@@ -53,7 +53,7 @@ export class SharedServices {
 
       const records = await this._individualRepo.getLunchTimeRecords();
       const list = await this.filterLunchRecords(records);
-      console.log(list);
+      // console.log(list);
     } catch (error) {
       this._logger.error(
         'Error fetching and sending email to employees whose their lunch time is 2 hours from now',
@@ -80,6 +80,8 @@ export class SharedServices {
       const bufferMinutes = 5;
       const startTime = targetTime.clone().subtract(bufferMinutes, 'minutes');
       const endTime = targetTime.clone().add(bufferMinutes, 'minutes');
+
+      console.log(record, '\n', hour24, lunchMoment, now, startTime, endTime);
 
       // Check if lunch time is within the target window
       return lunchMoment.isBetween(startTime, endTime);

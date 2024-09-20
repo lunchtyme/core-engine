@@ -8,7 +8,7 @@ exports.EMAIL_DATA = {
         welcome: `Welcome to ${exports.APP_NAME}`,
         verifyEmail: `Verify your email address`,
         employeeInvitation(companyName) {
-            return `${companyName} is inviting you to join ${exports.APP_NAME}`;
+            return `${companyName} (via ${exports.APP_NAME})`;
         },
         balanceTopup: 'Wallet topup successful',
         orderReciept(orderId) {

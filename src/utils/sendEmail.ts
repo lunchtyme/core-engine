@@ -15,6 +15,7 @@ export type SendEmailParams = {
   subject: string;
   template: string;
   context?: object;
+  from?: string;
 };
 
 const rootDir = process.cwd();
@@ -27,7 +28,7 @@ const hbsConverter = new HandlebarsConverter({
 
 export const sendEmail = async (params: SendEmailParams) => {
   try {
-    const { receiver, subject, template, context } = params;
+    const { receiver, subject, template, context, from } = params;
     if (
       !receiver ||
       typeof receiver !== 'string' ||
@@ -73,7 +74,7 @@ export const sendEmail = async (params: SendEmailParams) => {
     const mailOption: SendMailOptions = {
       subject,
       html,
-      from: process.env.MAIL_SENDER_FROM!,
+      from: from !== undefined ? from : process.env.MAIL_SENDER_FROM!,
       to: receiver,
     };
 

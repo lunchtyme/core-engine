@@ -437,22 +437,30 @@ class AuthCreateservice {
     }
     processEmployeeOnboardingData(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
             try {
                 const { error, value } = validators_1.employeeOnboardingDTOValidator.validate(params);
                 if (error) {
                     this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
-                const healthInfoParams = {
-                    allergies: value.allergies,
-                    medical_conditions: value.medical_conditions,
-                    dietary_preferences: value.dietary_preferences,
-                    user: value.user,
-                };
                 const userId = value.user.sub;
+                // Update individual user data
                 yield this._individualRepo.update(Object.assign(Object.assign({}, value), { user: userId }), session);
-                // Store user health information
-                yield this._healthInfoCreateService.addUserHealthInfo(healthInfoParams, session);
+                // Check if any health-related info is provided
+                const hasHealthInfo = ((_a = value.allergies) === null || _a === void 0 ? void 0 : _a.length) ||
+                    ((_b = value.medical_conditions) === null || _b === void 0 ? void 0 : _b.length) ||
+                    ((_c = value.dietary_preferences) === null || _c === void 0 ? void 0 : _c.length);
+                if (hasHealthInfo) {
+                    // Store user health information only if any of the fields are provided
+                    const healthInfoParams = {
+                        allergies: value.allergies || [],
+                        medical_conditions: value.medical_conditions || [],
+                        dietary_preferences: value.dietary_preferences || [],
+                        user: value.user,
+                    };
+                    yield this._healthInfoCreateService.addUserHealthInfo(healthInfoParams, session);
+                }
             }
             catch (error) {
                 this._logger.error('Error processing employee onboarding data', error);

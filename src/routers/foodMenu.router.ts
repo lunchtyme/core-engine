@@ -219,6 +219,13 @@ foodMenuRouter.post(
  *         required: false
  *         schema:
  *           type: string
+ *       - name: risk_health
+ *         in: query
+ *         description: Flag to allow fetching menus that may not be suitable for the user's health
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
  *     responses:
  *       200:
  *         description: Successfully fetched the food menu

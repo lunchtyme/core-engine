@@ -117,6 +117,7 @@ export interface FetchFoodMenuDTO extends FetchDataDTO {
   lastScore?: number;
   lastId?: string;
   user: AuthUserClaim;
+  risk_health: boolean;
 }
 
 export interface FetchFoodMenuByIdDTO {

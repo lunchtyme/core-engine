@@ -90,11 +90,13 @@ const addFoodToMenuController = (req, res, next) => __awaiter(void 0, void 0, vo
 exports.addFoodToMenuController = addFoodToMenuController;
 const fetchMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { limit, lastScore, lastId, category, query } = req.query;
+        const { limit, lastScore, lastId, category, query, risk_health } = req.query;
         // Convert category string to FoodCategory enum if provided
         const categoryEnum = category && Object.values(infrastructure_1.FoodCategory).includes(category)
             ? category
             : undefined;
+        // Ensure risk_health is treated as a boolean
+        const isRiskHealth = risk_health === 'true'; // Convert the string to a boolean
         const fetchFoodMenuDTO = {
             limit: limit ? parseInt(limit, 10) : 10,
             lastScore: lastScore ? parseFloat(lastScore) : undefined,
@@ -102,6 +104,7 @@ const fetchMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0
             category: categoryEnum,
             query: query || undefined,
             user: req.user,
+            risk_health: isRiskHealth, // Correctly assign the boolean value
         };
         const result = yield services_1.foodMenuReadService.getAllMenu(fetchFoodMenuDTO);
         utils_1.Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);

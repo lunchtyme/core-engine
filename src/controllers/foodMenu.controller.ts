@@ -80,13 +80,16 @@ export const addFoodToMenuController = async (req: Request, res: Response, next:
 
 export const fetchMenuController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { limit, lastScore, lastId, category, query } = req.query;
+    const { limit, lastScore, lastId, category, query, risk_health } = req.query;
 
     // Convert category string to FoodCategory enum if provided
     const categoryEnum =
       category && Object.values(FoodCategory).includes(category as FoodCategory)
         ? (category as FoodCategory)
         : undefined;
+
+    // Ensure risk_health is treated as a boolean
+    const isRiskHealth = risk_health === 'true'; // Convert the string to a boolean
 
     const fetchFoodMenuDTO: FetchFoodMenuDTO = {
       limit: limit ? parseInt(limit as string, 10) : 10,
@@ -95,7 +98,9 @@ export const fetchMenuController = async (req: Request, res: Response, next: Nex
       category: categoryEnum,
       query: (query as string) || undefined,
       user: req.user as AuthUserClaim,
+      risk_health: isRiskHealth, // Correctly assign the boolean value
     };
+
     const result = await foodMenuReadService.getAllMenu(fetchFoodMenuDTO);
     Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
   } catch (error) {

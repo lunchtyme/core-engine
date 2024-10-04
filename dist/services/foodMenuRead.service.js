@@ -19,15 +19,11 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FoodMenuReadService = void 0;
 const infrastructure_1 = require("../infrastructure");
 const utils_1 = require("../utils");
-const logger_1 = __importDefault(require("../utils/logger"));
-const getAllMenu_query_1 = require("./queries/getAllMenu.query");
+const getRecommendedMeals_query_1 = require("./queries/getRecommendedMeals.query");
 class FoodMenuReadService {
     constructor(_foodMenuRepo, _redisService, _logger) {
         this._foodMenuRepo = _foodMenuRepo;
@@ -37,15 +33,23 @@ class FoodMenuReadService {
     getAllMenu(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.COMPANY, infrastructure_1.UserAccountType.INDIVIDUAL, infrastructure_1.UserAccountType.ADMIN], 'fetch food menus');
-                const { query, category } = params, filters = __rest(params, ["query", "category"]);
-                const fetchPipeline = (0, getAllMenu_query_1.getFoodMenuQuery)({ query, category });
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.INDIVIDUAL, infrastructure_1.UserAccountType.ADMIN], 'fetch food menus');
+                const { query, category, risk_health } = params, filters = __rest(params, ["query", "category", "risk_health"]);
+                // Ensure risk_health is treated as a boolean
+                const isRiskHealth = typeof risk_health === 'boolean' ? risk_health : false;
+                // Get the aggregation pipeline with the adjusted risk_health parameter
+                const fetchPipeline = yield (0, getRecommendedMeals_query_1.getRecommendedMealsQuery)({
+                    query,
+                    category,
+                    userId: params.user.sub,
+                    risk_health: isRiskHealth,
+                });
                 const result = yield this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, filters);
                 this._logger.info('Fetching food menu from database');
                 return result;
             }
             catch (error) {
-                logger_1.default.error('Error fetching food list menu:', error);
+                this._logger.error('Error fetching food list menu:', error);
                 throw error;
             }
         });
@@ -53,7 +57,7 @@ class FoodMenuReadService {
     getOneMenu(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.COMPANY, infrastructure_1.UserAccountType.INDIVIDUAL, infrastructure_1.UserAccountType.ADMIN], 'fetch food menu by id');
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.INDIVIDUAL, infrastructure_1.UserAccountType.ADMIN], 'fetch food menu by id');
                 const result = yield this._foodMenuRepo.getOne(params.menuId);
                 if (!result) {
                     throw new utils_1.NotFoundError('Food menu not found');

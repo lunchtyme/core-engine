@@ -46,6 +46,8 @@ import { InvitationStatus } from '../infrastructure';
 import { UserAccountType } from '../infrastructure/database/models/enums';
 import logger from '../utils/logger';
 import { emailQueue } from '../infrastructure/queue/emailQueue';
+import { HealthInfoCreateService } from './healthInfoCreate.service';
+import { AuthUserClaim } from '../typings/user';
 
 export class AuthCreateservice {
   constructor(
@@ -57,6 +59,7 @@ export class AuthCreateservice {
     private readonly _addressRepo: AddressRepository,
     private readonly _sharedService: SharedServices,
     private readonly _redisService: RedisService,
+    private readonly _healthInfoCreateService: HealthInfoCreateService,
     private readonly _emailQueue: typeof emailQueue,
     private readonly _logger: typeof logger,
   ) {}
@@ -406,7 +409,7 @@ export class AuthCreateservice {
     try {
       const user = await this._sharedService.getUser({
         identifier: 'id',
-        value: params.user,
+        value: (params.user as AuthUserClaim).sub as mongoose.Types.ObjectId,
       });
       // Process address creation:
       await session.withTransaction(async () => {
@@ -425,7 +428,7 @@ export class AuthCreateservice {
             await this.processEmployeeOnboardingData(
               {
                 ...params,
-                user: user._id,
+                user: params.user as AuthUserClaim,
               } as EmployeeOnboardingDTO,
               session,
             );
@@ -456,11 +459,16 @@ export class AuthCreateservice {
         throw new BadRequestError(error.message);
       }
       // check if user has already create an address
-      const isDuplicateAddress = await this._addressRepo.checkIfExist(params.user);
+      const isDuplicateAddress = await this._addressRepo.checkIfExist(
+        (params.user as AuthUserClaim).sub as mongoose.Types.ObjectId,
+      );
       if (isDuplicateAddress) {
         throw new BadRequestError('Address already created, update instead');
       }
-      const result = await this._addressRepo.create(value, session);
+      const result = await this._addressRepo.create(
+        { ...value, user: (params.user as AuthUserClaim).sub as mongoose.Types.ObjectId },
+        session,
+      );
       this._logger.info('Address created', result._id);
       return result._id;
     } catch (error) {
@@ -479,7 +487,16 @@ export class AuthCreateservice {
         this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-      return await this._individualRepo.update(value, session);
+      const healthInfoParams = {
+        allergies: value.allergies,
+        medical_conditions: value.medical_conditions,
+        dietary_preferences: value.dietary_preferences,
+        user: value.user as AuthUserClaim,
+      };
+      const userId = (value.user as AuthUserClaim).sub as mongoose.Types.ObjectId;
+      await this._individualRepo.update({ ...value, user: userId }, session);
+      // Store user health information
+      await this._healthInfoCreateService.addUserHealthInfo(healthInfoParams, session);
     } catch (error) {
       this._logger.error('Error processing employee onboarding data', error);
       throw error;

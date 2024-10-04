@@ -3,6 +3,7 @@ import { CreateIndividualAccountDTO } from '../services/dtos/request.dto';
 import { IndividualModel } from '../infrastructure';
 import { getEmployeesLunchTime2hoursFromNowQuery } from '../services/queries/getEmployeeLunchTime.query';
 import logger from '../utils/logger';
+import { AuthUserClaim } from '../typings/user';
 
 export class IndividualRepository {
   async create(params: CreateIndividualAccountDTO, session?: mongoose.ClientSession | null) {
@@ -19,12 +20,13 @@ export class IndividualRepository {
     params: Partial<CreateIndividualAccountDTO>,
     session?: mongoose.ClientSession | null,
   ) {
+    const updateQuery = { ...params };
+    const options: any = {};
+    if (session) {
+      options.session = session;
+    }
+
     try {
-      const updateQuery = { ...params };
-      const options: any = {};
-      if (session) {
-        options.session = session;
-      }
       const result = await IndividualModel.updateOne({ user: params.user }, updateQuery, options);
       return result.acknowledged;
     } catch (error) {

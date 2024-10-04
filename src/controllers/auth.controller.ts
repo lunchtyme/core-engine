@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Helper } from '../utils';
 import { authCreateService, authReadService } from '../services';
+import { AuthUserClaim } from '../typings/user';
 
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -56,8 +57,8 @@ export const meController = async (req: Request, res: Response, next: NextFuncti
 export const onboardingController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract userId from session claim
-    const userId = req.user?.sub;
-    const result = await authCreateService.processUserOnboarding({ ...req.body, user: userId });
+    const user = req.user as AuthUserClaim;
+    const result = await authCreateService.processUserOnboarding({ ...req.body, user });
     Helper.formatAPIResponse(res, 'Onboarding completed', result);
   } catch (error) {
     next(error);

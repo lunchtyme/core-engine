@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPasswordDTOValidator = exports.initiatePasswordResetDTOValidator = exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.AddUserHealthInfoDTOValidator = exports.resetPasswordDTOValidator = exports.initiatePasswordResetDTOValidator = exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const infrastructure_1 = require("../../../infrastructure");
 exports.createAccountDTOValidator = joi_1.default.object({
@@ -234,5 +234,28 @@ exports.resetPasswordDTOValidator = joi_1.default.object({
     confirmPassword: joi_1.default.any().valid(joi_1.default.ref('password')).required().messages({
         'any.only': 'Passwords must match',
         'any.required': 'Confirm Password is required',
+    }),
+});
+exports.AddUserHealthInfoDTOValidator = joi_1.default.object({
+    allergies: joi_1.default.array().items(joi_1.default.string().min(1)).required().messages({
+        'array.base': 'Allergies must be an array of strings',
+        'array.empty': 'Please provide at least one allergy',
+        'any.required': 'Allergies field is required',
+        'string.empty': 'Each allergy must be a non-empty string',
+    }),
+    medical_conditions: joi_1.default.array().items(joi_1.default.string().min(1)).required().messages({
+        'array.base': 'Medical conditions must be an array of strings',
+        'array.empty': 'Please provide at least one medical condition',
+        'any.required': 'Medical conditions field is required',
+        'string.empty': 'Each medical condition must be a non-empty string',
+    }),
+    dietary_preferences: joi_1.default.array().items(joi_1.default.string().min(1)).required().messages({
+        'array.base': 'Dietary preferences must be an array of strings',
+        'array.empty': 'Please provide at least one dietary preference',
+        'any.required': 'Dietary preferences field is required',
+        'string.empty': 'Each dietary preference must be a non-empty string',
+    }),
+    user: joi_1.default.object().required().messages({
+        'any.required': 'User information is required',
     }),
 });

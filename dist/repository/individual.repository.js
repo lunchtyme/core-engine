@@ -31,12 +31,12 @@ class IndividualRepository {
     }
     update(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
+            const updateQuery = Object.assign({}, params);
+            const options = {};
+            if (session) {
+                options.session = session;
+            }
             try {
-                const updateQuery = Object.assign({}, params);
-                const options = {};
-                if (session) {
-                    options.session = session;
-                }
                 const result = yield infrastructure_1.IndividualModel.updateOne({ user: params.user }, updateQuery, options);
                 return result.acknowledged;
             }

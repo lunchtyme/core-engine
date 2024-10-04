@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderReadService = exports.orderCreateService = exports.adminReadService = exports.billingReadService = exports.billingCreateService = exports.userReadService = exports.foodMenuReadService = exports.foodMenuCreateService = exports.invitationReadService = exports.invitationCreateService = exports.authReadService = exports.authCreateService = exports.redisService = exports.sharedServices = exports.orderRepository = exports.billingRepository = exports.foodMenuRepository = exports.invitationRepository = exports.addressRepository = exports.individualRepository = exports.adminRepository = exports.companyRepository = exports.userRepository = void 0;
+exports.orderReadService = exports.orderCreateService = exports.adminReadService = exports.billingReadService = exports.billingCreateService = exports.userReadService = exports.foodMenuReadService = exports.foodMenuCreateService = exports.invitationReadService = exports.invitationCreateService = exports.authReadService = exports.authCreateService = exports.redisService = exports.healthInfoReadService = exports.healthInfoCreateService = exports.sharedServices = exports.healthInfoRepository = exports.orderRepository = exports.billingRepository = exports.foodMenuRepository = exports.invitationRepository = exports.addressRepository = exports.individualRepository = exports.adminRepository = exports.companyRepository = exports.userRepository = void 0;
 const infrastructure_1 = require("../infrastructure");
 const emailQueue_1 = require("../infrastructure/queue/emailQueue");
 const processAtQueue_1 = require("../infrastructure/queue/processAtQueue");
@@ -16,6 +16,8 @@ const billingCreate_service_1 = require("./billingCreate.service");
 const billingRead_service_1 = require("./billingRead.service");
 const foodMenuCreate_service_1 = require("./foodMenuCreate.service");
 const foodMenuRead_service_1 = require("./foodMenuRead.service");
+const healthInfoCreate_service_1 = require("./healthInfoCreate.service");
+const healthInfoRead_service_1 = require("./healthInfoRead.service");
 const invitationCreate_service_1 = require("./invitationCreate.service");
 const invitationRead_service_1 = require("./invitationRead.service");
 const orderCreate_service_1 = require("./orderCreate.service");
@@ -33,12 +35,15 @@ exports.invitationRepository = new repository_1.InvitationRepository();
 exports.foodMenuRepository = new repository_1.FoodMenuRepository();
 exports.billingRepository = new repository_1.BillingRepository();
 exports.orderRepository = new repository_1.OrderRepository();
+exports.healthInfoRepository = new repository_1.HealthInfoRepository();
 // Shared services instance
 exports.sharedServices = new shared_service_1.SharedServices(exports.userRepository, exports.individualRepository, emailQueue_1.emailQueue, processAtQueue_1.processAtQueue, logger_1.default);
+exports.healthInfoCreateService = new healthInfoCreate_service_1.HealthInfoCreateService(exports.healthInfoRepository, logger_1.default);
+exports.healthInfoReadService = new healthInfoRead_service_1.HealthInfoReadService(exports.healthInfoRepository, logger_1.default);
 // Redis service instance
 exports.redisService = new redis_service_1.RedisService(infrastructure_1.redisCache);
 // Auth create/write service instance
-exports.authCreateService = new authCreate_service_1.AuthCreateservice(exports.userRepository, exports.companyRepository, exports.adminRepository, exports.individualRepository, exports.invitationRepository, exports.addressRepository, exports.sharedServices, exports.redisService, emailQueue_1.emailQueue, logger_1.default);
+exports.authCreateService = new authCreate_service_1.AuthCreateservice(exports.userRepository, exports.companyRepository, exports.adminRepository, exports.individualRepository, exports.invitationRepository, exports.addressRepository, exports.sharedServices, exports.redisService, exports.healthInfoCreateService, emailQueue_1.emailQueue, logger_1.default);
 // Auth read service instance
 exports.authReadService = new authRead_service_1.AuthReadservice(exports.userRepository, exports.companyRepository, exports.adminRepository, exports.individualRepository, exports.sharedServices, exports.redisService, logger_1.default);
 exports.invitationCreateService = new invitationCreate_service_1.InvitationCreateService(exports.invitationRepository, exports.sharedServices, emailQueue_1.emailQueue, logger_1.default);

@@ -7,6 +7,7 @@ import {
   BillingRepository,
   CompanyRepository,
   FoodMenuRepository,
+  HealthInfoRepository,
   IndividualRepository,
   InvitationRepository,
   OrderRepository,
@@ -20,6 +21,8 @@ import { BillingCreateService } from './billingCreate.service';
 import { BillingReadService } from './billingRead.service';
 import { FoodMenuCreateService } from './foodMenuCreate.service';
 import { FoodMenuReadService } from './foodMenuRead.service';
+import { HealthInfoCreateService } from './healthInfoCreate.service';
+import { HealthInfoReadService } from './healthInfoRead.service';
 import { InvitationCreateService } from './invitationCreate.service';
 import { InvitationReadService } from './invitationRead.service';
 import { OrderCreateService } from './orderCreate.service';
@@ -38,6 +41,7 @@ export const invitationRepository = new InvitationRepository();
 export const foodMenuRepository = new FoodMenuRepository();
 export const billingRepository = new BillingRepository();
 export const orderRepository = new OrderRepository();
+export const healthInfoRepository = new HealthInfoRepository();
 
 // Shared services instance
 export const sharedServices = new SharedServices(
@@ -47,6 +51,9 @@ export const sharedServices = new SharedServices(
   processAtQueue,
   logger,
 );
+
+export const healthInfoCreateService = new HealthInfoCreateService(healthInfoRepository, logger);
+export const healthInfoReadService = new HealthInfoReadService(healthInfoRepository, logger);
 
 // Redis service instance
 export const redisService = new RedisService(redisCache);
@@ -61,6 +68,7 @@ export const authCreateService = new AuthCreateservice(
   addressRepository,
   sharedServices,
   redisService,
+  healthInfoCreateService,
   emailQueue,
   logger,
 );

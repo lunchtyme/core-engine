@@ -92,6 +92,16 @@ class SharedServices {
         return __awaiter(this, void 0, void 0, function* () {
             return records.filter((record) => {
                 const userTimeZone = record.user.time_zone;
+                // Skip records that were already processed within this window
+                if (record.processed_at) {
+                    const processedAt = (0, moment_timezone_1.default)(record.processed_at).tz(userTimeZone);
+                    const startOfToday = (0, moment_timezone_1.default)().tz(userTimeZone).startOf('day');
+                    const endOfToday = (0, moment_timezone_1.default)().tz(userTimeZone).endOf('day');
+                    // Check if it was already processed today and is within the time window
+                    if (processedAt.isBetween(startOfToday, endOfToday)) {
+                        return false; // Already processed today, skip
+                    }
+                }
                 // Parse lunch_time in the user's time zone
                 const [hour, minutePart] = record.lunch_time.split(':');
                 const [minute, period] = minutePart.split(' '); // Handle AM/PM
@@ -103,16 +113,6 @@ class SharedServices {
                 const bufferMinutes = 5;
                 const startTime = targetTime.clone().subtract(bufferMinutes, 'minutes');
                 const endTime = targetTime.clone().add(bufferMinutes, 'minutes');
-                // Skip records that were already processed within this window
-                if (record.processed_at) {
-                    const processedAt = (0, moment_timezone_1.default)(record.processed_at).tz(userTimeZone);
-                    const startOfToday = (0, moment_timezone_1.default)().tz(userTimeZone).startOf('day');
-                    const endOfToday = (0, moment_timezone_1.default)().tz(userTimeZone).endOf('day');
-                    // Check if it was already processed today and is within the time window
-                    if (processedAt.isBetween(startOfToday, endOfToday)) {
-                        return false; // Already processed today, skip
-                    }
-                }
                 // Check if lunch time is within the target window
                 return lunchMoment.isBetween(startTime, endTime);
             });

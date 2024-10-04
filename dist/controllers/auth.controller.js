@@ -66,11 +66,10 @@ const meController = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.meController = meController;
 const onboardingController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     try {
         // Extract userId from session claim
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub;
-        const result = yield services_1.authCreateService.processUserOnboarding(Object.assign(Object.assign({}, req.body), { user: userId }));
+        const user = req.user;
+        const result = yield services_1.authCreateService.processUserOnboarding(Object.assign(Object.assign({}, req.body), { user }));
         utils_1.Helper.formatAPIResponse(res, 'Onboarding completed', result);
     }
     catch (error) {

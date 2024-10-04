@@ -56,7 +56,7 @@ const infrastructure_1 = require("../infrastructure");
 const enums_1 = require("../infrastructure/database/models/enums");
 const emailQueue_1 = require("../infrastructure/queue/emailQueue");
 class AuthCreateservice {
-    constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _invitationRepo, _addressRepo, _sharedService, _redisService, _emailQueue, _logger) {
+    constructor(_userRepo, _companyRepo, _adminRepo, _individualRepo, _invitationRepo, _addressRepo, _sharedService, _redisService, _healthInfoCreateService, _emailQueue, _logger) {
         this._userRepo = _userRepo;
         this._companyRepo = _companyRepo;
         this._adminRepo = _adminRepo;
@@ -65,6 +65,7 @@ class AuthCreateservice {
         this._addressRepo = _addressRepo;
         this._sharedService = _sharedService;
         this._redisService = _redisService;
+        this._healthInfoCreateService = _healthInfoCreateService;
         this._emailQueue = _emailQueue;
         this._logger = _logger;
     }
@@ -380,7 +381,7 @@ class AuthCreateservice {
             try {
                 const user = yield this._sharedService.getUser({
                     identifier: 'id',
-                    value: params.user,
+                    value: params.user.sub,
                 });
                 // Process address creation:
                 yield session.withTransaction(() => __awaiter(this, void 0, void 0, function* () {
@@ -390,7 +391,7 @@ class AuthCreateservice {
                             yield this.processCompanyOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
                             break;
                         case enums_1.UserAccountType.INDIVIDUAL:
-                            yield this.processEmployeeOnboardingData(Object.assign(Object.assign({}, params), { user: user._id }), session);
+                            yield this.processEmployeeOnboardingData(Object.assign(Object.assign({}, params), { user: params.user }), session);
                             break;
                         default:
                             throw new Error('Account type not recognized');
@@ -420,11 +421,11 @@ class AuthCreateservice {
                     throw new utils_1.BadRequestError(error.message);
                 }
                 // check if user has already create an address
-                const isDuplicateAddress = yield this._addressRepo.checkIfExist(params.user);
+                const isDuplicateAddress = yield this._addressRepo.checkIfExist(params.user.sub);
                 if (isDuplicateAddress) {
                     throw new utils_1.BadRequestError('Address already created, update instead');
                 }
-                const result = yield this._addressRepo.create(value, session);
+                const result = yield this._addressRepo.create(Object.assign(Object.assign({}, value), { user: params.user.sub }), session);
                 this._logger.info('Address created', result._id);
                 return result._id;
             }
@@ -442,7 +443,16 @@ class AuthCreateservice {
                     this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
-                return yield this._individualRepo.update(value, session);
+                const healthInfoParams = {
+                    allergies: value.allergies,
+                    medical_conditions: value.medical_conditions,
+                    dietary_preferences: value.dietary_preferences,
+                    user: value.user,
+                };
+                const userId = value.user.sub;
+                yield this._individualRepo.update(Object.assign(Object.assign({}, value), { user: userId }), session);
+                // Store user health information
+                yield this._healthInfoCreateService.addUserHealthInfo(healthInfoParams, session);
             }
             catch (error) {
                 this._logger.error('Error processing employee onboarding data', error);

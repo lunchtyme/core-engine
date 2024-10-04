@@ -248,3 +248,27 @@ export const resetPasswordDTOValidator = Joi.object({
     'any.required': 'Confirm Password is required',
   }),
 });
+
+export const AddUserHealthInfoDTOValidator = Joi.object({
+  allergies: Joi.array().items(Joi.string().min(1)).required().messages({
+    'array.base': 'Allergies must be an array of strings',
+    'array.empty': 'Please provide at least one allergy',
+    'any.required': 'Allergies field is required',
+    'string.empty': 'Each allergy must be a non-empty string',
+  }),
+  medical_conditions: Joi.array().items(Joi.string().min(1)).required().messages({
+    'array.base': 'Medical conditions must be an array of strings',
+    'array.empty': 'Please provide at least one medical condition',
+    'any.required': 'Medical conditions field is required',
+    'string.empty': 'Each medical condition must be a non-empty string',
+  }),
+  dietary_preferences: Joi.array().items(Joi.string().min(1)).required().messages({
+    'array.base': 'Dietary preferences must be an array of strings',
+    'array.empty': 'Please provide at least one dietary preference',
+    'any.required': 'Dietary preferences field is required',
+    'string.empty': 'Each dietary preference must be a non-empty string',
+  }),
+  user: Joi.object().required().messages({
+    'any.required': 'User information is required',
+  }),
+});

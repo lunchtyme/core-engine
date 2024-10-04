@@ -464,6 +464,24 @@ authRouter.get('/me', resolveAuthContext, meController);
  *             lunch_time:
  *               type: string
  *               example: "12:00 PM"
+ *             allergies:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               example: ["peanuts", "shellfish"]
+ *               description: List of allergies the user has
+ *             medical_conditions:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               example: ["diabetes", "hypertension"]
+ *               description: List of medical conditions the user has
+ *             dietary_preferences:
+ *               type: array
+ *               items:
+ *                 type: string
+ *               example: ["low_sugar", "low_sodium"]
+ *               description: Dietary preferences or restrictions
  *
  *     CompanyOnboardingDTO:
  *       allOf:

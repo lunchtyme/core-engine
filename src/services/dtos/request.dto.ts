@@ -60,11 +60,18 @@ export interface CreateAddressDTO {
   state: string;
   country: string;
   zip_code: string;
-  user: mongoose.Types.ObjectId;
+  user: AuthUserClaim | mongoose.Types.ObjectId;
   address_line_2?: string;
 }
 
-export interface EmployeeOnboardingDTO extends CreateAddressDTO {
+export interface AddUserHealthInfoDTO {
+  allergies: string[];
+  medical_conditions: string[];
+  dietary_preferences: string[];
+  user: AuthUserClaim | mongoose.Types.ObjectId;
+}
+
+export interface EmployeeOnboardingDTO extends AddUserHealthInfoDTO, CreateAddressDTO {
   lunch_time: string;
 }
 

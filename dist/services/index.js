@@ -27,3 +27,5 @@ __exportStar(require("./dtos"), exports);
 __exportStar(require("./orderCreate.service"), exports);
 __exportStar(require("./orderRead.service"), exports);
 __exportStar(require("./adminRead.service"), exports);
+__exportStar(require("./healthInfoCreate.service"), exports);
+__exportStar(require("./healthInfoRead.service"), exports);

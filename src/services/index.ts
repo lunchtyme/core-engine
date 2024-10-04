@@ -11,3 +11,5 @@ export * from './dtos';
 export * from './orderCreate.service';
 export * from './orderRead.service';
 export * from './adminRead.service';
+export * from './healthInfoCreate.service';
+export * from './healthInfoRead.service';

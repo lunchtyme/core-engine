@@ -21,3 +21,4 @@ __exportStar(require("./users.controller"), exports);
 __exportStar(require("./billing.controller"), exports);
 __exportStar(require("./analytics.controller"), exports);
 __exportStar(require("./order.controller"), exports);
+__exportStar(require("./mealSuggestion.controller"), exports);

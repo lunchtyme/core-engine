@@ -21,3 +21,4 @@ __exportStar(require("./user.router"), exports);
 __exportStar(require("./billing.router"), exports);
 __exportStar(require("./order.router"), exports);
 __exportStar(require("./analytics.router"), exports);
+__exportStar(require("./mealSuggestion.router"), exports);

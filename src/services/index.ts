@@ -13,3 +13,5 @@ export * from './orderRead.service';
 export * from './adminRead.service';
 export * from './healthInfoCreate.service';
 export * from './healthInfoRead.service';
+export * from './mealSuggestionCreate.service';
+export * from './mealSuggestionRead.service';

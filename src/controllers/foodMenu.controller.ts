@@ -5,6 +5,7 @@ import { foodMenuCreateService, foodMenuReadService, userReadService } from '../
 import { FetchFoodMenuDTO } from '../services/dtos/request.dto';
 import { FoodCategory } from '../infrastructure';
 import { AuthUserClaim } from '../typings/user';
+import mongoose from 'mongoose';
 
 export const addFoodToMenuController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -96,6 +97,20 @@ export const fetchMenuController = async (req: Request, res: Response, next: Nex
       user: req.user as AuthUserClaim,
     };
     const result = await foodMenuReadService.getAllMenu(fetchFoodMenuDTO);
+    Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fetchOneMenuController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { menuId } = req.params;
+
+    const result = await foodMenuReadService.getOneMenu({
+      menuId: new mongoose.Types.ObjectId(menuId),
+      user: req.user as AuthUserClaim,
+    });
     Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
   } catch (error) {
     next(error);

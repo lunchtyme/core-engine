@@ -3,6 +3,7 @@ import { resolveAuthContext } from '../middlewares';
 import {
   addFoodToMenuController,
   fetchMenuController,
+  fetchOneMenuController,
   updateFoodMenuAvaliabilityController,
 } from '../controllers';
 import multer from 'multer';
@@ -284,3 +285,91 @@ foodMenuRouter.get('/', resolveAuthContext, fetchMenuController);
  *                       description: Updated availability status of the food menu item
  */
 foodMenuRouter.patch('/', resolveAuthContext, updateFoodMenuAvaliabilityController);
+
+/**
+ * @swagger
+ * /food-menu/{menuId}:
+ *   get:
+ *     summary: Fetch a specific food menu item by its ID
+ *     tags:
+ *       - FoodMenu
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: menuId
+ *         in: path
+ *         description: The ID of the food menu item to fetch
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "64a0f59c75e5f8abdbc12345"
+ *     responses:
+ *       200:
+ *         description: Successfully fetched the food menu item
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Successfully fetched the food menu
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       description: The name of the food item
+ *                       example: "Grilled Chicken Salad"
+ *                     description:
+ *                       type: string
+ *                       description: A brief description of the food item
+ *                       example: "A healthy grilled chicken salad with fresh greens"
+ *                     price:
+ *                       type: string
+ *                       description: The price of the food item
+ *                       example: "15.99"
+ *                     categories:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: The categories the food item belongs to
+ *                       example: ["Salad", "Grill"]
+ *                     health_benefits:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: Health benefits of the food item
+ *                       example: ["Boosts immunity", "Rich in vitamins"]
+ *                     allergens:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: Allergens present in the food item
+ *                       example: ["Dairy", "Peanuts"]
+ *                     suitable_for_conditions:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: Medical conditions the food item is suitable for
+ *                       example: ["Diabetes", "Hypertension"]
+ *                     suitable_for_diet:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: Dietary preferences the food item is suitable for
+ *                       example: ["Vegan", "Gluten-Free"]
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: The creation date of the food menu item
+ *                       example: "2024-10-04T12:34:56.789Z"
+ *       400:
+ *         description: Bad request, invalid menuId parameter
+ *       404:
+ *         description: Food menu item not found
+ *       500:
+ *         description: Internal server error
+ */
+
+foodMenuRouter.get('/:menuId', resolveAuthContext, fetchOneMenuController);

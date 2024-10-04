@@ -9,3 +9,4 @@ export * from './invitation.model';
 export * from './billing.model';
 export * from './enums';
 export * from './healthInfo.model';
+export * from './mealSuggestion.model';

@@ -5,3 +5,4 @@ export * from './user.router';
 export * from './billing.router';
 export * from './order.router';
 export * from './analytics.router';
+export * from './mealSuggestion.router';

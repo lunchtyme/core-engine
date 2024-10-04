@@ -59,6 +59,7 @@ SERVER.use('/users', routers_1.userRouter);
 SERVER.use('/billings', routers_1.billingRouter);
 SERVER.use('/analytics', routers_1.analyticsRouter);
 SERVER.use('/orders', routers_1.orderRouter);
+SERVER.use('/meal', routers_1.mealSuggestionRouter);
 SERVER.use(index_2.notFoundMiddleware);
 SERVER.use(index_2.globalErrorMiddleware);
 SERVER.listen(PORT, () => {

@@ -101,6 +101,10 @@ export interface AddFoodToMenuDTO {
   categories: FoodCategory[];
   user: AuthUserClaim | mongoose.Types.ObjectId;
   food_image: Express.Multer.File | string;
+  health_benefits: string[];
+  allergens: string[];
+  suitable_for_conditions: string[];
+  suitable_for_diet: string[];
 }
 
 export interface FetchDataDTO {

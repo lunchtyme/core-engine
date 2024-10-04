@@ -61,6 +61,24 @@ const foodMenuSchema = new Schema(
       ref: 'User',
       required: true,
     },
+
+    // New fields to store health-related information
+    health_benefits: {
+      type: [String], // List of health benefits like "low sodium", "high protein"
+      default: [],
+    },
+    allergens: {
+      type: [String], // List of possible allergens like "peanuts", "gluten"
+      default: [],
+    },
+    suitable_for_conditions: {
+      type: [String], // List of medical conditions this food is suitable for
+      default: [],
+    },
+    suitable_for_diet: {
+      type: [String], // List of dietary preferences like "Vegan", "Gluten-Free"
+      default: [],
+    },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
@@ -77,10 +95,32 @@ export interface FoodMenu {
   available: boolean;
   added_by: mongoose.Types.ObjectId;
   food_image: string;
+  health_benefits: string[];
+  allergens: string[];
+  suitable_for_conditions: string[];
+  suitable_for_diet: string[];
   created_at?: Date;
   updated_at?: Date;
 }
 
+foodMenuSchema.pre('save', function (next) {
+  this.health_benefits = this.health_benefits.map((value) =>
+    value.toLowerCase().replace(/\s+/g, '_'),
+  );
+  this.allergens = this.allergens.map((value) => value.toLowerCase().replace(/\s+/g, '_'));
+  this.suitable_for_conditions = this.suitable_for_conditions.map((value) =>
+    value.toLowerCase().replace(/\s+/g, '_'),
+  );
+  this.suitable_for_diet = this.suitable_for_diet.map((value) =>
+    value.toLowerCase().replace(/\s+/g, '_'),
+  );
+  next();
+});
+
 foodMenuSchema.index({ name: 'text', description: 'text' }, { background: true });
+foodMenuSchema.index({ allergens: 1 }, { background: true });
+foodMenuSchema.index({ suitable_for_conditions: 1 }, { background: true });
+foodMenuSchema.index({ suitable_for_diet: 1 }, { background: true });
+
 export interface FoodMenuDocument extends FoodMenu, Document {}
 export const FoodMenuModel = mongoose.model<FoodMenuDocument>('FoodMenu', foodMenuSchema);

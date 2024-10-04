@@ -21,12 +21,62 @@ const addFoodToMenuController = (req, res, next) => __awaiter(void 0, void 0, vo
             categories = req.body.categories;
         }
         else if (typeof req.body.categories === 'string') {
-            categories = req.body.categories.split(',') || [];
+            categories = req.body.categories.split(',').map((item) => item.trim()) || [];
         }
         else {
             throw new utils_1.BadRequestError('Invalid categories provided');
         }
-        const result = yield services_1.foodMenuCreateService.addFoodToMenu(Object.assign(Object.assign({}, req.body), { categories, user: req.user, food_image: req.file }));
+        // Parse suitable_for_diet into an array
+        let suitable_for_diet;
+        if (Array.isArray(req.body.suitable_for_diet)) {
+            suitable_for_diet = req.body.suitable_for_diet;
+        }
+        else if (typeof req.body.suitable_for_diet === 'string') {
+            suitable_for_diet =
+                req.body.suitable_for_diet.split(',').map((item) => item.trim()) || [];
+        }
+        else {
+            throw new utils_1.BadRequestError('Invalid suitable_for_diet provided');
+        }
+        // Parse suitable_for_conditions into an array
+        let suitable_for_conditions;
+        if (Array.isArray(req.body.suitable_for_conditions)) {
+            suitable_for_conditions = req.body.suitable_for_conditions;
+        }
+        else if (typeof req.body.suitable_for_conditions === 'string') {
+            suitable_for_conditions =
+                req.body.suitable_for_conditions.split(',').map((item) => item.trim()) || [];
+        }
+        else {
+            throw new utils_1.BadRequestError('Invalid suitable_for_conditions provided');
+        }
+        // Parse allergens into an array
+        let allergens;
+        if (Array.isArray(req.body.allergens)) {
+            allergens = req.body.allergens;
+        }
+        else if (typeof req.body.allergens === 'string') {
+            allergens = req.body.allergens.split(',').map((item) => item.trim()) || [];
+        }
+        else {
+            throw new utils_1.BadRequestError('Invalid allergens provided');
+        }
+        // Parse health_benefits into an array
+        let health_benefits;
+        if (Array.isArray(req.body.health_benefits)) {
+            health_benefits = req.body.health_benefits;
+        }
+        else if (typeof req.body.health_benefits === 'string') {
+            health_benefits = req.body.health_benefits.split(',').map((item) => item.trim()) || [];
+        }
+        else {
+            throw new utils_1.BadRequestError('Invalid health_benefits provided');
+        }
+        const result = yield services_1.foodMenuCreateService.addFoodToMenu(Object.assign(Object.assign({}, req.body), { categories, // Pass the parsed array
+            suitable_for_diet, // Pass the parsed array
+            suitable_for_conditions, // Pass the parsed array
+            allergens, // Pass the parsed array
+            health_benefits, user: req.user, food_image: req.file }));
         utils_1.Helper.formatAPIResponse(res, 'New food added to menu', result);
     }
     catch (error) {

@@ -189,26 +189,53 @@ export const CreateInvitationDTOValidator = Joi.object({
 });
 
 export const AddFoodToMenuDTOValidator = Joi.object({
-  name: Joi.string().required().messages({
+  name: Joi.string().required().example('Grilled Chicken Salad').messages({
     'any.required': "Provide the name of the food you're adding",
   }),
-  description: Joi.string().required().messages({
-    'any.required': "Provide a brief description of the food you're adding",
-  }),
-  price: Joi.string().required().messages({
+  description: Joi.string()
+    .required()
+    .example('A healthy grilled chicken salad with fresh greens')
+    .messages({
+      'any.required': "Provide a brief description of the food you're adding",
+    }),
+  price: Joi.string().required().example('15.99').messages({
     'any.required': 'Add a price to the food menu',
   }),
   categories: Joi.array()
     .items(Joi.string().valid(...Object.values(FoodCategory)))
     .required()
+    .example(['Salad', 'Grill'])
     .messages({
       'any.required': 'Please provide one or more categories the food belongs to',
       'any.only': 'Invalid category provided',
     }),
-  user: Joi.required(),
-  // food_image: Joi.required().messages({
-  //   'any.required': 'Please provide the food menu cover image',
-  // }),
+  user: Joi.required().example('603dcd417997db243b3c7a6d'), // Example ObjectId
+
+  // New health-related fields with examples
+  health_benefits: Joi.array()
+    .items(Joi.string())
+    .optional()
+    .example(['Rich in vitamins', 'Boosts immunity'])
+    .messages({
+      'array.includes': 'Health benefits should be a list of strings',
+    }),
+  allergens: Joi.array().items(Joi.string()).optional().example(['Peanuts', 'Dairy']).messages({
+    'array.includes': 'Allergens should be a list of strings',
+  }),
+  suitable_for_conditions: Joi.array()
+    .items(Joi.string())
+    .optional()
+    .example(['Diabetes', 'Hypertension'])
+    .messages({
+      'array.includes': 'Medical condition suitability should be a list of strings',
+    }),
+  suitable_for_diet: Joi.array()
+    .items(Joi.string())
+    .optional()
+    .example(['Vegan', 'Gluten-Free'])
+    .messages({
+      'array.includes': 'Dietary suitability should be a list of strings',
+    }),
 }).unknown();
 
 export const CreateBillingDTOValidator = Joi.object({

@@ -27,7 +27,7 @@ class FoodMenuCreateService {
                     this._logger.error('Validation error', error);
                     throw new utils_1.BadRequestError(error.message);
                 }
-                const { user, price, description, name, categories } = value;
+                const { user, price, description, name, categories, allergens, suitable_for_conditions, suitable_for_diet, health_benefits, } = value;
                 // Only accept certain text file e.g (jpeg, webp, png e.t.c)
                 const allowedMimeTypes = ['image/jpeg', 'image/webp', 'image/png'];
                 const file = params.food_image;
@@ -48,6 +48,10 @@ class FoodMenuCreateService {
                     categories,
                     user: user.sub,
                     food_image: photo,
+                    health_benefits,
+                    allergens,
+                    suitable_for_conditions,
+                    suitable_for_diet,
                 };
                 const result = yield this._foodMenuRepo.create(addFoodMenuParams);
                 return result.id;

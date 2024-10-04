@@ -41,6 +41,10 @@ exports.foodMenuRouter = (0, express_1.Router)();
  *               - price
  *               - categories
  *               - food_image
+ *               - health_benefits
+ *               - allergens
+ *               - suitable_for_conditions
+ *               - suitable_for_diet
  *             properties:
  *               name:
  *                 type: string
@@ -64,6 +68,30 @@ exports.foodMenuRouter = (0, express_1.Router)();
  *                 type: string
  *                 format: binary
  *                 description: The image of the food item
+ *               health_benefits:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of health benefits
+ *                 example: ["Boosts immunity", "Aids digestion"]
+ *               allergens:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of allergens present in the food
+ *                 example: ["Nuts", "Dairy"]
+ *               suitable_for_conditions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of medical conditions suitable for this food
+ *                 example: ["Diabetes", "Hypertension"]
+ *               suitable_for_diet:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of dietary preferences suitable for this food
+ *                 example: ["Vegan", "Gluten-Free"]
  *     responses:
  *       201:
  *         description: Food item added to the menu successfully
@@ -103,6 +131,30 @@ exports.foodMenuRouter = (0, express_1.Router)();
  *                         type: string
  *                       description: One or more categories the food item belongs to
  *                       example: ["Appetizer", "Main Course"]
+ *                     health_benefits:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: List of health benefits
+ *                       example: ["Boosts immunity", "Aids digestion"]
+ *                     allergens:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: List of allergens present in the food
+ *                       example: ["Nuts", "Dairy"]
+ *                     suitable_for_conditions:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: List of medical conditions suitable for this food
+ *                       example: ["Diabetes", "Hypertension"]
+ *                     suitable_for_diet:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: List of dietary preferences suitable for this food
+ *                       example: ["Vegan", "Gluten-Free"]
  *       400:
  *         description: Invalid input data
  *         content:

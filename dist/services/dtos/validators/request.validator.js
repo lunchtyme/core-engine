@@ -180,26 +180,52 @@ exports.CreateInvitationDTOValidator = joi_1.default.object({
     user: joi_1.default.required(),
 });
 exports.AddFoodToMenuDTOValidator = joi_1.default.object({
-    name: joi_1.default.string().required().messages({
+    name: joi_1.default.string().required().example('Grilled Chicken Salad').messages({
         'any.required': "Provide the name of the food you're adding",
     }),
-    description: joi_1.default.string().required().messages({
+    description: joi_1.default.string()
+        .required()
+        .example('A healthy grilled chicken salad with fresh greens')
+        .messages({
         'any.required': "Provide a brief description of the food you're adding",
     }),
-    price: joi_1.default.string().required().messages({
+    price: joi_1.default.string().required().example('15.99').messages({
         'any.required': 'Add a price to the food menu',
     }),
     categories: joi_1.default.array()
         .items(joi_1.default.string().valid(...Object.values(infrastructure_1.FoodCategory)))
         .required()
+        .example(['Salad', 'Grill'])
         .messages({
         'any.required': 'Please provide one or more categories the food belongs to',
         'any.only': 'Invalid category provided',
     }),
-    user: joi_1.default.required(),
-    // food_image: Joi.required().messages({
-    //   'any.required': 'Please provide the food menu cover image',
-    // }),
+    user: joi_1.default.required().example('603dcd417997db243b3c7a6d'), // Example ObjectId
+    // New health-related fields with examples
+    health_benefits: joi_1.default.array()
+        .items(joi_1.default.string())
+        .optional()
+        .example(['Rich in vitamins', 'Boosts immunity'])
+        .messages({
+        'array.includes': 'Health benefits should be a list of strings',
+    }),
+    allergens: joi_1.default.array().items(joi_1.default.string()).optional().example(['Peanuts', 'Dairy']).messages({
+        'array.includes': 'Allergens should be a list of strings',
+    }),
+    suitable_for_conditions: joi_1.default.array()
+        .items(joi_1.default.string())
+        .optional()
+        .example(['Diabetes', 'Hypertension'])
+        .messages({
+        'array.includes': 'Medical condition suitability should be a list of strings',
+    }),
+    suitable_for_diet: joi_1.default.array()
+        .items(joi_1.default.string())
+        .optional()
+        .example(['Vegan', 'Gluten-Free'])
+        .messages({
+        'array.includes': 'Dietary suitability should be a list of strings',
+    }),
 }).unknown();
 exports.CreateBillingDTOValidator = joi_1.default.object({
     amount: joi_1.default.string().required().messages({

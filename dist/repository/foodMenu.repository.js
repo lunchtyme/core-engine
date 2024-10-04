@@ -25,7 +25,7 @@ class FoodMenuRepository extends base_repository_1.BaseRepository {
     create(params, session) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, price, categories, user, description, food_image } = params;
+                const { name, price, categories, user, description, food_image, health_benefits, allergens, suitable_for_conditions, suitable_for_diet, } = params;
                 const result = new infrastructure_1.FoodMenuModel({
                     name,
                     price: new mongoose_1.default.Types.Decimal128(price),
@@ -33,6 +33,10 @@ class FoodMenuRepository extends base_repository_1.BaseRepository {
                     description,
                     added_by: user,
                     food_image: food_image,
+                    health_benefits,
+                    suitable_for_conditions,
+                    suitable_for_diet,
+                    allergens,
                 });
                 return yield result.save({ session });
             }

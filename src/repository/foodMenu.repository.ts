@@ -11,7 +11,19 @@ export class FoodMenuRepository extends BaseRepository<FoodMenuDocument> {
   }
   async create(params: AddFoodToMenuDTO, session?: mongoose.ClientSession | null) {
     try {
-      const { name, price, categories, user, description, food_image } = params;
+      const {
+        name,
+        price,
+        categories,
+        user,
+        description,
+        food_image,
+        health_benefits,
+        allergens,
+        suitable_for_conditions,
+        suitable_for_diet,
+      } = params;
+
       const result = new FoodMenuModel({
         name,
         price: new mongoose.Types.Decimal128(price),
@@ -19,6 +31,10 @@ export class FoodMenuRepository extends BaseRepository<FoodMenuDocument> {
         description,
         added_by: user,
         food_image: food_image as string,
+        health_benefits,
+        suitable_for_conditions,
+        suitable_for_diet,
+        allergens,
       });
 
       return await result.save({ session });

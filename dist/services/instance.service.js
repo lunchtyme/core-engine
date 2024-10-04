@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderReadService = exports.orderCreateService = exports.adminReadService = exports.billingReadService = exports.billingCreateService = exports.userReadService = exports.foodMenuReadService = exports.foodMenuCreateService = exports.invitationReadService = exports.invitationCreateService = exports.authReadService = exports.authCreateService = exports.redisService = exports.healthInfoReadService = exports.healthInfoCreateService = exports.sharedServices = exports.healthInfoRepository = exports.orderRepository = exports.billingRepository = exports.foodMenuRepository = exports.invitationRepository = exports.addressRepository = exports.individualRepository = exports.adminRepository = exports.companyRepository = exports.userRepository = void 0;
+exports.mealSuggestionReadService = exports.mealSuggestionCreateService = exports.orderReadService = exports.orderCreateService = exports.adminReadService = exports.billingReadService = exports.billingCreateService = exports.userReadService = exports.foodMenuReadService = exports.foodMenuCreateService = exports.invitationReadService = exports.invitationCreateService = exports.authReadService = exports.authCreateService = exports.redisService = exports.healthInfoReadService = exports.healthInfoCreateService = exports.sharedServices = exports.mealSuggestionRepository = exports.healthInfoRepository = exports.orderRepository = exports.billingRepository = exports.foodMenuRepository = exports.invitationRepository = exports.addressRepository = exports.individualRepository = exports.adminRepository = exports.companyRepository = exports.userRepository = void 0;
 const infrastructure_1 = require("../infrastructure");
 const emailQueue_1 = require("../infrastructure/queue/emailQueue");
 const processAtQueue_1 = require("../infrastructure/queue/processAtQueue");
@@ -20,6 +20,8 @@ const healthInfoCreate_service_1 = require("./healthInfoCreate.service");
 const healthInfoRead_service_1 = require("./healthInfoRead.service");
 const invitationCreate_service_1 = require("./invitationCreate.service");
 const invitationRead_service_1 = require("./invitationRead.service");
+const mealSuggestionCreate_service_1 = require("./mealSuggestionCreate.service");
+const mealSuggestionRead_service_1 = require("./mealSuggestionRead.service");
 const orderCreate_service_1 = require("./orderCreate.service");
 const orderRead_service_1 = require("./orderRead.service");
 const redis_service_1 = require("./redis.service");
@@ -36,6 +38,7 @@ exports.foodMenuRepository = new repository_1.FoodMenuRepository();
 exports.billingRepository = new repository_1.BillingRepository();
 exports.orderRepository = new repository_1.OrderRepository();
 exports.healthInfoRepository = new repository_1.HealthInfoRepository();
+exports.mealSuggestionRepository = new repository_1.MealSuggestionRepository();
 // Shared services instance
 exports.sharedServices = new shared_service_1.SharedServices(exports.userRepository, exports.individualRepository, emailQueue_1.emailQueue, processAtQueue_1.processAtQueue, logger_1.default);
 exports.healthInfoCreateService = new healthInfoCreate_service_1.HealthInfoCreateService(exports.healthInfoRepository, logger_1.default);
@@ -56,3 +59,5 @@ exports.billingReadService = new billingRead_service_1.BillingReadService(export
 exports.adminReadService = new adminRead_service_1.AdminReadService(exports.userRepository, exports.orderRepository, logger_1.default);
 exports.orderCreateService = new orderCreate_service_1.OrderCreateService(exports.orderRepository, exports.foodMenuRepository, exports.individualRepository, exports.companyRepository, exports.billingCreateService, emailQueue_1.emailQueue, exports.sharedServices, logger_1.default);
 exports.orderReadService = new orderRead_service_1.OrderReadService(exports.orderRepository, logger_1.default);
+exports.mealSuggestionCreateService = new mealSuggestionCreate_service_1.MealSuggestionCreateService(exports.mealSuggestionRepository, logger_1.default);
+exports.mealSuggestionReadService = new mealSuggestionRead_service_1.MealSuggestionReadService(exports.mealSuggestionRepository, logger_1.default);

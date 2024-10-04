@@ -119,6 +119,11 @@ export interface FetchFoodMenuDTO extends FetchDataDTO {
   user: AuthUserClaim;
 }
 
+export interface FetchFoodMenuByIdDTO {
+  menuId: mongoose.Types.ObjectId;
+  user: AuthUserClaim;
+}
+
 export interface FetchUsersDTO extends FetchDataDTO {
   user: AuthUserClaim;
   lastScore?: number;
@@ -162,4 +167,16 @@ export interface ResetPasswordDTO extends InitiatePasswordResetDTO {
   otp: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface AddMealSuggestionDTO {
+  user: AuthUserClaim;
+  name: string;
+  description: string;
+  reason_for_suggestion?: string;
+}
+
+export interface FetchMealSuggestionsDTO extends FetchDataDTO {
+  user: AuthUserClaim;
+  lastId?: string;
 }

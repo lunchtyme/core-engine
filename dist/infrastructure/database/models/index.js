@@ -25,3 +25,4 @@ __exportStar(require("./invitation.model"), exports);
 __exportStar(require("./billing.model"), exports);
 __exportStar(require("./enums"), exports);
 __exportStar(require("./healthInfo.model"), exports);
+__exportStar(require("./mealSuggestion.model"), exports);

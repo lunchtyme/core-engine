@@ -41,12 +41,26 @@ class FoodMenuReadService {
                 const { query, category } = params, filters = __rest(params, ["query", "category"]);
                 const fetchPipeline = (0, getAllMenu_query_1.getFoodMenuQuery)({ query, category });
                 const result = yield this._foodMenuRepo.paginateAndAggregateCursor(fetchPipeline, filters);
-                // );
                 this._logger.info('Fetching food menu from database');
                 return result;
             }
             catch (error) {
                 logger_1.default.error('Error fetching food list menu:', error);
+                throw error;
+            }
+        });
+    }
+    getOneMenu(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                utils_1.Helper.checkUserType(params.user.account_type, [infrastructure_1.UserAccountType.COMPANY, infrastructure_1.UserAccountType.INDIVIDUAL, infrastructure_1.UserAccountType.ADMIN], 'fetch food menu by id');
+                const result = yield this._foodMenuRepo.getOne(params.menuId);
+                if (!result) {
+                    throw new utils_1.NotFoundError('Food menu not found');
+                }
+                return result;
+            }
+            catch (error) {
                 throw error;
             }
         });

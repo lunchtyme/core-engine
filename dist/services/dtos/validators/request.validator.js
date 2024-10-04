@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddUserHealthInfoDTOValidator = exports.resetPasswordDTOValidator = exports.initiatePasswordResetDTOValidator = exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.AddMealSuggestionDTOValidator = exports.AddUserHealthInfoDTOValidator = exports.resetPasswordDTOValidator = exports.initiatePasswordResetDTOValidator = exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const infrastructure_1 = require("../../../infrastructure");
 exports.createAccountDTOValidator = joi_1.default.object({
@@ -204,27 +204,31 @@ exports.AddFoodToMenuDTOValidator = joi_1.default.object({
     // New health-related fields with examples
     health_benefits: joi_1.default.array()
         .items(joi_1.default.string())
-        .optional()
+        .required()
         .example(['Rich in vitamins', 'Boosts immunity'])
         .messages({
         'array.includes': 'Health benefits should be a list of strings',
+        'any.required': 'Please provide one or more health benefits for the food',
     }),
-    allergens: joi_1.default.array().items(joi_1.default.string()).optional().example(['Peanuts', 'Dairy']).messages({
+    allergens: joi_1.default.array().items(joi_1.default.string()).required().example(['Peanuts', 'Dairy']).messages({
         'array.includes': 'Allergens should be a list of strings',
+        'any.required': 'Please provide one or more allergens present in the food',
     }),
     suitable_for_conditions: joi_1.default.array()
         .items(joi_1.default.string())
-        .optional()
+        .required()
         .example(['Diabetes', 'Hypertension'])
         .messages({
         'array.includes': 'Medical condition suitability should be a list of strings',
+        'any.required': 'Please provide one or more medical conditions suitable for the food',
     }),
     suitable_for_diet: joi_1.default.array()
         .items(joi_1.default.string())
-        .optional()
+        .required()
         .example(['Vegan', 'Gluten-Free'])
         .messages({
         'array.includes': 'Dietary suitability should be a list of strings',
+        'any.required': 'Please provide one or more dietary preferences suitable for the food',
     }),
 }).unknown();
 exports.CreateBillingDTOValidator = joi_1.default.object({
@@ -263,25 +267,38 @@ exports.resetPasswordDTOValidator = joi_1.default.object({
     }),
 });
 exports.AddUserHealthInfoDTOValidator = joi_1.default.object({
-    allergies: joi_1.default.array().items(joi_1.default.string().min(1)).required().messages({
+    allergies: joi_1.default.array().items(joi_1.default.string().min(1)).optional().messages({
         'array.base': 'Allergies must be an array of strings',
         'array.empty': 'Please provide at least one allergy',
-        'any.required': 'Allergies field is required',
         'string.empty': 'Each allergy must be a non-empty string',
     }),
-    medical_conditions: joi_1.default.array().items(joi_1.default.string().min(1)).required().messages({
+    medical_conditions: joi_1.default.array().items(joi_1.default.string().min(1)).optional().messages({
         'array.base': 'Medical conditions must be an array of strings',
         'array.empty': 'Please provide at least one medical condition',
-        'any.required': 'Medical conditions field is required',
         'string.empty': 'Each medical condition must be a non-empty string',
     }),
-    dietary_preferences: joi_1.default.array().items(joi_1.default.string().min(1)).required().messages({
+    dietary_preferences: joi_1.default.array().items(joi_1.default.string().min(1)).optional().messages({
         'array.base': 'Dietary preferences must be an array of strings',
         'array.empty': 'Please provide at least one dietary preference',
-        'any.required': 'Dietary preferences field is required',
         'string.empty': 'Each dietary preference must be a non-empty string',
     }),
     user: joi_1.default.object().required().messages({
         'any.required': 'User information is required',
+    }),
+}).optional(); // Optionally the whole object can also be optional if required
+exports.AddMealSuggestionDTOValidator = joi_1.default.object({
+    user: joi_1.default.object().required().messages({
+        'any.required': 'User information is required',
+    }),
+    name: joi_1.default.string().required().messages({
+        'any.required': 'Provide the name of the suggested food item',
+        'string.empty': 'Name cannot be empty',
+    }),
+    description: joi_1.default.string().required().messages({
+        'any.required': 'Provide a brief description of the suggested food item',
+        'string.empty': 'Description cannot be empty',
+    }),
+    reason_for_suggestion: joi_1.default.string().optional().messages({
+        'string.empty': 'Reason for suggestion cannot be empty',
     }),
 });

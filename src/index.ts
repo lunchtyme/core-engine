@@ -12,6 +12,7 @@ import {
   billingRouter,
   foodMenuRouter,
   invitationRouter,
+  mealSuggestionRouter,
   orderRouter,
   userRouter,
 } from './routers';
@@ -63,6 +64,7 @@ SERVER.use('/users', userRouter);
 SERVER.use('/billings', billingRouter);
 SERVER.use('/analytics', analyticsRouter);
 SERVER.use('/orders', orderRouter);
+SERVER.use('/meal', mealSuggestionRouter);
 SERVER.use(notFoundMiddleware);
 SERVER.use(globalErrorMiddleware);
 SERVER.listen(PORT, () => {

@@ -29,3 +29,5 @@ __exportStar(require("./orderRead.service"), exports);
 __exportStar(require("./adminRead.service"), exports);
 __exportStar(require("./healthInfoCreate.service"), exports);
 __exportStar(require("./healthInfoRead.service"), exports);
+__exportStar(require("./mealSuggestionCreate.service"), exports);
+__exportStar(require("./mealSuggestionRead.service"), exports);

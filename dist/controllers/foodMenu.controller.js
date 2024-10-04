@@ -8,11 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateFoodMenuAvaliabilityController = exports.fetchMenuController = exports.addFoodToMenuController = void 0;
+exports.updateFoodMenuAvaliabilityController = exports.fetchOneMenuController = exports.fetchMenuController = exports.addFoodToMenuController = void 0;
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const infrastructure_1 = require("../infrastructure");
+const mongoose_1 = __importDefault(require("mongoose"));
 const addFoodToMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Parse the categories string into an array
@@ -107,6 +111,20 @@ const fetchMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.fetchMenuController = fetchMenuController;
+const fetchOneMenuController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { menuId } = req.params;
+        const result = yield services_1.foodMenuReadService.getOneMenu({
+            menuId: new mongoose_1.default.Types.ObjectId(menuId),
+            user: req.user,
+        });
+        utils_1.Helper.formatAPIResponse(res, 'Fetched food menu successfully', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.fetchOneMenuController = fetchOneMenuController;
 const updateFoodMenuAvaliabilityController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield services_1.foodMenuCreateService.updateFoodAvalibility({

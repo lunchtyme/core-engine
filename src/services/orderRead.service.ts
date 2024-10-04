@@ -21,13 +21,13 @@ export class OrderReadService {
         [UserAccountType.INDIVIDUAL, UserAccountType.ADMIN],
         'fetch order history',
       );
-      let getBillingQuery =
+      let getOrderQuery =
         user.account_type === UserAccountType.INDIVIDUAL
           ? getOrderHistoryQuery({
               employeeId: user.sub as mongoose.Types.ObjectId,
             })
           : getOrderHistoryQuery({});
-      const result = await this._orderRepo.paginateAndAggregateCursor(getBillingQuery, filters);
+      const result = await this._orderRepo.paginateAndAggregateCursor(getOrderQuery, filters);
       return result;
     } catch (error) {
       this._logger.error('Error billings data', error);

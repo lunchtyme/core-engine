@@ -214,27 +214,31 @@ export const AddFoodToMenuDTOValidator = Joi.object({
   // New health-related fields with examples
   health_benefits: Joi.array()
     .items(Joi.string())
-    .optional()
+    .required()
     .example(['Rich in vitamins', 'Boosts immunity'])
     .messages({
       'array.includes': 'Health benefits should be a list of strings',
+      'any.required': 'Please provide one or more health benefits for the food',
     }),
-  allergens: Joi.array().items(Joi.string()).optional().example(['Peanuts', 'Dairy']).messages({
+  allergens: Joi.array().items(Joi.string()).required().example(['Peanuts', 'Dairy']).messages({
     'array.includes': 'Allergens should be a list of strings',
+    'any.required': 'Please provide one or more allergens present in the food',
   }),
   suitable_for_conditions: Joi.array()
     .items(Joi.string())
-    .optional()
+    .required()
     .example(['Diabetes', 'Hypertension'])
     .messages({
       'array.includes': 'Medical condition suitability should be a list of strings',
+      'any.required': 'Please provide one or more medical conditions suitable for the food',
     }),
   suitable_for_diet: Joi.array()
     .items(Joi.string())
-    .optional()
+    .required()
     .example(['Vegan', 'Gluten-Free'])
     .messages({
       'array.includes': 'Dietary suitability should be a list of strings',
+      'any.required': 'Please provide one or more dietary preferences suitable for the food',
     }),
 }).unknown();
 
@@ -277,25 +281,39 @@ export const resetPasswordDTOValidator = Joi.object({
 });
 
 export const AddUserHealthInfoDTOValidator = Joi.object({
-  allergies: Joi.array().items(Joi.string().min(1)).required().messages({
+  allergies: Joi.array().items(Joi.string().min(1)).optional().messages({
     'array.base': 'Allergies must be an array of strings',
     'array.empty': 'Please provide at least one allergy',
-    'any.required': 'Allergies field is required',
     'string.empty': 'Each allergy must be a non-empty string',
   }),
-  medical_conditions: Joi.array().items(Joi.string().min(1)).required().messages({
+  medical_conditions: Joi.array().items(Joi.string().min(1)).optional().messages({
     'array.base': 'Medical conditions must be an array of strings',
     'array.empty': 'Please provide at least one medical condition',
-    'any.required': 'Medical conditions field is required',
     'string.empty': 'Each medical condition must be a non-empty string',
   }),
-  dietary_preferences: Joi.array().items(Joi.string().min(1)).required().messages({
+  dietary_preferences: Joi.array().items(Joi.string().min(1)).optional().messages({
     'array.base': 'Dietary preferences must be an array of strings',
     'array.empty': 'Please provide at least one dietary preference',
-    'any.required': 'Dietary preferences field is required',
     'string.empty': 'Each dietary preference must be a non-empty string',
   }),
   user: Joi.object().required().messages({
     'any.required': 'User information is required',
+  }),
+}).optional(); // Optionally the whole object can also be optional if required
+
+export const AddMealSuggestionDTOValidator = Joi.object({
+  user: Joi.object().required().messages({
+    'any.required': 'User information is required',
+  }),
+  name: Joi.string().required().messages({
+    'any.required': 'Provide the name of the suggested food item',
+    'string.empty': 'Name cannot be empty',
+  }),
+  description: Joi.string().required().messages({
+    'any.required': 'Provide a brief description of the suggested food item',
+    'string.empty': 'Description cannot be empty',
+  }),
+  reason_for_suggestion: Joi.string().optional().messages({
+    'string.empty': 'Reason for suggestion cannot be empty',
   }),
 });

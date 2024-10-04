@@ -487,16 +487,29 @@ export class AuthCreateservice {
         this._logger.error('Validation error', error);
         throw new BadRequestError(error.message);
       }
-      const healthInfoParams = {
-        allergies: value.allergies,
-        medical_conditions: value.medical_conditions,
-        dietary_preferences: value.dietary_preferences,
-        user: value.user as AuthUserClaim,
-      };
+
       const userId = (value.user as AuthUserClaim).sub as mongoose.Types.ObjectId;
+
+      // Update individual user data
       await this._individualRepo.update({ ...value, user: userId }, session);
-      // Store user health information
-      await this._healthInfoCreateService.addUserHealthInfo(healthInfoParams, session);
+
+      // Check if any health-related info is provided
+      const hasHealthInfo =
+        value.allergies?.length ||
+        value.medical_conditions?.length ||
+        value.dietary_preferences?.length;
+
+      if (hasHealthInfo) {
+        // Store user health information only if any of the fields are provided
+        const healthInfoParams = {
+          allergies: value.allergies || [],
+          medical_conditions: value.medical_conditions || [],
+          dietary_preferences: value.dietary_preferences || [],
+          user: value.user as AuthUserClaim,
+        };
+
+        await this._healthInfoCreateService.addUserHealthInfo(healthInfoParams, session);
+      }
     } catch (error) {
       this._logger.error('Error processing employee onboarding data', error);
       throw error;

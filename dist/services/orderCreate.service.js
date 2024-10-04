@@ -116,12 +116,12 @@ class OrderCreateService {
                         when: formattedDate,
                     },
                 };
-                this._emailQueue.add('mailer', companyEmailPayload, {
+                yield this._emailQueue.add('mailer', companyEmailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,
                 });
-                this._emailQueue.add('mailer', orderConfirmationEmailPayload, {
+                yield this._emailQueue.add('mailer', orderConfirmationEmailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,
@@ -179,7 +179,7 @@ class OrderCreateService {
                         orderStatus: order.status,
                     },
                 };
-                this._emailQueue.add('mailer', emailPayload, {
+                yield this._emailQueue.add('mailer', emailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,

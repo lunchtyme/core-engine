@@ -217,3 +217,34 @@ export const CreateBillingDTOValidator = Joi.object({
   }),
   user: Joi.required(),
 });
+
+export const initiatePasswordResetDTOValidator = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format',
+    'any.required': 'Email is required',
+  }),
+});
+
+export const resetPasswordDTOValidator = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'Invalid email format',
+    'any.required': 'Email is required',
+  }),
+  otp: Joi.string().length(6).required().messages({
+    'string.length': 'OTP must be 6 characters long',
+    'any.required': 'OTP is required',
+  }),
+  password: Joi.string()
+    .pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,30}$/))
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters long.',
+      'string.max': 'Password must not be more than 30 characters long.',
+      'any.required': 'Password is required.',
+      'string.pattern.base': 'Provide a valid and secure password characters',
+    }),
+  confirmPassword: Joi.any().valid(Joi.ref('password')).required().messages({
+    'any.only': 'Passwords must match',
+    'any.required': 'Confirm Password is required',
+  }),
+});

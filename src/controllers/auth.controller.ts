@@ -63,3 +63,25 @@ export const onboardingController = async (req: Request, res: Response, next: Ne
     next(error);
   }
 };
+
+export const initatePasswordResetController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await authCreateService.initatePasswordReset({ ...req.body });
+    Helper.formatAPIResponse(res, 'Password reset flow initiated', result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await authCreateService.resetPassword({ ...req.body });
+    Helper.formatAPIResponse(res, 'Password resetted', result);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
+exports.resetPasswordDTOValidator = exports.initiatePasswordResetDTOValidator = exports.CreateBillingDTOValidator = exports.AddFoodToMenuDTOValidator = exports.CreateInvitationDTOValidator = exports.employeeOnboardingDTOValidator = exports.companyOnboardingDTOValidator = exports.createAddressDTOValidator = exports.confirmEmailDTOValidator = exports.resendEmailVerificationCodeDTOValidator = exports.loginDTOValidator = exports.createAdminAccountDTOValidator = exports.createIndividualAccountDTOValidator = exports.createCompanyAccountDTOValidator = exports.createAccountDTOValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
 const infrastructure_1 = require("../../../infrastructure");
 exports.createAccountDTOValidator = joi_1.default.object({
@@ -206,4 +206,33 @@ exports.CreateBillingDTOValidator = joi_1.default.object({
         'any.required': 'Provide amount you want to topup',
     }),
     user: joi_1.default.required(),
+});
+exports.initiatePasswordResetDTOValidator = joi_1.default.object({
+    email: joi_1.default.string().email().required().messages({
+        'string.email': 'Invalid email format',
+        'any.required': 'Email is required',
+    }),
+});
+exports.resetPasswordDTOValidator = joi_1.default.object({
+    email: joi_1.default.string().email().required().messages({
+        'string.email': 'Invalid email format',
+        'any.required': 'Email is required',
+    }),
+    otp: joi_1.default.string().length(6).required().messages({
+        'string.length': 'OTP must be 6 characters long',
+        'any.required': 'OTP is required',
+    }),
+    password: joi_1.default.string()
+        .pattern(new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,30}$/))
+        .required()
+        .messages({
+        'string.min': 'Password must be at least 8 characters long.',
+        'string.max': 'Password must not be more than 30 characters long.',
+        'any.required': 'Password is required.',
+        'string.pattern.base': 'Provide a valid and secure password characters',
+    }),
+    confirmPassword: joi_1.default.any().valid(joi_1.default.ref('password')).required().messages({
+        'any.only': 'Passwords must match',
+        'any.required': 'Confirm Password is required',
+    }),
 });

@@ -67,13 +67,13 @@ class SharedServices {
                         },
                     };
                     // Send reminder email 2hr before their lunchtyme
-                    this._emailQueue.add('mailer', emailPayload, {
+                    yield this._emailQueue.add('mailer', emailPayload, {
                         attempts: 5,
                         removeOnComplete: true,
                         delay: 1000,
                     });
                     // Set update the time the record was processed for daily notifications
-                    this._processAtQueue.add('processor', { record }, {
+                    yield this._processAtQueue.add('processor', { record }, {
                         attempts: 5,
                         removeOnComplete: true,
                         delay: 2000,

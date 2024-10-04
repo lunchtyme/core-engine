@@ -36,6 +36,8 @@ exports.EMAIL_DATA = {
         walletCharge: 'Your wallet was charged',
         chargeFail: 'Insufficient wallet balance',
         dailyNotification: "Check out today's menu for your lunch",
+        initPasswordReset: `Request to reset ${exports.APP_NAME} password`,
+        passwordReset: 'Password reset successful',
     },
     template: {
         welcome: 'welcome',
@@ -47,6 +49,8 @@ exports.EMAIL_DATA = {
         chargeFail: 'chargeFail',
         dailyNotification: 'dailyNotification',
         orderUpdated: 'orderUpdated',
+        initPasswordReset: 'initPasswordReset',
+        passwordReset: 'passwordReset',
     },
 };
 exports.DEFAULT_CACHE_EXPIRY_IN_SECS = 180;

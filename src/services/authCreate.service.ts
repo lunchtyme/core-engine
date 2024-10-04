@@ -16,10 +16,12 @@ import {
   CreateCompanyAccountDTO,
   CreateIndividualAccountDTO,
   EmployeeOnboardingDTO,
+  InitiatePasswordResetDTO,
   LoginDTO,
   OnboardingUserDTO,
   RegisterAccountDTO,
   ResendEmailVerificationCodeDTO,
+  ResetPasswordDTO,
 } from './dtos/request.dto';
 import { SharedServices } from './shared.service';
 import { hash, verify } from 'argon2';
@@ -35,8 +37,10 @@ import {
   createCompanyAccountDTOValidator,
   createIndividualAccountDTOValidator,
   employeeOnboardingDTOValidator,
+  initiatePasswordResetDTOValidator,
   loginDTOValidator,
   resendEmailVerificationCodeDTOValidator,
+  resetPasswordDTOValidator,
 } from './dtos/validators';
 import { InvitationStatus } from '../infrastructure';
 import { UserAccountType } from '../infrastructure/database/models/enums';
@@ -146,7 +150,7 @@ export class AuthCreateservice {
         },
       };
 
-      this._emailQueue.add('mailer', emailPayload, {
+      await this._emailQueue.add('mailer', emailPayload, {
         delay: 2000,
         attempts: 5,
         removeOnComplete: true,
@@ -495,6 +499,97 @@ export class AuthCreateservice {
       return await this._companyRepo.update(value, session);
     } catch (error) {
       this._logger.error('Error processing company onboarding data', error);
+      throw error;
+    }
+  }
+
+  async initatePasswordReset(params: InitiatePasswordResetDTO) {
+    try {
+      const { error, value } = initiatePasswordResetDTOValidator.validate(params);
+      if (error) {
+        this._logger.error('Validation error', error);
+        throw new BadRequestError(error.message);
+      }
+      const { email } = value;
+      const user: any = await this._sharedService.getUserWithDetails({
+        identifier: 'email',
+        value: email,
+      });
+      const cacheKey = `${user._id}:verify:mail`;
+      const OTP = Helper.generateOTPCode();
+      await this._redisService.set(cacheKey, OTP, true, 600);
+
+      const emailPayload: SendEmailParams = {
+        receiver: user.email,
+        subject: EMAIL_DATA.subject.initPasswordReset,
+        template: EMAIL_DATA.template.initPasswordReset,
+        context: {
+          OTP,
+          email: user.email,
+          name:
+            user.account_type === UserAccountType.COMPANY
+              ? user.account_details.name
+              : user.account_details.first_name,
+        },
+      };
+
+      await this._emailQueue.add('mailer', emailPayload, {
+        delay: 2000,
+        attempts: 5,
+        removeOnComplete: true,
+      });
+
+      this._logger.info('Password reset flow initiated', user._id);
+      return email;
+    } catch (error) {
+      this._logger.error('Error initiating password reset flow', { error });
+      throw error;
+    }
+  }
+
+  async resetPassword(params: ResetPasswordDTO) {
+    try {
+      const { error, value } = resetPasswordDTOValidator.validate(params);
+      if (error) {
+        this._logger.error('Validation error', error);
+        throw new BadRequestError(error.message);
+      }
+
+      const { otp, email, password } = value;
+      const user: any = await this._sharedService.getUserWithDetails({
+        identifier: 'email',
+        value: email,
+      });
+      const cacheKey = `${user._id}:verify:mail`;
+      const cacheValue = await this._redisService.get(cacheKey);
+      if (!cacheValue || parseInt(cacheValue) !== parseInt(otp)) {
+        throw new BadRequestError('Invalid or expired otp provided');
+      }
+      await this._redisService.del(cacheKey);
+      user.password = await hash(password);
+      await user.save();
+      const emailPayload: SendEmailParams = {
+        receiver: user.email,
+        subject: EMAIL_DATA.subject.passwordReset,
+        template: EMAIL_DATA.template.passwordReset,
+        context: {
+          email: user.email,
+          name:
+            user.account_type === UserAccountType.COMPANY
+              ? user.account_details.name
+              : user.account_details.first_name,
+        },
+      };
+
+      await this._emailQueue.add('mailer', emailPayload, {
+        delay: 2000,
+        attempts: 5,
+        removeOnComplete: true,
+      });
+      this._logger.info('Password reset successful', user.email);
+      return email;
+    } catch (error) {
+      this._logger.error('Error resetting password', { error });
       throw error;
     }
   }

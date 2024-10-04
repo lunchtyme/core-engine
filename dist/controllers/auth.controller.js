@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onboardingController = exports.meController = exports.resendVerificationCodeController = exports.verifyEmailController = exports.loginController = exports.registerController = void 0;
+exports.resetPasswordController = exports.initatePasswordResetController = exports.onboardingController = exports.meController = exports.resendVerificationCodeController = exports.verifyEmailController = exports.loginController = exports.registerController = void 0;
 const utils_1 = require("../utils");
 const services_1 = require("../services");
 const registerController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -78,3 +78,23 @@ const onboardingController = (req, res, next) => __awaiter(void 0, void 0, void 
     }
 });
 exports.onboardingController = onboardingController;
+const initatePasswordResetController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield services_1.authCreateService.initatePasswordReset(Object.assign({}, req.body));
+        utils_1.Helper.formatAPIResponse(res, 'Password reset flow initiated', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.initatePasswordResetController = initatePasswordResetController;
+const resetPasswordController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield services_1.authCreateService.resetPassword(Object.assign({}, req.body));
+        utils_1.Helper.formatAPIResponse(res, 'Password resetted', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.resetPasswordController = resetPasswordController;

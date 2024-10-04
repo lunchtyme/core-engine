@@ -131,7 +131,7 @@ class AuthCreateservice {
                             : userDetails.account_details.first_name,
                     },
                 };
-                this._emailQueue.add('mailer', emailPayload, {
+                yield this._emailQueue.add('mailer', emailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,
@@ -462,6 +462,94 @@ class AuthCreateservice {
             }
             catch (error) {
                 this._logger.error('Error processing company onboarding data', error);
+                throw error;
+            }
+        });
+    }
+    initatePasswordReset(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { error, value } = validators_1.initiatePasswordResetDTOValidator.validate(params);
+                if (error) {
+                    this._logger.error('Validation error', error);
+                    throw new utils_1.BadRequestError(error.message);
+                }
+                const { email } = value;
+                const user = yield this._sharedService.getUserWithDetails({
+                    identifier: 'email',
+                    value: email,
+                });
+                const cacheKey = `${user._id}:verify:mail`;
+                const OTP = utils_1.Helper.generateOTPCode();
+                yield this._redisService.set(cacheKey, OTP, true, 600);
+                const emailPayload = {
+                    receiver: user.email,
+                    subject: utils_1.EMAIL_DATA.subject.initPasswordReset,
+                    template: utils_1.EMAIL_DATA.template.initPasswordReset,
+                    context: {
+                        OTP,
+                        email: user.email,
+                        name: user.account_type === enums_1.UserAccountType.COMPANY
+                            ? user.account_details.name
+                            : user.account_details.first_name,
+                    },
+                };
+                yield this._emailQueue.add('mailer', emailPayload, {
+                    delay: 2000,
+                    attempts: 5,
+                    removeOnComplete: true,
+                });
+                this._logger.info('Password reset flow initiated', user._id);
+                return email;
+            }
+            catch (error) {
+                this._logger.error('Error initiating password reset flow', { error });
+                throw error;
+            }
+        });
+    }
+    resetPassword(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { error, value } = validators_1.resetPasswordDTOValidator.validate(params);
+                if (error) {
+                    this._logger.error('Validation error', error);
+                    throw new utils_1.BadRequestError(error.message);
+                }
+                const { otp, email, password } = value;
+                const user = yield this._sharedService.getUserWithDetails({
+                    identifier: 'email',
+                    value: email,
+                });
+                const cacheKey = `${user._id}:verify:mail`;
+                const cacheValue = yield this._redisService.get(cacheKey);
+                if (!cacheValue || parseInt(cacheValue) !== parseInt(otp)) {
+                    throw new utils_1.BadRequestError('Invalid or expired otp provided');
+                }
+                yield this._redisService.del(cacheKey);
+                user.password = yield (0, argon2_1.hash)(password);
+                yield user.save();
+                const emailPayload = {
+                    receiver: user.email,
+                    subject: utils_1.EMAIL_DATA.subject.passwordReset,
+                    template: utils_1.EMAIL_DATA.template.passwordReset,
+                    context: {
+                        email: user.email,
+                        name: user.account_type === enums_1.UserAccountType.COMPANY
+                            ? user.account_details.name
+                            : user.account_details.first_name,
+                    },
+                };
+                yield this._emailQueue.add('mailer', emailPayload, {
+                    delay: 2000,
+                    attempts: 5,
+                    removeOnComplete: true,
+                });
+                this._logger.info('Password reset successful', user.email);
+                return email;
+            }
+            catch (error) {
+                this._logger.error('Error resetting password', { error });
                 throw error;
             }
         });

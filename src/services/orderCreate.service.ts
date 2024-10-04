@@ -141,13 +141,13 @@ export class OrderCreateService {
         },
       };
 
-      this._emailQueue.add('mailer', companyEmailPayload, {
+      await this._emailQueue.add('mailer', companyEmailPayload, {
         delay: 2000,
         attempts: 5,
         removeOnComplete: true,
       });
 
-      this._emailQueue.add('mailer', orderConfirmationEmailPayload, {
+      await this._emailQueue.add('mailer', orderConfirmationEmailPayload, {
         delay: 2000,
         attempts: 5,
         removeOnComplete: true,
@@ -211,7 +211,7 @@ export class OrderCreateService {
         },
       };
 
-      this._emailQueue.add('mailer', emailPayload, {
+      await this._emailQueue.add('mailer', emailPayload, {
         delay: 2000,
         attempts: 5,
         removeOnComplete: true,

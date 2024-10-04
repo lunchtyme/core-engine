@@ -142,3 +142,13 @@ export interface FetchOrderssDTO extends FetchDataDTO {
   user: AuthUserClaim;
   lastId?: string;
 }
+
+export interface InitiatePasswordResetDTO {
+  email: string;
+}
+
+export interface ResetPasswordDTO extends InitiatePasswordResetDTO {
+  otp: string;
+  password: string;
+  confirmPassword: string;
+}

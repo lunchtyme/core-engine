@@ -58,7 +58,7 @@ class InvitationCreateService {
                         email: employee_work_email,
                     },
                 };
-                this._emailQueue.add('mailer', emailPayload, {
+                yield this._emailQueue.add('mailer', emailPayload, {
                     delay: 2000,
                     attempts: 5,
                     removeOnComplete: true,

@@ -105,7 +105,7 @@ export class BillingCreateService {
           },
         };
 
-        this._emailQueue.add('mailer', emailPayload, {
+        await this._emailQueue.add('mailer', emailPayload, {
           delay: 2000,
           attempts: 5,
           removeOnComplete: true,
@@ -219,7 +219,7 @@ export class BillingCreateService {
         };
 
         // Send email to billing receipt to company outside transaction
-        this._emailQueue.add('mailer', emailPayload, {
+        await this._emailQueue.add('mailer', emailPayload, {
           delay: 2000,
           attempts: 5,
           removeOnComplete: true,

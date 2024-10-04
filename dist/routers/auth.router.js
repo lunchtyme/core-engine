@@ -154,7 +154,7 @@ exports.authRouter = (0, express_1.Router)();
  *           example: "admin@example.com"
  *         password:
  *           type: string
- *           example: "securePassword123"
+ *           example: "securePassword123?"
  *         account_type:
  *           type: string
  *           enum: [Admin]
@@ -463,3 +463,65 @@ exports.authRouter.get('/me', middlewares_1.resolveAuthContext, controllers_1.me
  *               example: "50-100"
  */
 exports.authRouter.post('/onboard', middlewares_1.resolveAuthContext, controllers_1.onboardingController);
+/**
+ * @swagger
+ * /auth/request-password-reset:
+ *   post:
+ *     summary: Request a password reset link
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address to send the password reset link.
+ *                 example: "user@example.com"
+ *     responses:
+ *       200:
+ *         description: Password reset link sent successfully.
+ *       400:
+ *         description: Invalid email or other validation error.
+ */
+exports.authRouter.post('/request-password-reset', controllers_1.initatePasswordResetController);
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset the user's password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email of the user resetting the password.
+ *                 example: "user@example.com"
+ *               otp:
+ *                 type: string
+ *                 description: OTP sent to the user's email.
+ *                 example: "123456"
+ *               password:
+ *                 type: string
+ *                 description: New password for the user.
+ *                 example: "P@ssw0rd!"
+ *               confirmPassword:
+ *                 type: string
+ *                 description: Confirmation of the new password.
+ *                 example: "P@ssw0rd!"
+ *     responses:
+ *       200:
+ *         description: Password reset successful.
+ *       400:
+ *         description: Invalid input or password mismatch.
+ */
+exports.authRouter.post('/reset-password', controllers_1.resetPasswordController);

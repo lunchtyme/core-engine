@@ -101,7 +101,7 @@ class BillingCreateService {
                             name: companyInfo === null || companyInfo === void 0 ? void 0 : companyInfo.name,
                         },
                     };
-                    this._emailQueue.add('mailer', emailPayload, {
+                    yield this._emailQueue.add('mailer', emailPayload, {
                         delay: 2000,
                         attempts: 5,
                         removeOnComplete: true,
@@ -191,7 +191,7 @@ class BillingCreateService {
                         },
                     };
                     // Send email to billing receipt to company outside transaction
-                    this._emailQueue.add('mailer', emailPayload, {
+                    yield this._emailQueue.add('mailer', emailPayload, {
                         delay: 2000,
                         attempts: 5,
                         removeOnComplete: true,
